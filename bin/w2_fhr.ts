@@ -4,7 +4,7 @@ import * as cdk from "aws-cdk-lib";
 import { DeploymentPipelineStack } from "../lib/stacks/DeploymentPipelineStack";
 
 const app = new cdk.App();
-new DeploymentPipelineStack(app, "W2FHR-Deployment-Pipeline-Stack", {
+new DeploymentPipelineStack(app, "W2FHRDeploymentStack", {
   env: {
     account: "268847659094",
     region: "us-west-2",
