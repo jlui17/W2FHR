@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@aws-cdk/aws-lambda-go": "^1.164.0",
+    "@aws-cdk/aws-lambda-go-alpha": "^2.32.1-alpha.0",
     "aws-cdk-lib": "2.32.1",
     "constructs": "^10.1.48",
     "source-map-support": "^0.5.21"
