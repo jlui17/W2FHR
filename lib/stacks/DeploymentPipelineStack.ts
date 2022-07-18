@@ -1,11 +1,11 @@
 import { SecretValue, Stack, StackProps } from "aws-cdk-lib";
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import {
   CodePipeline,
   CodePipelineSource,
   ShellStep,
 } from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
+import { AppDeploymentStage } from "../stages/AppDeploymentStage";
 
 export class DeploymentPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -19,8 +19,10 @@ export class DeploymentPipelineStack extends Stack {
         input: CodePipelineSource.gitHub("jlui17/W2FHR", "main", {
           authentication: GITHUB_AUTH_TOKEN,
         }),
-        commands: ["npm ci", "npm run build", "npx cdk synth"],
+        commands: ["npm ci", "npm run build", "go mod tidy", "npx cdk synth"],
       }),
     });
+
+    pipeline.addStage(new AppDeploymentStage(this, "AppDeploymenStage"));
   }
 }
