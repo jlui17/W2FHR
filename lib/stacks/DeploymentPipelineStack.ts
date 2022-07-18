@@ -19,7 +19,7 @@ export class DeploymentPipelineStack extends Stack {
         input: CodePipelineSource.gitHub("jlui17/W2FHR", "main", {
           authentication: GITHUB_AUTH_TOKEN,
         }),
-        commands: ["npm ci", "npm run build", "go mod tidy", "npx cdk synth"],
+        commands: ["npm ci", "npm run build", "npx cdk synth"],
       }),
     });
 
