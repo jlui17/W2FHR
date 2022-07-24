@@ -8,8 +8,11 @@ export class AppDeploymentStage extends Stage {
     super(scope, id, props);
 
     const testStack = new TestStack(this, "TestStack");
+    const apiServiceDependencies = [testStack];
+
     const apiService = new ApiService(this, "ApiService", {
       testHandler: testStack.testHandler,
     });
+    apiService.addDependencies(apiServiceDependencies);
   }
 }

@@ -42,4 +42,10 @@ export class ApiService extends Stack {
     const testRoute = api.root.addResource("test");
     testRoute.addMethod("GET", new LambdaIntegration(props.testHandler));
   }
+
+  public addDependencies(targets: Stack[]): void {
+    targets.forEach((dependency) => {
+      this.addDependency(dependency);
+    });
+  }
 }
