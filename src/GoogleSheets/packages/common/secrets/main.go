@@ -12,9 +12,9 @@ var (
 		aws.NewConfig().WithRegion("us-west-2"))
 )
 
-func GetGoogleSheetsApiKey() string {
+func GetGoogleSheetsApiKey() (string, error) {
 	if sessErr != nil {
-		return sessErr.Error()
+		return "", sessErr
 	}
 	secretId := "API_KEY"
 
@@ -24,8 +24,8 @@ func GetGoogleSheetsApiKey() string {
 
 	secretResult, err := secretClient.GetSecretValue(input)
 	if err != nil {
-		return err.Error()
+		return "", err
 	}
 
-	return *secretResult.SecretString
+	return *secretResult.SecretString, nil
 }

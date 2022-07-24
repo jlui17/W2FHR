@@ -10,18 +10,25 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	name, nameExists := event.QueryStringParameters["name"]
 	if !nameExists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 404,
 			Body:       "No name",
-		}, nil
+		}
+	}
+	apiKey, err := secrets.GetGoogleSheetsApiKey()
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       err.Error(),
+		}
 	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Body:       fmt.Sprintf("Hello %s! %s", name, secrets.GetGoogleSheetsApiKey()),
-	}, nil
+		Body:       fmt.Sprintf("Hello %s! %s", name, apiKey),
+	}
 }
 
 func main() {
