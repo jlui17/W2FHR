@@ -1,6 +1,5 @@
 import { GoFunction } from "@aws-cdk/aws-lambda-go-alpha";
-import { Stack, StackProps } from "aws-cdk-lib";
-import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { SecretValue, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class GoogleSheetsService extends Stack {
@@ -10,16 +9,15 @@ export class GoogleSheetsService extends Stack {
     super(scope, id);
     const FUNCTION_FOLDER = "src/GoogleSheets";
 
+    const GOOGLE_API_KEY =
+      SecretValue.secretsManager("GOOGLE_API_KEY").unsafeUnwrap();
+
     this.testHandler = new GoFunction(this, "GoTestHandler", {
       entry: `${FUNCTION_FOLDER}/packages`,
       moduleDir: `${FUNCTION_FOLDER}/go.mod`,
+      environment: {
+        GOOGLE_API_KEY: GOOGLE_API_KEY,
+      },
     });
-    this.testHandler.addToRolePolicy(
-      new PolicyStatement({
-        actions: ["secretsmanager:GetSecretValue"],
-        effect: Effect.ALLOW,
-        resources: ["*"],
-      })
-    );
   }
 }
