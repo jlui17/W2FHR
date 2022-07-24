@@ -1,19 +1,27 @@
 package main
 
 import (
-        "fmt"
-        "context"
-        "github.com/aws/aws-lambda-go/lambda"
+	"context"
+	"fmt"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type MyEvent struct {
-        Name string `json:"name"`
-}
-
-func HandleRequest(ctx context.Context, name MyEvent) (string, error) {
-        return fmt.Sprintf("Hello %s!", name.Name ), nil
+func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	name, nameExists := event.QueryStringParameters["name"]
+	if !nameExists {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 404,
+			Body:       "No name",
+		}, nil
+	}
+	return events.APIGatewayProxyResponse{
+		StatusCode: 201,
+		Body:       fmt.Sprintf("Hello %s!", name),
+	}, nil
 }
 
 func main() {
-        lambda.Start(HandleRequest)
+	lambda.Start(HandleRequest)
 }
