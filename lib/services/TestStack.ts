@@ -11,8 +11,8 @@ export class TestStack extends Stack {
     const FUNCTION_FOLDER = "src/test";
 
     this.testHandler = new GoFunction(this, "GoTestHandler", {
-      entry: `${FUNCTION_FOLDER}/test/packages`,
-      moduleDir: `${FUNCTION_FOLDER}/test/go.mod`,
+      entry: `${FUNCTION_FOLDER}/packages`,
+      moduleDir: `${FUNCTION_FOLDER}/go.mod`,
     });
   }
 }
