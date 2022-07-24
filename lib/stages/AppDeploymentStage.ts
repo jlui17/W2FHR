@@ -7,11 +7,14 @@ export class AppDeploymentStage extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props);
 
-    const testStack = new GoogleSheetsService(this, "TestStack");
-    const apiServiceDependencies = [testStack];
+    const googleSheetsService = new GoogleSheetsService(
+      this,
+      "GoogleSheetsService"
+    );
+    const apiServiceDependencies = [googleSheetsService];
 
     const apiService = new ApiService(this, "ApiService", {
-      testHandler: testStack.testHandler,
+      testHandler: googleSheetsService.testHandler,
     });
     apiService.addDependencies(apiServiceDependencies);
   }
