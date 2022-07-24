@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { DeploymentPipelineStack } from "../lib/stacks/DeploymentPipelineStack";
+import "source-map-support/register";
+import { DeploymentPipelineStack } from "../lib/deployment/DeploymentPipelineStack";
 
 const app = new cdk.App();
 new DeploymentPipelineStack(app, "W2FHRDeploymentStack", {
