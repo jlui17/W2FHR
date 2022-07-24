@@ -1,4 +1,4 @@
-module wun2free.com/test
+module GoogleSheets
 
 go 1.18
 

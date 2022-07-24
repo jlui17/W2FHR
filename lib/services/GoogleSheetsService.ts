@@ -2,12 +2,12 @@ import { GoFunction } from "@aws-cdk/aws-lambda-go-alpha";
 import { Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
-export class TestStack extends Stack {
+export class GoogleSheetsService extends Stack {
   public readonly testHandler: GoFunction;
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id);
-    const FUNCTION_FOLDER = "src/test";
+    const FUNCTION_FOLDER = "src/GoogleSheets";
 
     this.testHandler = new GoFunction(this, "GoTestHandler", {
       entry: `${FUNCTION_FOLDER}/packages`,
