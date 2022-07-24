@@ -1,14 +1,31 @@
 package secrets
 
 import (
-	"github.com/aws/aws-secretsmanager-caching-go/secretcache"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 )
 
 var (
-	secretClient, _ = secretcache.New()
+	sess, sessErr = session.NewSession()
+	secretClient  = secretsmanager.New(sess,
+		aws.NewConfig().WithRegion("us-west-2"))
 )
 
 func GetGoogleSheetsApiKey() string {
-	apiKey, _ := secretClient.GetSecretString("API_KEY")
-	return apiKey
+	if sessErr != nil {
+		return sessErr.Error()
+	}
+	secretId := "API_KEY"
+
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(secretId),
+	}
+
+	secretResult, err := secretClient.GetSecretValue(input)
+	if err != nil {
+		return err.Error()
+	}
+
+	return *secretResult.SecretString
 }
