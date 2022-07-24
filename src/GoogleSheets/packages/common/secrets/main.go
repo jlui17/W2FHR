@@ -16,7 +16,7 @@ func GetGoogleSheetsApiKey() (string, error) {
 	if sessErr != nil {
 		return "", sessErr
 	}
-	secretId := "API_KEY"
+	secretId := "GOOGLE_API_KEY"
 
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId: aws.String(secretId),

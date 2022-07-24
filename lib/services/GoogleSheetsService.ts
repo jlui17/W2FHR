@@ -18,7 +18,7 @@ export class GoogleSheetsService extends Stack {
       new PolicyStatement({
         actions: ["secretsmanager:GetSecretValue"],
         effect: Effect.ALLOW,
-        resources: [this.testHandler.functionArn],
+        resources: ["*"],
       })
     );
   }
