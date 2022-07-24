@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"GoogleSheets/packages/common/secrets"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -18,7 +20,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Body:       fmt.Sprintf("Hello %s!", name),
+		Body:       fmt.Sprintf("Hello %s! %s", name, secrets.GetGoogleSheetsApiKey()),
 	}, nil
 }
 
