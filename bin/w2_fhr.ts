@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
-import { DeploymentPipelineStack } from "../lib/deployment/DeploymentPipelineStack";
+import { ApiService } from "../lib/services/ApiService";
+import { GoogleSheetsService } from "../lib/services/GoogleSheetsService";
 
 const app = new cdk.App();
-new DeploymentPipelineStack(app, "W2FHRDeploymentStack", {
-  env: {
-    account: "268847659094",
-    region: "us-west-2",
-  },
+const googleSheetsService = new GoogleSheetsService(app, "GoogleSheetsService");
+const apiServiceDependencies = [googleSheetsService];
+
+const apiService = new ApiService(app, "ApiService", {
+  testHandler: googleSheetsService.testHandler,
 });
+apiService.addDependencies(apiServiceDependencies);
 
 app.synth();
