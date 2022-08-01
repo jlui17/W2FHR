@@ -9,7 +9,7 @@ export class GoogleSheetsService extends Stack {
     super(scope, id);
     const FUNCTION_FOLDER = "src/GoogleSheets";
 
-    this.testHandler = new GoFunction(this, "GoTestHandler", {
+    this.testHandler = new GoFunction(this, "GoogleSheetsTestHandler", {
       entry: `${FUNCTION_FOLDER}/packages`,
       moduleDir: `${FUNCTION_FOLDER}/go.mod`,
     });
