@@ -22,8 +22,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	sheetId := "1Q9Wt-dtjJN3c3lcJ1v8SHTTz4molRm09rAru3BT8AV8"
-	readRange := "Master Timesheet!A2"
+	sheetId := "1nomP3VKJxYewKICTwtPj464uZLclPEBgLv4i-6PPtSY"
+	readRange := "Links!A2:B"
 
 	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
 	if err != nil {
@@ -41,9 +41,18 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	for i := 0; i < len(response.Values); i++ {
+		if response.Values[i][0] == employeeId {
+			return events.APIGatewayProxyResponse{
+				StatusCode: 201,
+				Body:       fmt.Sprintf("Employee ID: %s, Name: %s", employeeId, response.Values[i][1]),
+			}, nil
+		}
+	}
+
 	return events.APIGatewayProxyResponse{
-		StatusCode: 201,
-		Body:       fmt.Sprintf("%s, Employee ID: %s", response.Values[0][0], employeeId),
+		StatusCode: 404,
+		Body:       fmt.Sprintf("Name not found for employee id %s", employeeId),
 	}, nil
 }
 
