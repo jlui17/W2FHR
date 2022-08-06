@@ -3,15 +3,21 @@ import { Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class GoogleSheetsService extends Stack {
-  public readonly testHandler: GoFunction;
+  public readonly availabilityHandler: GoFunction;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
-    const FUNCTION_FOLDER = "src/GoogleSheets";
+    const SOURCE_DIR = "src/GoogleSheets";
+    const MODULE_DIR = `${SOURCE_DIR}/go.mod`;
+    const SOURCE_PACKAGES_DIR = `${SOURCE_DIR}/packages`;
 
-    this.testHandler = new GoFunction(this, "GoogleSheetsTestHandler", {
-      entry: `${FUNCTION_FOLDER}/packages`,
-      moduleDir: `${FUNCTION_FOLDER}/go.mod`,
-    });
+    this.availabilityHandler = new GoFunction(
+      this,
+      "GoogleSheetsAvailabilityHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/availability`,
+        moduleDir: MODULE_DIR,
+      }
+    );
   }
 }

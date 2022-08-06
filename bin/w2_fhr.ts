@@ -9,7 +9,9 @@ const googleSheetsService = new GoogleSheetsService(app, "GoogleSheetsService");
 const apiServiceDependencies = [googleSheetsService];
 
 const apiService = new ApiService(app, "ApiService", {
-  testHandler: googleSheetsService.testHandler,
+  GoogleSheets: {
+    availabilityHandler: googleSheetsService.availabilityHandler,
+  },
 });
 apiService.addDependencies(apiServiceDependencies);
 

@@ -9,7 +9,9 @@ import {
 import { Construct } from "constructs";
 
 interface ApiServiceProps {
-  testHandler: GoFunction;
+  GoogleSheets: {
+    availabilityHandler: GoFunction;
+  };
 }
 
 export class ApiService extends Stack {
@@ -39,8 +41,11 @@ export class ApiService extends Stack {
       },
     });
 
-    const testRoute = api.root.addResource("test");
-    testRoute.addMethod("GET", new LambdaIntegration(props.testHandler));
+    const testRoute = api.root.addResource("availability");
+    testRoute.addMethod(
+      "GET",
+      new LambdaIntegration(props.GoogleSheets.availabilityHandler)
+    );
   }
 
   public addDependencies(targets: Stack[]): void {
