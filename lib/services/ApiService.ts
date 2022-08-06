@@ -41,8 +41,9 @@ export class ApiService extends Stack {
       },
     });
 
-    const testRoute = api.root.addResource("availability");
-    testRoute.addMethod(
+    const baseAvailabilityRoute = api.root.addResource("availability");
+    const availabilityRoute = baseAvailabilityRoute.addResource("{employeeId}");
+    availabilityRoute.addMethod(
       "GET",
       new LambdaIntegration(props.GoogleSheets.availabilityHandler)
     );

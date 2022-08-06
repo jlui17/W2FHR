@@ -33,9 +33,17 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	employeeId, exists := event.PathParameters["employeeId"]
+	if !exists {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
+			Body:       "Employee ID not found",
+		}, nil
+	}
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Body:       fmt.Sprintf("%s", response.Values[0][0]),
+		Body:       fmt.Sprintf("%s, Employee ID: %s", response.Values[0][0], employeeId),
 	}, nil
 }
 
