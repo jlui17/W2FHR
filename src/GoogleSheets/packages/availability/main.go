@@ -23,7 +23,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	sheetId := "1nomP3VKJxYewKICTwtPj464uZLclPEBgLv4i-6PPtSY"
-	readRange := "Links!A2:B"
+	readRange := "Links!A2:J"
 
 	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
 	if err != nil {
@@ -45,7 +45,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		if response.Values[i][0] == employeeId {
 			return events.APIGatewayProxyResponse{
 				StatusCode: 201,
-				Body:       fmt.Sprintf("Employee ID: %s, Name: %s", employeeId, response.Values[i][1]),
+				Body:       fmt.Sprintf("Num of Employees: %s, Employee ID: %s, Friday: %s, Saturday: %s, Sunday: %s, Monday: %s", fmt.Sprint(len(response.Values)), employeeId, response.Values[i][6], response.Values[i][7], response.Values[i][8], response.Values[i][9]),
 			}, nil
 		}
 	}
