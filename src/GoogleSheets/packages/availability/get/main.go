@@ -37,32 +37,24 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 }
 
 func getEmployeeAvailability(employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
-	sheetsService, err := googleClient.GetReadOnlyService()
+	availabilityTimesheet, err := GetAvailabilityTimesheet()
 	if err != nil {
 		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
-	readRange := AvailabilityConstants.AVAILABILITY_SHEET_GET_RANGE
-
-	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
-	if err != nil {
-		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	return findEmployeeAvailabilityFromId(response, employeeId)
+	return findEmployeeAvailabilityFromId(availabilityTimesheet, employeeId)
 }
 
-func findEmployeeAvailabilityFromId(availabilitySheet *sheets.ValueRange, employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
-	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilitySheet, employeeId)
+func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
 	if err != nil {
 		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	isAvailabileDay1 := availabilitySheet.Values[rowOfEmployeeAvailability][6] == "TRUE"
-	isAvailabileDay2 := availabilitySheet.Values[rowOfEmployeeAvailability][7] == "TRUE"
-	isAvailabileDay3 := availabilitySheet.Values[rowOfEmployeeAvailability][8] == "TRUE"
-	isAvailabileDay4 := availabilitySheet.Values[rowOfEmployeeAvailability][9] == "TRUE"
+	isAvailabileDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][6] == "TRUE"
+	isAvailabileDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][7] == "TRUE"
+	isAvailabileDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][8] == "TRUE"
+	isAvailabileDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][9] == "TRUE"
 
 	return AvailabilityConstants.EMPLOYEE_AVAILABILITY{
 		Day1: isAvailabileDay1,
@@ -72,9 +64,26 @@ func findEmployeeAvailabilityFromId(availabilitySheet *sheets.ValueRange, employ
 	}, nil
 }
 
-func FindRowOfEmployeeAvailability(availabilitySheet *sheets.ValueRange, employeeId string) (int, error) {
-	for i := 0; i < len(availabilitySheet.Values); i++ {
-		if availabilitySheet.Values[i][0] == employeeId {
+func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
+	sheetsService, err := googleClient.GetReadOnlyService()
+	if err != nil {
+		return &sheets.ValueRange{}, err
+	}
+
+	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
+	readRange := AvailabilityConstants.AVAILABILITY_SHEET_GET_RANGE
+
+	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+	if err != nil {
+		return &sheets.ValueRange{}, err
+	}
+
+	return response, nil
+}
+
+func FindRowOfEmployeeAvailability(availabilityTimesheet *sheets.ValueRange, employeeId string) (int, error) {
+	for i := 0; i < len(availabilityTimesheet.Values); i++ {
+		if availabilityTimesheet.Values[i][0] == employeeId {
 			return i, nil
 		}
 	}
