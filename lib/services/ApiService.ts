@@ -48,6 +48,10 @@ export class ApiService extends Stack {
       "GET",
       new LambdaIntegration(props.GoogleSheets.availabilityHandler)
     );
+    availabilityRoute.addMethod(
+      "POST",
+      new LambdaIntegration(props.GoogleSheets.availabilityHandler)
+    );
 
     const baseTimesheetRoute = api.root.addResource("timesheet");
     baseTimesheetRoute.addMethod(
