@@ -48,13 +48,13 @@ func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailabilit
 
 	updateRange := AvailabilityConstants.GetUpdateAvailabilityRangeFromRow(employeeAvailabilityRow)
 	updateValueRange := createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability)
-	updateResponse, err := sheetsService.Spreadsheets.Values.Update(AvailabilityConstants.AVAILABILITY_SHEET_ID, updateRange, updateValueRange).ValueInputOption("RAW").Do()
+	updateResponse, err := sheetsService.Spreadsheets.Values.Update(AvailabilityConstants.AVAILABILITY_SHEET_ID, updateRange, updateValueRange).ValueInputOption("RAW").IncludeValuesInResponse(true).Do()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	fmt.Sprint(updateResponse)
-	return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, nil
+	updatedEmployeeAvailability := createEmployeeAvailabilityFromUpdateResponse(updateResponse)
+	return updatedEmployeeAvailability, nil
 }
 
 func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) *sheets.ValueRange {
@@ -68,4 +68,19 @@ func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability 
 			newEmployeeAvailability.Day4})
 	updatedValueRange := sheets.ValueRange{Values: updatedValues}
 	return &updatedValueRange
+}
+
+func createEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) *AvailabilityConstants.EMPLOYEE_AVAILABILITY {
+	updateResponseValueRange := updateResponse.UpdatedData
+	isAvailabileDay1 := updateResponseValueRange.Values[0][0] == "TRUE"
+	isAvailabileDay2 := updateResponseValueRange.Values[0][1] == "TRUE"
+	isAvailabileDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
+	isAvailabileDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
+
+	return &AvailabilityConstants.EMPLOYEE_AVAILABILITY{
+		Day1: isAvailabileDay1,
+		Day2: isAvailabileDay2,
+		Day3: isAvailabileDay3,
+		Day4: isAvailabileDay4,
+	}
 }
