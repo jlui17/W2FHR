@@ -18,7 +18,17 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	return GetAvailability.HandleRequest(employeeId)
+	requestMethod := event.HTTPMethod
+
+	switch requestMethod {
+	case "GET":
+		return GetAvailability.HandleRequest(employeeId)
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: 400,
+		Body:       "Not a valid request",
+	}, nil
 }
 
 func main() {
