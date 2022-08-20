@@ -3,14 +3,12 @@ package GetAvailability
 import (
 	googleClient "GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Types/AvailabilityConstants"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 
-	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
 
@@ -39,9 +37,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 }
 
 func getEmployeeAvailability(employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
-	client := googleClient.GetReadOnlyClient()
-
-	sheetsService, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
+	sheetsService, err := googleClient.GetReadOnlyService()
 	if err != nil {
 		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}

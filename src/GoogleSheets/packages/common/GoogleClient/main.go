@@ -3,9 +3,11 @@ package googleClient
 import (
 	configService "GoogleSheets/packages/common/ConfigService"
 	"context"
-	"net/http"
+
+	"google.golang.org/api/sheets/v4"
 
 	"golang.org/x/oauth2/jwt"
+	"google.golang.org/api/option"
 )
 
 const (
@@ -23,10 +25,20 @@ func getConfig(scope string) *jwt.Config {
 	}
 }
 
-func GetReadOnlyClient() *http.Client {
-	return getConfig(READ_ONLY_SCOPE).Client(context.Background())
+func GetReadOnlyService() (*sheets.Service, error) {
+	client := getConfig(READ_ONLY_SCOPE).Client(context.Background())
+	service, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
+	if err != nil {
+		return service, err
+	}
+	return service, nil
 }
 
-func GetReadWriteClient() *http.Client {
-	return getConfig(READ_WRITE_SCOPE).Client(context.Background())
+func GetReadWriteService() (*sheets.Service, error) {
+	client := getConfig(READ_WRITE_SCOPE).Client(context.Background())
+	service, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
+	if err != nil {
+		return service, err
+	}
+	return service, nil
 }
