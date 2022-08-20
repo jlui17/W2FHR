@@ -27,10 +27,10 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	case "GET":
 		return GetAvailability.HandleRequest(employeeId)
 	case "POST":
-		availabilityFromRequestBody := event.Body
-		employeeAvailability := AvailabilityConstants.EMPLOYEE_AVAILABILITY{}
-		json.Unmarshal([]byte(availabilityFromRequestBody), &employeeAvailability)
-		return UpdateAvailability.HandleRequest(employeeId, &employeeAvailability)
+		newAvailabilityFromRequestBody := event.Body
+		newEmployeeAvailability := AvailabilityConstants.EMPLOYEE_AVAILABILITY{}
+		json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
+		return UpdateAvailability.HandleRequest(employeeId, &newEmployeeAvailability)
 	}
 
 	return events.APIGatewayProxyResponse{

@@ -71,7 +71,7 @@ func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
 	}
 
 	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
-	readRange := AvailabilityConstants.AVAILABILITY_SHEET_GET_RANGE
+	readRange := AvailabilityConstants.AVAILABILITY_TIMESHEET_GET_RANGE
 
 	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
 	if err != nil {
