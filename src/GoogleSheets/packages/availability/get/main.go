@@ -58,21 +58,29 @@ func getEmployeeAvailability(employeeId string) (AvailabilityConstants.EMPLOYEE_
 }
 
 func findEmployeeAvailabilityFromId(availabilitySheet *sheets.ValueRange, employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
-	for i := 0; i < len(availabilitySheet.Values); i++ {
-		if availabilitySheet.Values[i][0] == employeeId {
-			isAvailabileDay1 := availabilitySheet.Values[i][6] == "TRUE"
-			isAvailabileDay2 := availabilitySheet.Values[i][7] == "TRUE"
-			isAvailabileDay3 := availabilitySheet.Values[i][8] == "TRUE"
-			isAvailabileDay4 := availabilitySheet.Values[i][9] == "TRUE"
-
-			return AvailabilityConstants.EMPLOYEE_AVAILABILITY{
-				Day1: isAvailabileDay1,
-				Day2: isAvailabileDay2,
-				Day3: isAvailabileDay3,
-				Day4: isAvailabileDay4,
-			}, nil
-		}
+	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilitySheet, employeeId)
+	if err != nil {
+		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, errors.New(AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND)
+	isAvailabileDay1 := availabilitySheet.Values[rowOfEmployeeAvailability][6] == "TRUE"
+	isAvailabileDay2 := availabilitySheet.Values[rowOfEmployeeAvailability][7] == "TRUE"
+	isAvailabileDay3 := availabilitySheet.Values[rowOfEmployeeAvailability][8] == "TRUE"
+	isAvailabileDay4 := availabilitySheet.Values[rowOfEmployeeAvailability][9] == "TRUE"
+
+	return AvailabilityConstants.EMPLOYEE_AVAILABILITY{
+		Day1: isAvailabileDay1,
+		Day2: isAvailabileDay2,
+		Day3: isAvailabileDay3,
+		Day4: isAvailabileDay4,
+	}, nil
+}
+
+func FindRowOfEmployeeAvailability(availabilitySheet *sheets.ValueRange, employeeId string) (int, error) {
+	for i := 0; i < len(availabilitySheet.Values); i++ {
+		if availabilitySheet.Values[i][0] == employeeId {
+			return i, nil
+		}
+	}
+	return 0, errors.New(AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND)
 }
