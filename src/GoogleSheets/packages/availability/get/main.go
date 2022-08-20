@@ -4,13 +4,41 @@ import (
 	googleClient "GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Types/AvailabilityConstants"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+
+	"github.com/aws/aws-lambda-go/events"
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
 
-func Get(employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
+	employeeAvailability, err := getEmployeeAvailability(employeeId)
+
+	if err != nil {
+		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND {
+			return events.APIGatewayProxyResponse{
+				StatusCode: 404,
+				Body:       fmt.Sprintf("Name not found for employee id %s", employeeId),
+			}, nil
+		}
+
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	res, _ := json.Marshal(employeeAvailability)
+	return events.APIGatewayProxyResponse{
+		StatusCode: 201,
+		Body:       fmt.Sprint(string(res)),
+	}, nil
+}
+
+func getEmployeeAvailability(employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
 	client := googleClient.GetReadOnlyClient()
 
 	sheetsService, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
@@ -26,12 +54,16 @@ func Get(employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error)
 		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	for i := 0; i < len(response.Values); i++ {
-		if response.Values[i][0] == employeeId {
-			isAvailabileDay1 := response.Values[i][6] == "TRUE"
-			isAvailabileDay2 := response.Values[i][7] == "TRUE"
-			isAvailabileDay3 := response.Values[i][8] == "TRUE"
-			isAvailabileDay4 := response.Values[i][9] == "TRUE"
+	return findEmployeeAvailabilityFromId(response, employeeId)
+}
+
+func findEmployeeAvailabilityFromId(availabilitySheet *sheets.ValueRange, employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+	for i := 0; i < len(availabilitySheet.Values); i++ {
+		if availabilitySheet.Values[i][0] == employeeId {
+			isAvailabileDay1 := availabilitySheet.Values[i][6] == "TRUE"
+			isAvailabileDay2 := availabilitySheet.Values[i][7] == "TRUE"
+			isAvailabileDay3 := availabilitySheet.Values[i][8] == "TRUE"
+			isAvailabileDay4 := availabilitySheet.Values[i][9] == "TRUE"
 
 			return AvailabilityConstants.EMPLOYEE_AVAILABILITY{
 				Day1: isAvailabileDay1,
