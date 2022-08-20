@@ -11,6 +11,7 @@ import { Construct } from "constructs";
 interface ApiServiceProps {
   GoogleSheets: {
     availabilityHandler: GoFunction;
+    timesheetHandler: GoFunction;
   };
 }
 
@@ -46,6 +47,12 @@ export class ApiService extends Stack {
     availabilityRoute.addMethod(
       "GET",
       new LambdaIntegration(props.GoogleSheets.availabilityHandler)
+    );
+
+    const baseTimesheetRoute = api.root.addResource("timesheet");
+    baseTimesheetRoute.addMethod(
+      "GET",
+      new LambdaIntegration(props.GoogleSheets.timesheetHandler)
     );
   }
 

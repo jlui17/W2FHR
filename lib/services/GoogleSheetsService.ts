@@ -4,6 +4,7 @@ import { Construct } from "constructs";
 
 export class GoogleSheetsService extends Stack {
   public readonly availabilityHandler: GoFunction;
+  public readonly timesheetHandler: GoFunction;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -16,6 +17,15 @@ export class GoogleSheetsService extends Stack {
       "GoogleSheetsAvailabilityHandler",
       {
         entry: `${SOURCE_PACKAGES_DIR}/availability`,
+        moduleDir: MODULE_DIR,
+      }
+    );
+
+    this.timesheetHandler = new GoFunction(
+      this,
+      "GoogleSheetsTimesheetHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/timesheet`,
         moduleDir: MODULE_DIR,
       }
     );

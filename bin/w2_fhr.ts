@@ -11,6 +11,7 @@ const apiServiceDependencies = [googleSheetsService];
 const apiService = new ApiService(app, "ApiService", {
   GoogleSheets: {
     availabilityHandler: googleSheetsService.availabilityHandler,
+    timesheetHandler: googleSheetsService.timesheetHandler,
   },
 });
 apiService.addDependencies(apiServiceDependencies);
