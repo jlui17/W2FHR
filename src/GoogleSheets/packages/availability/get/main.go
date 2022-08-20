@@ -36,19 +36,19 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	}, nil
 }
 
-func getEmployeeAvailability(employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
 	availabilityTimesheet, err := GetAvailabilityTimesheet()
 	if err != nil {
-		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
 	return findEmployeeAvailabilityFromId(availabilityTimesheet, employeeId)
 }
 
-func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, employeeId string) (AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, employeeId string) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
 	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
 	if err != nil {
-		return AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
 	isAvailabileDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][6] == "TRUE"
@@ -56,7 +56,7 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 	isAvailabileDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][8] == "TRUE"
 	isAvailabileDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][9] == "TRUE"
 
-	return AvailabilityConstants.EMPLOYEE_AVAILABILITY{
+	return &AvailabilityConstants.EMPLOYEE_AVAILABILITY{
 		Day1: isAvailabileDay1,
 		Day2: isAvailabileDay2,
 		Day3: isAvailabileDay3,
