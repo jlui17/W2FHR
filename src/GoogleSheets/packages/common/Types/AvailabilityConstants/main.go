@@ -1,10 +1,10 @@
 package AvailabilityConstants
 
 type EMPLOYEE_AVAILABILITY struct {
-	Day1 bool
-	Day2 bool
-	Day3 bool
-	Day4 bool
+	Day1 bool `json:"Day1"`
+	Day2 bool `json:"Day2"`
+	Day3 bool `json:"Day3"`
+	Day4 bool `json:"Day4"`
 }
 
 const (
