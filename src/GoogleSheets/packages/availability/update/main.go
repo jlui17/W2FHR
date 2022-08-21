@@ -14,15 +14,19 @@ import (
 func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) (events.APIGatewayProxyResponse, error) {
 	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
 	if err != nil {
+		statusCode := 500
+		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND {
+			statusCode = 404
+		}
 		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
+			StatusCode: statusCode,
 			Body:       err.Error(),
 		}, nil
 	}
 	res, _ := json.Marshal(updatedEmployeeAvailability)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Body:       fmt.Sprintf("Update availability, new availability: %s", string(res)),
+		Body:       fmt.Sprint(string(res)),
 	}, nil
 }
 

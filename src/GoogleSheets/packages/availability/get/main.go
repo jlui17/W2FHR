@@ -16,15 +16,13 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	employeeAvailability, err := getEmployeeAvailability(employeeId)
 
 	if err != nil {
+		statusCode := 500
 		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND {
-			return events.APIGatewayProxyResponse{
-				StatusCode: 404,
-				Body:       fmt.Sprintf("Name not found for employee id %s", employeeId),
-			}, nil
+			statusCode = 404
 		}
 
 		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
+			StatusCode: statusCode,
 			Body:       err.Error(),
 		}, nil
 	}
