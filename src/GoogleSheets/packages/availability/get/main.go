@@ -49,10 +49,12 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	isAvailabileDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][6] == "TRUE"
-	isAvailabileDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][7] == "TRUE"
-	isAvailabileDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][8] == "TRUE"
-	isAvailabileDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][9] == "TRUE"
+	day1ColumnNumber := AvailabilityConstants.LETTER_TO_NUMBER_MAP[AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN]
+
+	isAvailabileDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
+	isAvailabileDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
+	isAvailabileDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
+	isAvailabileDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
 
 	return &AvailabilityConstants.EMPLOYEE_AVAILABILITY{
 		Day1: isAvailabileDay1,
