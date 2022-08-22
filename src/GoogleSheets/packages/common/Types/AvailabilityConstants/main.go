@@ -13,8 +13,8 @@ const (
 	EMPLOYEE_AVAILABILITY_NOT_FOUND = "EMPLOYEE_NOT_FOUND"
 	AVAILABILITY_SHEET_ID           = "13LQSitRMmmyZPwvvDa5Pbf9yMWzKL2y0TaitaETqCmI"
 	AVAILABILITY_SHEET_SHEET_NAME   = "Availability"
-	AVAILABILITY_SHEET_DAY1_COLUMN  = "D"
-	AVAILABILITY_SHEET_DAY4_COLUMN  = "G"
+	AVAILABILITY_SHEET_DAY1_COLUMN  = "E"
+	AVAILABILITY_SHEET_DAY4_COLUMN  = "H"
 	GOOGLESHEETS_ROW_OFFSET         = 3 // 1 (index 0) + 1 (first row is title of column sections) + 1 (second row is title of columns)
 )
 
