@@ -1,9 +1,11 @@
+import { QueryClient, QueryClientProvider } from "react-query";
 import { AvailabilityWidget } from "./AvailabilityWidget";
 
 export const Availability = () => {
+  const queryClient = new QueryClient();
   return (
-    <div>
+    <QueryClientProvider client={queryClient}>
       Availability <AvailabilityWidget />
-    </div>
+    </QueryClientProvider>
   );
 };
