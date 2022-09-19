@@ -23,6 +23,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 
 		return events.APIGatewayProxyResponse{
 			StatusCode: statusCode,
+			Headers:    AvailabilityConstants.ALLOW_ORIGINS_HEADER,
 			Body:       err.Error(),
 		}, nil
 	}
@@ -30,6 +31,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	res, _ := json.Marshal(employeeAvailability)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
+		Headers:    AvailabilityConstants.ALLOW_ORIGINS_HEADER,
 		Body:       fmt.Sprint(string(res)),
 	}, nil
 }

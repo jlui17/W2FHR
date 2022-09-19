@@ -54,6 +54,7 @@ var (
 		Day4: false,
 	}
 	AVAILABILITY_TIMESHEET_GET_RANGE = fmt.Sprintf("%s!A%d:%s", AVAILABILITY_SHEET_SHEET_NAME, GOOGLESHEETS_ROW_OFFSET, AVAILABILITY_SHEET_DAY4_COLUMN)
+	ALLOW_ORIGINS_HEADER             = map[string]string{"Access-Control-Allow-Origin": "*"}
 )
 
 func GetUpdateAvailabilityRangeFromRow(employeeAvailabilityRow int) string {
