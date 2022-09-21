@@ -1,7 +1,7 @@
 package GetAvailability
 
 import (
-	googleClient "GoogleSheets/packages/common/GoogleClient"
+	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Types/AvailabilityConstants"
 	"encoding/json"
 	"errors"
@@ -67,7 +67,7 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 }
 
 func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
-	sheetsService, err := googleClient.GetReadOnlyService()
+	sheetsService, err := GoogleClient.GetReadOnlyService()
 	if err != nil {
 		return &sheets.ValueRange{}, err
 	}

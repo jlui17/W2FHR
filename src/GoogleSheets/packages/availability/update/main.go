@@ -2,7 +2,7 @@ package UpdateAvailability
 
 import (
 	GetAvailability "GoogleSheets/packages/availability/get"
-	googleClient "GoogleSheets/packages/common/GoogleClient"
+	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Types/AvailabilityConstants"
 	"encoding/json"
 	"fmt"
@@ -47,7 +47,7 @@ func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *Avai
 }
 
 func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
-	sheetsService, err := googleClient.GetReadWriteService()
+	sheetsService, err := GoogleClient.GetReadWriteService()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}

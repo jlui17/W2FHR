@@ -1,4 +1,4 @@
-package googleClient
+package GoogleClient
 
 import (
 	configService "GoogleSheets/packages/common/ConfigService"
