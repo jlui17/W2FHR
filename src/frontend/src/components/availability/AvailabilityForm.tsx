@@ -10,19 +10,19 @@ export const AvailabilityForm = ({
   availability,
   setAvailability,
 }: AvailabilityFormProps) => {
-  const updateDay = (day: string) => {
+  const updateDay = (day: number) => {
     const newAvailability: Availability = { ...availability };
     switch (day) {
-      case "day1":
+      case 1:
         newAvailability.Day1 = !availability.Day1;
         break;
-      case "day2":
+      case 2:
         newAvailability.Day2 = !availability.Day2;
         break;
-      case "day3":
+      case 3:
         newAvailability.Day3 = !availability.Day3;
         break;
-      case "day4":
+      case 4:
         newAvailability.Day4 = !availability.Day4;
         break;
     }
@@ -37,7 +37,7 @@ export const AvailabilityForm = ({
           label="Day 1"
           checked={availability.Day1}
           onChange={() => {
-            updateDay("day1");
+            updateDay(1);
           }}
         />
         <Form.Check
@@ -45,7 +45,7 @@ export const AvailabilityForm = ({
           label="Day 2"
           checked={availability.Day2}
           onChange={() => {
-            updateDay("day2");
+            updateDay(2);
           }}
         />
         <Form.Check
@@ -53,7 +53,7 @@ export const AvailabilityForm = ({
           label="Day 3"
           checked={availability.Day3}
           onChange={() => {
-            updateDay("day3");
+            updateDay(3);
           }}
         />
         <Form.Check
@@ -61,7 +61,7 @@ export const AvailabilityForm = ({
           label="Day 4"
           checked={availability.Day4}
           onChange={() => {
-            updateDay("day4");
+            updateDay(4);
           }}
         />
       </Form>
