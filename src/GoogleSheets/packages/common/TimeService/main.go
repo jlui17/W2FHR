@@ -25,5 +25,9 @@ func GetDatesForSettingAvailability() (*[]string, error) {
 		dates = append(dates, fmt.Sprint(unformattedDates.Values[0][i]))
 	}
 
+	if len(dates) == 3 {
+		dates = append(dates, "")
+	}
+
 	return &dates, nil
 }
