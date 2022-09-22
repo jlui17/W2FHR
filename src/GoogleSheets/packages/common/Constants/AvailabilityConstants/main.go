@@ -2,11 +2,16 @@ package AvailabilityConstants
 
 import "fmt"
 
+type EmployeeAvailabilityDay struct {
+	IsAvailable bool   `json:"isAvailable"`
+	Date        string `json:"date"`
+}
+
 type EmployeeAvailability struct {
-	Day1 bool `json:"Day1"`
-	Day2 bool `json:"Day2"`
-	Day3 bool `json:"Day3"`
-	Day4 bool `json:"Day4"`
+	Day1 EmployeeAvailabilityDay `json:"Day1"`
+	Day2 EmployeeAvailabilityDay `json:"Day2"`
+	Day3 EmployeeAvailabilityDay `json:"Day3"`
+	Day4 EmployeeAvailabilityDay `json:"Day4"`
 }
 
 const (
@@ -48,10 +53,10 @@ var (
 		"Z": 25,
 	}
 	DEFAULT_EMPLOYEE_AVAILABILITY = EmployeeAvailability{
-		Day1: false,
-		Day2: false,
-		Day3: false,
-		Day4: false,
+		Day1: EmployeeAvailabilityDay{IsAvailable: false, Date: ""},
+		Day2: EmployeeAvailabilityDay{IsAvailable: false, Date: ""},
+		Day3: EmployeeAvailabilityDay{IsAvailable: false, Date: ""},
+		Day4: EmployeeAvailabilityDay{IsAvailable: false, Date: ""},
 	}
 	AVAILABILITY_TIMESHEET_GET_RANGE = fmt.Sprintf("%s!A%d:%s200", AVAILABILITY_SHEET_SHEET_NAME, GOOGLESHEETS_ROW_OFFSET, AVAILABILITY_SHEET_DAY4_COLUMN)
 	ALLOW_ORIGINS_HEADER             = map[string]string{"Access-Control-Allow-Origin": "*"}
