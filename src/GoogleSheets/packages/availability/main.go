@@ -3,7 +3,7 @@ package main
 import (
 	GetAvailability "GoogleSheets/packages/availability/get"
 	UpdateAvailability "GoogleSheets/packages/availability/update"
-	"GoogleSheets/packages/common/Types/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"context"
 	"encoding/json"
 
@@ -28,7 +28,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		return GetAvailability.HandleRequest(employeeId)
 	case "POST":
 		newAvailabilityFromRequestBody := event.Body
-		newEmployeeAvailability := AvailabilityConstants.EMPLOYEE_AVAILABILITY{}
+		newEmployeeAvailability := AvailabilityConstants.EmployeeAvailability{}
 		json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
 		return UpdateAvailability.HandleRequest(employeeId, &newEmployeeAvailability)
 	}

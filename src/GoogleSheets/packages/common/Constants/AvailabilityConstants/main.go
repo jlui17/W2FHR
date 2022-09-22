@@ -2,7 +2,7 @@ package AvailabilityConstants
 
 import "fmt"
 
-type EMPLOYEE_AVAILABILITY struct {
+type EmployeeAvailability struct {
 	Day1 bool `json:"Day1"`
 	Day2 bool `json:"Day2"`
 	Day3 bool `json:"Day3"`
@@ -47,7 +47,7 @@ var (
 		"Y": 24,
 		"Z": 25,
 	}
-	DEFAULT_EMPLOYEE_AVAILABILITY = EMPLOYEE_AVAILABILITY{
+	DEFAULT_EMPLOYEE_AVAILABILITY = EmployeeAvailability{
 		Day1: false,
 		Day2: false,
 		Day3: false,

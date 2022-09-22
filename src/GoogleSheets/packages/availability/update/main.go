@@ -2,8 +2,8 @@ package UpdateAvailability
 
 import (
 	GetAvailability "GoogleSheets/packages/availability/get"
+	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Types/AvailabilityConstants"
 	"encoding/json"
 	"fmt"
 
@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) (events.APIGatewayProxyResponse, error) {
+func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (events.APIGatewayProxyResponse, error) {
 	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
 	if err != nil {
 		statusCode := 500
@@ -32,7 +32,7 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 	}, nil
 }
 
-func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
 	availabilityTimesheet, err := GetAvailability.GetAvailabilityTimesheet()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -46,7 +46,7 @@ func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *Avai
 	return updateAvailabilityOnRow(employeeAvailabilityRow+AvailabilityConstants.GOOGLESHEETS_ROW_OFFSET, newEmployeeAvailability)
 }
 
-func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
 	sheetsService, err := GoogleClient.GetReadWriteService()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -63,7 +63,7 @@ func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailabilit
 	return updatedEmployeeAvailability, nil
 }
 
-func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EMPLOYEE_AVAILABILITY) *sheets.ValueRange {
+func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) *sheets.ValueRange {
 	updatedValues := make([][]interface{}, 0)
 	updatedValues = append(
 		updatedValues,
@@ -76,14 +76,14 @@ func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability 
 	return &updatedValueRange
 }
 
-func createEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) *AvailabilityConstants.EMPLOYEE_AVAILABILITY {
+func createEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) *AvailabilityConstants.EmployeeAvailability {
 	updateResponseValueRange := updateResponse.UpdatedData
 	isAvailabileDay1 := updateResponseValueRange.Values[0][0] == "TRUE"
 	isAvailabileDay2 := updateResponseValueRange.Values[0][1] == "TRUE"
 	isAvailabileDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
 	isAvailabileDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
 
-	return &AvailabilityConstants.EMPLOYEE_AVAILABILITY{
+	return &AvailabilityConstants.EmployeeAvailability{
 		Day1: isAvailabileDay1,
 		Day2: isAvailabileDay2,
 		Day3: isAvailabileDay3,

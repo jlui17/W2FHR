@@ -1,8 +1,8 @@
 package TimeService
 
 import (
+	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Types/AvailabilityConstants"
 	"fmt"
 )
 

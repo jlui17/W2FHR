@@ -1,8 +1,8 @@
 package GetAvailability
 
 import (
+	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Types/AvailabilityConstants"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -36,7 +36,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	}, nil
 }
 
-func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
 	availabilityTimesheet, err := GetAvailabilityTimesheet()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -45,7 +45,7 @@ func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.EMPLOYEE
 	return findEmployeeAvailabilityFromId(availabilityTimesheet, employeeId)
 }
 
-func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, employeeId string) (*AvailabilityConstants.EMPLOYEE_AVAILABILITY, error) {
+func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
 	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -58,7 +58,7 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 	isAvailabileDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
 	isAvailabileDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
 
-	return &AvailabilityConstants.EMPLOYEE_AVAILABILITY{
+	return &AvailabilityConstants.EmployeeAvailability{
 		Day1: isAvailabileDay1,
 		Day2: isAvailabileDay2,
 		Day3: isAvailabileDay3,
