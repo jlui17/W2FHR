@@ -68,10 +68,10 @@ func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability 
 	updatedValues = append(
 		updatedValues,
 		[]interface{}{
-			newEmployeeAvailability.Day1,
-			newEmployeeAvailability.Day2,
-			newEmployeeAvailability.Day3,
-			newEmployeeAvailability.Day4})
+			newEmployeeAvailability.Day1.IsAvailable,
+			newEmployeeAvailability.Day2.IsAvailable,
+			newEmployeeAvailability.Day3.IsAvailable,
+			newEmployeeAvailability.Day4.IsAvailable})
 	updatedValueRange := sheets.ValueRange{Values: updatedValues}
 	return &updatedValueRange
 }
