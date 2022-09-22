@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { Availability, BASE_API_ENDPOINT } from "../../helpers/API_CONSTANTS";
 import { AvailabilityWidget } from "./AvailabilityWidget";
@@ -13,14 +14,24 @@ const useGetAvailabilityByEmployeeId = (employeeId: string) => {
 };
 
 const AvailabilityRequestHandler = () => {
-  const { data, isFetching } = useGetAvailabilityByEmployeeId("w2fnm170007");
+  // const { data, isFetching } = useGetAvailabilityByEmployeeId("w2fnm170007");
 
-  const employeeAvailability: Availability = data;
+  // const employeeAvailability: Availability = data;
+
+  const isFetching = false;
+  const [availability, setAvailability] = useState<Availability>({
+    Day1: false,
+    Day2: true,
+    Day3: true,
+    Day4: false,
+  });
+  console.log(availability);
 
   return (
     <AvailabilityWidget
-      initialAvailability={employeeAvailability}
       isLoading={isFetching}
+      availability={availability}
+      setAvailability={setAvailability}
     />
   );
 };
