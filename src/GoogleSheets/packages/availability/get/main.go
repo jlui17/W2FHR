@@ -3,6 +3,7 @@ package GetAvailability
 import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/GoogleClient"
+	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -53,17 +54,12 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 
 	day1ColumnNumber := AvailabilityConstants.LETTER_TO_NUMBER_MAP[AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN]
 
-	isAvailabileDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
-	isAvailabileDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
-	isAvailabileDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
-	isAvailabileDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
+	isAvailableDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
+	isAvailableDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
+	isAvailableDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
+	isAvailableDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
 
-	return &AvailabilityConstants.EmployeeAvailability{
-		Day1: isAvailabileDay1,
-		Day2: isAvailabileDay2,
-		Day3: isAvailabileDay3,
-		Day4: isAvailabileDay4,
-	}, nil
+	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4)
 }
 
 func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {

@@ -4,6 +4,7 @@ import (
 	GetAvailability "GoogleSheets/packages/availability/get"
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/GoogleClient"
+	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
 	"encoding/json"
 	"fmt"
 
@@ -59,8 +60,7 @@ func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailabilit
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	updatedEmployeeAvailability := createEmployeeAvailabilityFromUpdateResponse(updateResponse)
-	return updatedEmployeeAvailability, nil
+	return getEmployeeAvailabilityFromUpdateResponse(updateResponse)
 }
 
 func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) *sheets.ValueRange {
@@ -76,17 +76,12 @@ func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability 
 	return &updatedValueRange
 }
 
-func createEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) *AvailabilityConstants.EmployeeAvailability {
+func getEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) (*AvailabilityConstants.EmployeeAvailability, error) {
 	updateResponseValueRange := updateResponse.UpdatedData
-	isAvailabileDay1 := updateResponseValueRange.Values[0][0] == "TRUE"
-	isAvailabileDay2 := updateResponseValueRange.Values[0][1] == "TRUE"
-	isAvailabileDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
-	isAvailabileDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
+	isAvailableDay1 := updateResponseValueRange.Values[0][0] == "TRUE"
+	isAvailableDay2 := updateResponseValueRange.Values[0][1] == "TRUE"
+	isAvailableDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
+	isAvailableDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
 
-	return &AvailabilityConstants.EmployeeAvailability{
-		Day1: isAvailabileDay1,
-		Day2: isAvailabileDay2,
-		Day3: isAvailabileDay3,
-		Day4: isAvailabileDay4,
-	}
+	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4)
 }
