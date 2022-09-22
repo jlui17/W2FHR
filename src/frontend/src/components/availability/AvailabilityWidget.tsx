@@ -1,33 +1,40 @@
-import axios from "axios";
-import { useQuery, useQueryClient } from "react-query";
-import { Availability, BASE_API_ENDPOINT } from "../../helpers/API_CONSTANTS";
+import React, { useState } from "react";
+import Button from "react-bootstrap/Button";
+import { Availability } from "../../helpers/API_CONSTANTS";
 
-const useGetAvailabilityByEmployeeId = (employeeId: string) => {
-  return useQuery(["getAvailabilityByEmployeeId"], async () => {
-    const employeeAvailabilityEndpoint = `${BASE_API_ENDPOINT}/availability/${employeeId}`;
-    const { data } = await axios.get(employeeAvailabilityEndpoint);
+interface AvailabilityWidgetProps extends WidgetProps {
+  isLoading: boolean;
+}
 
-    return data;
-  });
+interface WidgetProps {
+  initialAvailability: Availability;
+}
+
+export const AvailabilityWidget = (props: AvailabilityWidgetProps) => {
+  const { isLoading } = props;
+
+  if (isLoading) return <p>Loading...</p>;
+
+  const { initialAvailability } = props;
+  return <Widget initialAvailability={initialAvailability} />;
 };
 
-export const AvailabilityWidget = () => {
-  const queryClient = useQueryClient();
-  const { data, error, isFetching } =
-    useGetAvailabilityByEmployeeId("w2fnm170007");
+const Widget = (props: WidgetProps) => {
+  const [availability, setAvailability] = useState<Availability>({
+    ...props.initialAvailability,
+  });
 
-  const employeeAvailability: Availability = data;
-  console.log(employeeAvailability, isFetching);
+  const handleAvailabilityChange = (event: React.MouseEvent) => {
+    console.log(event);
+  };
 
-  if (isFetching) {
-    return <div>Loading</div>;
-  }
   return (
-    <div>
-      Day1: {String(employeeAvailability.Day1)} <br />
-      Day2: {String(employeeAvailability.Day2)} <br />
-      Day3: {String(employeeAvailability.Day3)} <br />
-      Day4: {String(employeeAvailability.Day4)}
-    </div>
+    <>
+      <Button variant="outline-primary" onClick={handleAvailabilityChange} />
+      Day1: {String(availability.Day1)}
+      Day2: {String(availability.Day2)}
+      Day3: {String(availability.Day3)}
+      Day4: {String(availability.Day4)}
+    </>
   );
 };
