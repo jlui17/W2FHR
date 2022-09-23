@@ -3,6 +3,7 @@ package UpdateAvailability
 import (
 	GetAvailability "GoogleSheets/packages/availability/get"
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
 	"encoding/json"
@@ -21,14 +22,14 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 		}
 		return events.APIGatewayProxyResponse{
 			StatusCode: statusCode,
-			Headers:    AvailabilityConstants.ALLOW_ORIGINS_HEADER,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       err.Error(),
 		}, nil
 	}
 	res, _ := json.Marshal(updatedEmployeeAvailability)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Headers:    AvailabilityConstants.ALLOW_ORIGINS_HEADER,
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       fmt.Sprint(string(res)),
 	}, nil
 }

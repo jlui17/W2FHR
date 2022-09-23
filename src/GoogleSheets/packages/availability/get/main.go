@@ -2,6 +2,7 @@ package GetAvailability
 
 import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
 	"encoding/json"
@@ -24,7 +25,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 
 		return events.APIGatewayProxyResponse{
 			StatusCode: statusCode,
-			Headers:    AvailabilityConstants.ALLOW_ORIGINS_HEADER,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       err.Error(),
 		}, nil
 	}
@@ -32,7 +33,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	res, _ := json.Marshal(employeeAvailability)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Headers:    AvailabilityConstants.ALLOW_ORIGINS_HEADER,
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       fmt.Sprint(string(res)),
 	}, nil
 }
@@ -52,7 +53,7 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	day1ColumnNumber := AvailabilityConstants.LETTER_TO_NUMBER_MAP[AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN]
+	day1ColumnNumber := SharedConstants.LETTER_TO_NUMBER_MAP[AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN]
 
 	isAvailableDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
 	isAvailableDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
