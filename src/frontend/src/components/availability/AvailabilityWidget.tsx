@@ -4,17 +4,8 @@ interface AvailabilityWidgetProps extends AvailabilityFormProps {
   isLoading: boolean;
 }
 
-export const AvailabilityWidget = ({
-  isLoading,
-  availability,
-  setAvailability,
-}: AvailabilityWidgetProps) => {
-  if (isLoading) return <p>Loading...</p>;
+export const AvailabilityWidget = (props: AvailabilityWidgetProps) => {
+  if (props.isLoading) return <p>Loading...</p>;
 
-  return (
-    <AvailabilityForm
-      availability={availability}
-      setAvailability={setAvailability}
-    />
-  );
+  return <AvailabilityForm {...props} />;
 };
