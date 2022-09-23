@@ -52,10 +52,6 @@ const AvailabilityRequestHandler = () => {
     updateAvailability();
   };
 
-  const refreshEmployeeAvailability = () => {
-    refreshAvailability();
-  };
-
   return (
     <AvailabilityWidget
       isLoading={isFetchingGet || isFetchingUpdate}
