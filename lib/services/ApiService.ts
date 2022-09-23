@@ -54,7 +54,8 @@ export class ApiService extends Stack {
     );
 
     const baseTimesheetRoute = api.root.addResource("timesheet");
-    baseTimesheetRoute.addMethod(
+    const timesheetRoute = baseTimesheetRoute.addResource("{employeeId}");
+    timesheetRoute.addMethod(
       "GET",
       new LambdaIntegration(props.GoogleSheets.timesheetHandler)
     );
