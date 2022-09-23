@@ -1,6 +1,7 @@
 package main
 
 import (
+	GetTimesheet "GoogleSheets/packages/timesheet/get"
 	"context"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -8,10 +9,16 @@ import (
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return events.APIGatewayProxyResponse{
-		StatusCode: 201,
-		Body:       "timesheet",
-	}, nil
+
+	employeeId, exists := event.PathParameters["employeeId"]
+	if !exists {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
+			Body:       "Please include employee id in request.",
+		}, nil
+	}
+
+	return GetTimesheet.HandleRequest(employeeId)
 }
 
 func main() {
