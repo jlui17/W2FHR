@@ -19,7 +19,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 		}, err
 	}
 
-	employeeShifts := getShiftsForEmployee("w2fnm170007", masterTimesheet)
+	employeeShifts := getShiftsForEmployee(employeeId, masterTimesheet)
 	res, _ := json.Marshal(employeeShifts)
 
 	return events.APIGatewayProxyResponse{
