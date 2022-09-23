@@ -84,7 +84,9 @@ export const AvailabilityForm = ({
             updateDay(4);
           }}
         />
-        <Button variant="primary">Update</Button>
+        <Button variant="primary" type="submit">
+          Update
+        </Button>
         <Button variant="secondary" onClick={refreshAvailability}>
           Refresh Availability
         </Button>
