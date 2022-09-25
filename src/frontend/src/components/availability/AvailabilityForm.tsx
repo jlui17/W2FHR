@@ -85,7 +85,7 @@ export const AvailabilityForm = ({
           }}
         />
         <Button
-          variant="primary"
+          variant={availability.canUpdate ? "primary" : "secondary"}
           type="submit"
           disabled={!availability.canUpdate}
         >
