@@ -4,6 +4,7 @@ import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"GoogleSheets/packages/common/GoogleClient"
+	"GoogleSheets/packages/common/TimeService"
 	"GoogleSheets/packages/common/Utilities/TimesheetUtil"
 
 	"encoding/json"
@@ -22,7 +23,13 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 		}, err
 	}
 
-	employeeShifts := getShiftsForEmployee(employeeId, masterTimesheet)
+	employeeShifts, err := getTimesheetForEmployee(employeeId, masterTimesheet)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		}, err
+	}
 	res, _ := json.Marshal(employeeShifts)
 
 	return events.APIGatewayProxyResponse{
@@ -49,10 +56,19 @@ func getMasterTimesheet() (*sheets.ValueRange, error) {
 	return response, nil
 }
 
-func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange) *[]*TimesheetConstants.EmployeeShift {
-	employeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet)
+func getTimesheetForEmployee(employeeId string, masterTimesheet *sheets.ValueRange) (*TimesheetConstants.Timesheet, error) {
+	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet)
+	formattedEmployeeShifts := formatEmployeeShifts(unformattedEmployeeShifts)
 
-	return formatEmployeeShifts(employeeShifts)
+	viewingDates, err := TimeService.GetDatesForSettingAvailability(TimesheetConstants.TIMESHEET_VIEWING_DATE_READ_RANGE)
+	if err != nil {
+		return TimesheetConstants.DEFAULT_TIMESHEET, err
+	}
+
+	return &TimesheetConstants.Timesheet{
+		Shifts:       formattedEmployeeShifts,
+		ViewingDates: viewingDates,
+	}, nil
 }
 
 func filterShiftsByEmployeeId(employeeId string, masterTimesheet *sheets.ValueRange) *[][]string {
