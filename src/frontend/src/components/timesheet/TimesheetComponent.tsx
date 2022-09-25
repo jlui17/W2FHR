@@ -28,7 +28,15 @@ const TimesheetRequestHandler = () => {
     { onSuccess: setTimesheet }
   );
 
-  return <TimesheetWidget isLoading={isFetching} timesheet={timesheet} />;
+  return (
+    <TimesheetWidget
+      isLoading={isFetching}
+      timesheet={timesheet}
+      employeeId={employeeId}
+      setEmployeeId={setEmployeeId}
+      refreshTimesheet={refreshTimesheet}
+    />
+  );
 };
 
 export const TimesheetComponent = () => {

@@ -92,7 +92,7 @@ export const AvailabilityForm = ({
           Update
         </Button>
         <Button variant="secondary" onClick={refreshAvailability}>
-          Refresh Availability
+          Refresh
         </Button>
       </Form>
     </>
