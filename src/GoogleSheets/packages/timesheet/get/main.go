@@ -1,9 +1,11 @@
 package GetTimesheet
 
 import (
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/TimesheetUtil"
+
 	"encoding/json"
 	"fmt"
 
@@ -16,6 +18,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		}, err
 	}
 
@@ -24,6 +27,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       fmt.Sprint(string(res)),
 	}, err
 }

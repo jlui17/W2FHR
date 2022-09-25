@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	GetTimesheet "GoogleSheets/packages/timesheet/get"
 	"context"
 
@@ -14,6 +15,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if !exists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Please include employee id in request.",
 		}, nil
 	}
