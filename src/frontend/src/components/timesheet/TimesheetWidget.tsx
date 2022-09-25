@@ -1,7 +1,7 @@
-import { EmployeeShift } from "../../helpers/API_CONSTANTS";
+import { Timesheet } from "../../helpers/API_CONSTANTS";
 
 interface TimesheetWidgetProps {
-  timesheet: EmployeeShift[];
+  timesheet: Timesheet;
   isLoading: boolean;
 }
 
@@ -13,21 +13,31 @@ export const TimesheetWidget = ({
 
   return (
     <>
-      {timesheet.map((shift) => (
-        <div>
-          {shift.date}
-          <br />
-          {shift.shiftTitle}
-          <br />
-          {shift.startTime}
-          <br />
-          {shift.endTime}
-          <br />
-          {shift.breakDuration}
-          <br />
-          ----
-        </div>
-      ))}
+      {timesheet.shifts.map((shift) => {
+        return (
+          <div>
+            {shift.date}
+            <br />
+            {shift.shiftTitle}
+            <br />
+            {shift.startTime}
+            <br />
+            {shift.endTime}
+            <br />
+            {shift.breakDuration}
+            <br />
+            ----
+          </div>
+        );
+      })}
+      {timesheet.viewingDates.map((date) => {
+        return (
+          <div>
+            {date}
+            <br />
+          </div>
+        );
+      })}
     </>
   );
 };

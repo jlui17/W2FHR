@@ -3,13 +3,16 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import {
   BASE_API_ENDPOINT,
-  EmployeeShift,
   QUERY_CLIENT_DEFAULT_OPTIONS,
+  Timesheet,
 } from "../../helpers/API_CONSTANTS";
 import { TimesheetWidget } from "./TimesheetWidget";
 
 const TimesheetRequestHandler = () => {
-  const [timesheet, setTimesheet] = useState<EmployeeShift[]>([]);
+  const [timesheet, setTimesheet] = useState<Timesheet>({
+    shifts: [],
+    viewingDates: [],
+  });
   const [employeeId, setEmployeeId] = useState<string>("w2fnm170007");
 
   const { refetch: refreshTimesheet, isFetching } = useQuery(

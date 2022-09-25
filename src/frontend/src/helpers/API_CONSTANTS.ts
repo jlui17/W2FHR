@@ -14,7 +14,12 @@ export interface Availability {
   canUpdate: boolean;
 }
 
-export interface EmployeeShift {
+export interface Timesheet {
+  shifts: EmployeeShift[];
+  viewingDates: string[];
+}
+
+interface EmployeeShift {
   date: string;
   shiftTitle: string;
   startTime: string;
