@@ -6,7 +6,7 @@ import (
 )
 
 func CreateEmployeeAvailability(isAvailableDay1 bool, isAvailableDay2 bool, isAvailableDay3 bool, isAvailableDay4 bool, canUpdate bool) (*AvailabilityConstants.EmployeeAvailability, error) {
-	dates, err := TimeService.GetDatesForSettingAvailability()
+	dates, err := TimeService.GetDatesForSettingAvailability(AvailabilityConstants.AVAILABILITY_VIEWING_DATES_READ_RANGE)
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}

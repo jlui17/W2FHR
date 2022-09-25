@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func GetDatesForSettingAvailability() (*[]string, error) {
+func GetDatesForSettingAvailability(datesReadRange string) (*[]string, error) {
 	dates := []string{}
 
 	sheetsService, err := GoogleClient.GetReadOnlyService()
@@ -14,7 +14,7 @@ func GetDatesForSettingAvailability() (*[]string, error) {
 		return &dates, err
 	}
 
-	readRange := "B5:E5"
+	readRange := datesReadRange
 
 	unformattedDates, err := sheetsService.Spreadsheets.Values.Get(AvailabilityConstants.AVAILABILITY_SHEET_ID, readRange).Do()
 	if err != nil {

@@ -23,6 +23,7 @@ const (
 	AVAILABILITY_SHEET_DAY1_COLUMN        = "E"
 	AVAILABILITY_SHEET_DAY4_COLUMN        = "H"
 	AVAILABILITY_CAN_UPDATE_CELL          = "G4"
+	AVAILABILITY_VIEWING_DATES_READ_RANGE = "B5:E5"
 	GOOGLESHEETS_ROW_OFFSET               = 3 // 1 (index 0) + 1 (first row is title of column sections) + 1 (second row is title of columns)
 )
 
