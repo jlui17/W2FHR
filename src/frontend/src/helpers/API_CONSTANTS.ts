@@ -7,10 +7,11 @@ interface AvailabilityDay {
 }
 
 export interface Availability {
-  Day1: AvailabilityDay;
-  Day2: AvailabilityDay;
-  Day3: AvailabilityDay;
-  Day4: AvailabilityDay;
+  day1: AvailabilityDay;
+  day2: AvailabilityDay;
+  day3: AvailabilityDay;
+  day4: AvailabilityDay;
+  canUpdate: boolean;
 }
 
 export const QUERY_CLIENT_DEFAULT_OPTIONS = {

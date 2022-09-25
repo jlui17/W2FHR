@@ -24,16 +24,16 @@ export const AvailabilityForm = ({
     const newAvailability: Availability = { ...availability };
     switch (day) {
       case 1:
-        newAvailability.Day1.isAvailable = !availability.Day1.isAvailable;
+        newAvailability.day1.isAvailable = !availability.day1.isAvailable;
         break;
       case 2:
-        newAvailability.Day2.isAvailable = !availability.Day2.isAvailable;
+        newAvailability.day2.isAvailable = !availability.day2.isAvailable;
         break;
       case 3:
-        newAvailability.Day3.isAvailable = !availability.Day3.isAvailable;
+        newAvailability.day3.isAvailable = !availability.day3.isAvailable;
         break;
       case 4:
-        newAvailability.Day4.isAvailable = !availability.Day4.isAvailable;
+        newAvailability.day4.isAvailable = !availability.day4.isAvailable;
         break;
     }
     setAvailability(newAvailability);
@@ -54,37 +54,41 @@ export const AvailabilityForm = ({
         />
         <Form.Check
           type="checkbox"
-          label={availability.Day1.date}
-          checked={availability.Day1.isAvailable}
+          label={availability.day1.date}
+          checked={availability.day1.isAvailable}
           onChange={() => {
             updateDay(1);
           }}
         />
         <Form.Check
           type="checkbox"
-          label={availability.Day2.date}
-          checked={availability.Day2.isAvailable}
+          label={availability.day2.date}
+          checked={availability.day2.isAvailable}
           onChange={() => {
             updateDay(2);
           }}
         />
         <Form.Check
           type="checkbox"
-          label={availability.Day3.date}
-          checked={availability.Day3.isAvailable}
+          label={availability.day3.date}
+          checked={availability.day3.isAvailable}
           onChange={() => {
             updateDay(3);
           }}
         />
         <Form.Check
           type="checkbox"
-          label={availability.Day4.date}
-          checked={availability.Day4.isAvailable}
+          label={availability.day4.date}
+          checked={availability.day4.isAvailable}
           onChange={() => {
             updateDay(4);
           }}
         />
-        <Button variant="primary" type="submit">
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={!availability.canUpdate}
+        >
           Update
         </Button>
         <Button variant="secondary" onClick={refreshAvailability}>

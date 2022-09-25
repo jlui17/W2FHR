@@ -10,10 +10,11 @@ import { AvailabilityWidget } from "./AvailabilityWidget";
 
 const AvailabilityRequestHandler = () => {
   const [availability, setAvailability] = useState<Availability>({
-    Day1: { isAvailable: false, date: "" },
-    Day2: { isAvailable: false, date: "" },
-    Day3: { isAvailable: false, date: "" },
-    Day4: { isAvailable: false, date: "" },
+    day1: { isAvailable: false, date: "" },
+    day2: { isAvailable: false, date: "" },
+    day3: { isAvailable: false, date: "" },
+    day4: { isAvailable: false, date: "" },
+    canUpdate: false,
   });
   const [employeeId, setEmployeeId] = useState<string>("w2fnm170007");
 
