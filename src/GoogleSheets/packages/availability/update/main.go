@@ -7,6 +7,7 @@ import (
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -17,8 +18,11 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
 	if err != nil {
 		statusCode := 500
-		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND {
+		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR {
 			statusCode = 404
+		}
+		if err.Error() == AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR {
+			statusCode = 405
 		}
 		return events.APIGatewayProxyResponse{
 			StatusCode: statusCode,
@@ -35,6 +39,15 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 }
 
 func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
+	canUpdate, err := GetAvailability.CanUpdateAvailability()
+	if err != nil {
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+	}
+
+	if !canUpdate {
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, errors.New(AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR)
+	}
+
 	availabilityTimesheet, err := GetAvailability.GetAvailabilityTimesheet()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -84,5 +97,5 @@ func getEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValu
 	isAvailableDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
 	isAvailableDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
 
-	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4)
+	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4, true)
 }

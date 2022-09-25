@@ -19,7 +19,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 
 	if err != nil {
 		statusCode := 500
-		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND {
+		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR {
 			statusCode = 404
 		}
 
@@ -60,7 +60,12 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 	isAvailableDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
 	isAvailableDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
 
-	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4)
+	canUpdate, err := CanUpdateAvailability()
+	if err != nil {
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+	}
+
+	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4, canUpdate)
 }
 
 func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
@@ -86,5 +91,26 @@ func FindRowOfEmployeeAvailability(availabilityTimesheet *sheets.ValueRange, emp
 			return i, nil
 		}
 	}
-	return 0, errors.New(AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND)
+	return 0, errors.New(AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR)
+}
+
+func CanUpdateAvailability() (bool, error) {
+	sheetsService, err := GoogleClient.GetReadOnlyService()
+	if err != nil {
+		return false, err
+	}
+
+	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
+	readRange := AvailabilityConstants.AVAILABILITY_CAN_UPDATE_CELL
+
+	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+	if err != nil {
+		return false, err
+	}
+
+	if response.Values[0][0].(string) == "TRUE" {
+		return false, nil
+	}
+
+	return true, nil
 }
