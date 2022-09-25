@@ -14,6 +14,14 @@ export interface Availability {
   canUpdate: boolean;
 }
 
+export interface EmployeeShift {
+  date: string;
+  shiftTitle: string;
+  startTime: string;
+  endTime: string;
+  breakDuration: string;
+}
+
 export const QUERY_CLIENT_DEFAULT_OPTIONS = {
   defaultOptions: {
     queries: {
