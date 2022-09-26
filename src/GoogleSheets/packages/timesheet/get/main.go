@@ -75,6 +75,10 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet *sheets.ValueRa
 	employeeShifts := [][]string{}
 
 	for i := 0; i < len(masterTimesheet.Values); i++ {
+		if masterTimesheet.Values[i][0] == "" {
+			break
+		}
+
 		isThisEmployeesShift := masterTimesheet.Values[i][2].(string) == employeeId
 		if isThisEmployeesShift {
 			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(&masterTimesheet.Values[i])
