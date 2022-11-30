@@ -4,22 +4,29 @@ import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"fmt"
+
+	"google.golang.org/api/sheets/v4"
 )
 
 func GetDatesForSettingAvailability(datesReadRange string) (*[]string, error) {
-	dates := []string{}
-
 	sheetsService, err := GoogleClient.GetReadOnlyService()
 	if err != nil {
-		return &dates, err
+		return nil, err
 	}
 
 	readRange := datesReadRange
 
 	unformattedDates, err := sheetsService.Spreadsheets.Values.Get(AvailabilityConstants.AVAILABILITY_SHEET_ID, readRange).Do()
 	if err != nil {
-		return &dates, err
+		return nil, err
 	}
+
+	dates := formatDates(unformattedDates)
+	return dates, nil
+}
+
+func formatDates(unformattedDates *sheets.ValueRange) *[]string {
+	dates := []string{}
 
 	for i := 0; i < len(unformattedDates.Values[0]); i++ {
 		dates = append(dates, fmt.Sprint(unformattedDates.Values[0][i]))
@@ -29,5 +36,5 @@ func GetDatesForSettingAvailability(datesReadRange string) (*[]string, error) {
 		dates = append(dates, "")
 	}
 
-	return &dates, nil
+	return &dates
 }
