@@ -1,7 +1,7 @@
 package GoogleClient
 
 import (
-	configService "GoogleSheets/packages/common/ConfigService"
+	"GoogleSheets/packages/common/ConfigService"
 	"context"
 
 	"google.golang.org/api/sheets/v4"
@@ -17,10 +17,10 @@ const (
 
 func getConfig(scope string) *jwt.Config {
 	return &jwt.Config{
-		Email:        configService.GetClientEmail(),
-		PrivateKey:   []byte(configService.GetPrivateKey()),
-		PrivateKeyID: configService.GetPrivateKeyId(),
-		TokenURL:     configService.GetTokenUrl(),
+		Email:        ConfigService.GetClientEmail(),
+		PrivateKey:   []byte(ConfigService.GetPrivateKey()),
+		PrivateKeyID: ConfigService.GetPrivateKeyId(),
+		TokenURL:     ConfigService.GetTokenUrl(),
 		Scopes:       []string{scope},
 	}
 }

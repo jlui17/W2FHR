@@ -1,4 +1,4 @@
-package configService
+package ConfigService
 
 func GetClientEmail() string {
 	return "w2fhr-239@w2fhr-357303.iam.gserviceaccount.com"
