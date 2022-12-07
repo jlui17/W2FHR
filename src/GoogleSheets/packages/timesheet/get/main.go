@@ -58,7 +58,7 @@ func getMasterTimesheet() (*sheets.ValueRange, error) {
 
 func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange) (*TimesheetConstants.Timesheet, error) {
 	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet)
-	formattedEmployeeShifts := formatEmployeeShifts(unformattedEmployeeShifts)
+	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
 	viewingDates, err := TimeService.GetDatesForSettingAvailability(TimesheetConstants.TIMESHEET_VIEWING_DATE_READ_RANGE)
 	if err != nil {
@@ -87,15 +87,4 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet *sheets.ValueRa
 	}
 
 	return &employeeShifts
-}
-
-func formatEmployeeShifts(unformattedEmployeeShifts *[][]string) *[]*TimesheetConstants.EmployeeShift {
-	formattedEmployeeShifts := []*TimesheetConstants.EmployeeShift{}
-
-	for i := 0; i < len(*unformattedEmployeeShifts); i++ {
-		convertedShift := TimesheetUtil.ConvertUnformattedShiftToEmployeeShift((*unformattedEmployeeShifts)[i])
-		formattedEmployeeShifts = append(formattedEmployeeShifts, convertedShift)
-	}
-
-	return &formattedEmployeeShifts
 }

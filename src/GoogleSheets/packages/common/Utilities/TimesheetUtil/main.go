@@ -1,6 +1,8 @@
 package TimesheetUtil
 
-import "GoogleSheets/packages/common/Constants/TimesheetConstants"
+import (
+	"GoogleSheets/packages/common/Constants/TimesheetConstants"
+)
 
 func ConvertShiftInterfaceSliceToStringSlice(shiftInterfaceSlice *[]interface{}) []string {
 	shiftAsStringSlice := []string{}
@@ -13,7 +15,7 @@ func ConvertShiftInterfaceSliceToStringSlice(shiftInterfaceSlice *[]interface{})
 	return shiftAsStringSlice
 }
 
-func ConvertUnformattedShiftToEmployeeShift(unformattedShift []string) *TimesheetConstants.EmployeeShift {
+func convertUnformattedShiftToEmployeeShift(unformattedShift []string) *TimesheetConstants.EmployeeShift {
 	return &TimesheetConstants.EmployeeShift{
 		Date:          unformattedShift[3],
 		ShiftTitle:    unformattedShift[4],
@@ -21,4 +23,15 @@ func ConvertUnformattedShiftToEmployeeShift(unformattedShift []string) *Timeshee
 		EndTime:       unformattedShift[8],
 		BreakDuration: unformattedShift[9],
 	}
+}
+
+func FormatEmployeeShifts(unformattedEmployeeShifts *[][]string) *[]*TimesheetConstants.EmployeeShift {
+	formattedEmployeeShifts := []*TimesheetConstants.EmployeeShift{}
+
+	for i := 0; i < len(*unformattedEmployeeShifts); i++ {
+		convertedShift := convertUnformattedShiftToEmployeeShift((*unformattedEmployeeShifts)[i])
+		formattedEmployeeShifts = append(formattedEmployeeShifts, convertedShift)
+	}
+
+	return &formattedEmployeeShifts
 }
