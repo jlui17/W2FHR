@@ -22,7 +22,7 @@ export const getTimesheetData = async (): Promise<TimesheetData> => {
   const response = await axios.get(getTimesheetApiUrlForEmployee(employeeId));
 
   switch (response.status) {
-    case 201:
+    case 200:
       const timesheetData = response.data as TimesheetData;
       return Promise.resolve(timesheetData);
     case 404:

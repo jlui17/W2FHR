@@ -33,7 +33,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	res, _ := json.Marshal(employeeShifts)
 
 	return events.APIGatewayProxyResponse{
-		StatusCode: 201,
+		StatusCode: 200,
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       fmt.Sprint(string(res)),
 	}, err
