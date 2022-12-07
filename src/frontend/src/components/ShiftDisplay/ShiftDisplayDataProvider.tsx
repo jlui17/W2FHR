@@ -4,7 +4,7 @@ import { getTimesheetApiUrlForEmployee } from "../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../common/constants";
 import { ShiftDisplayWidget } from "./ShiftDisplayWidget";
 
-interface Shift {
+export interface Shift {
   date: string;
   shiftTitle: string;
   startTime: string;
