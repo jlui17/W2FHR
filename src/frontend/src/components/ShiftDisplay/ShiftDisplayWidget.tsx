@@ -19,7 +19,7 @@ export const ShiftDisplayWidget = (
 ): JSX.Element => {
   const { isLoading, timesheetData } = props;
 
-  const getShiftDisplayTable = (): JSX.Element => {
+  const getShiftDisplayTable = (shifts: Shift[]): JSX.Element => {
     return (
       <TableContainer>
         <Table>
@@ -33,7 +33,7 @@ export const ShiftDisplayWidget = (
             </TableRow>
           </TableHead>
           <TableBody>
-            {timesheetData.shifts.map((shift: Shift) => (
+            {shifts.map((shift: Shift) => (
               <TableRow>
                 <TableCell>{shift.date}</TableCell>
                 <TableCell>{shift.shiftTitle}</TableCell>
@@ -51,7 +51,20 @@ export const ShiftDisplayWidget = (
   return (
     <div>
       <h1>Shifts</h1>
-      {isLoading ? <CircularProgress /> : getShiftDisplayTable()}
+      {isLoading ? (
+        <CircularProgress />
+      ) : (
+        <>
+          <h2>Shifts for This Week</h2>
+          {getShiftDisplayTable(
+            timesheetData.shifts.filter((shift: Shift) =>
+              timesheetData.viewingDates.includes(shift.date)
+            )
+          )}
+          <h2>Total Shifts</h2>
+          {getShiftDisplayTable(timesheetData.shifts)}
+        </>
+      )}
     </div>
   );
 };
