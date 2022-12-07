@@ -11,8 +11,8 @@ import (
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	employeeId, exists := event.PathParameters["employeeId"]
-	if !exists {
+	employeeId, employeeIdExists := event.PathParameters["employeeId"]
+	if !employeeIdExists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -20,7 +20,12 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	return GetTimesheet.HandleRequest(employeeId)
+	getUpcomingShifts, getUpcomingShiftsExists := event.QueryStringParameters["upcoming"]
+	if getUpcomingShiftsExists && getUpcomingShifts == "true" {
+		return GetTimesheet.HandleRequest(employeeId, true)
+	}
+
+	return GetTimesheet.HandleRequest(employeeId, false)
 }
 
 func main() {

@@ -5,6 +5,7 @@ const (
 	MASTER_TIMESHEET_SHEET_NAME       = "Master Timesheet"
 	TIMESHEET_GET_RANGE               = "A2:J"
 	TIMESHEET_VIEWING_DATE_READ_RANGE = "B4:E4"
+	DATE_FORMAT                       = "Monday, January 2, 2006"
 )
 
 type Timesheet struct {

@@ -2,8 +2,10 @@ package TimeService
 
 import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"fmt"
+	"time"
 
 	"google.golang.org/api/sheets/v4"
 )
@@ -37,4 +39,14 @@ func formatDates(unformattedDates *sheets.ValueRange) *[]string {
 	}
 
 	return &dates
+}
+
+func GetToday() *time.Time {
+	today := time.Now()
+	return &today
+}
+
+func ConvertDateToTime(date string) *time.Time {
+	t, _ := time.Parse(TimesheetConstants.DATE_FORMAT, date)
+	return &t
 }
