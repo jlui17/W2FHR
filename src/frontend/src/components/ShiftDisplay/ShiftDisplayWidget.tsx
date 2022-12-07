@@ -18,7 +18,6 @@ export const ShiftDisplayWidget = (
   props: ShiftDisplayWidgetProps
 ): JSX.Element => {
   const { isLoading, timesheetData } = props;
-  console.log(timesheetData);
 
   const getShiftDisplayTable = (): JSX.Element => {
     return (
