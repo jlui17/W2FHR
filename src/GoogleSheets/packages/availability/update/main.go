@@ -32,7 +32,7 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 	}
 	res, _ := json.Marshal(updatedEmployeeAvailability)
 	return events.APIGatewayProxyResponse{
-		StatusCode: 201,
+		StatusCode: 200,
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       fmt.Sprint(string(res)),
 	}, nil

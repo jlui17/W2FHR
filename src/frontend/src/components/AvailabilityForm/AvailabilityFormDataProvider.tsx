@@ -42,7 +42,7 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
     );
 
     switch (response.status) {
-      case 201:
+      case 200:
         if (!isAvailabilityData(response.data)) {
           return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
         }
@@ -62,7 +62,7 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
     );
 
     switch (response.status) {
-      case 201:
+      case 200:
         if (!isAvailabilityData(response.data)) {
           return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
         }
