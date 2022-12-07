@@ -1,12 +1,10 @@
-import { useState } from "react";
 import "./App.css";
+import ShiftDisplay from "./components/ShiftDisplay";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <div className="App">
-      <p>hello</p>
+      <ShiftDisplay />
     </div>
   );
 }
