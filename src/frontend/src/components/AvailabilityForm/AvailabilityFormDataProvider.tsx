@@ -100,9 +100,12 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
     updateAvailability();
   };
 
-  const { isLoading } = useQuery<void>("availability", fetchAvailability);
+  const { timesheetDataIsLoading } = useQuery<void>(
+    "availability",
+    fetchAvailability
+  );
 
-  if (isLoading) {
+  if (timesheetDataIsLoading) {
     return (
       <AvailabilityFormWidget
         isLoading

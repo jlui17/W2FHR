@@ -7,18 +7,19 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { Shift, TimesheetData } from "./ShiftDisplayDataProvider";
+import { Shift, TimesheetData } from "./TimesheetDataProvider";
 
-interface ShiftDisplayWidgetProps {
+interface TimesheetWidgetProps {
   isLoading: boolean;
   timesheetData: TimesheetData;
+  upcomingShiftsData: TimesheetData;
 }
 
-export const ShiftDisplayWidget = (
-  props: ShiftDisplayWidgetProps
-): JSX.Element => {
-  const { isLoading, timesheetData } = props;
-
+export const TimesheetWidget = ({
+  isLoading,
+  timesheetData,
+  upcomingShiftsData,
+}: TimesheetWidgetProps): JSX.Element => {
   const getShiftDisplayTable = (shifts: Shift[]): JSX.Element => {
     return (
       <TableContainer>
@@ -56,7 +57,7 @@ export const ShiftDisplayWidget = (
       ) : (
         <>
           <h2>Shifts for This Week</h2>
-
+          {getShiftDisplayTable(upcomingShiftsData.shifts)}
           <h2>Total Shifts</h2>
           {getShiftDisplayTable(timesheetData.shifts)}
         </>

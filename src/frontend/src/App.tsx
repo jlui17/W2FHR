@@ -1,12 +1,12 @@
 import "./App.css";
 import AvailabilityForm from "./components/AvailabilityForm";
-import ShiftDisplay from "./components/ShiftDisplay";
+import Timesheet from "./components/Timesheet";
 
 function App() {
   return (
     <div className="App">
       <AvailabilityForm />
-      <ShiftDisplay />
+      <Timesheet />
     </div>
   );
 }
