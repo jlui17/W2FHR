@@ -12,13 +12,11 @@ import { Shift, TimesheetData } from "./TimesheetDataProvider";
 interface TimesheetWidgetProps {
   isLoading: boolean;
   timesheetData: TimesheetData;
-  upcomingShiftsData: TimesheetData;
 }
 
 export const TimesheetWidget = ({
   isLoading,
   timesheetData,
-  upcomingShiftsData,
 }: TimesheetWidgetProps): JSX.Element => {
   const getShiftDisplayTable = (shifts: Shift[]): JSX.Element => {
     return (
@@ -51,14 +49,11 @@ export const TimesheetWidget = ({
 
   return (
     <div>
-      <h1>Shifts</h1>
       {isLoading ? (
         <CircularProgress />
       ) : (
         <>
-          <h2>Shifts for This Week</h2>
-          {getShiftDisplayTable(upcomingShiftsData.shifts)}
-          <h2>Total Shifts</h2>
+          <h2>Shift History</h2>
           {getShiftDisplayTable(timesheetData.shifts)}
         </>
       )}

@@ -44,46 +44,17 @@ const TimesheetDataProvider = (): JSX.Element => {
       () => getTimesheetData("w2fnm150009", false)
     );
 
-    const { isLoading: upcomingShiftsDataIsLoading, data: upcomingShiftsData } =
-      useQuery("upcomingShiftsData", () =>
-        getTimesheetData("w2fnm150009", true)
-      );
-
-    if (timesheetDataIsLoading || upcomingShiftsDataIsLoading) {
-      return (
-        <TimesheetWidget
-          isLoading
-          timesheetData={EMPTY_DATA}
-          upcomingShiftsData={EMPTY_DATA}
-        />
-      );
+    if (timesheetDataIsLoading) {
+      return <TimesheetWidget isLoading timesheetData={EMPTY_DATA} />;
     }
 
-    if (!timesheetData || !upcomingShiftsData) {
-      return (
-        <TimesheetWidget
-          isLoading={false}
-          timesheetData={EMPTY_DATA}
-          upcomingShiftsData={EMPTY_DATA}
-        />
-      );
+    if (!timesheetData) {
+      return <TimesheetWidget isLoading={false} timesheetData={EMPTY_DATA} />;
     }
 
-    return (
-      <TimesheetWidget
-        isLoading={false}
-        timesheetData={timesheetData}
-        upcomingShiftsData={upcomingShiftsData}
-      />
-    );
+    return <TimesheetWidget isLoading={false} timesheetData={timesheetData} />;
   } catch (err) {
-    return (
-      <TimesheetWidget
-        isLoading
-        timesheetData={EMPTY_DATA}
-        upcomingShiftsData={EMPTY_DATA}
-      />
-    );
+    return <TimesheetWidget isLoading timesheetData={EMPTY_DATA} />;
   }
 };
 
