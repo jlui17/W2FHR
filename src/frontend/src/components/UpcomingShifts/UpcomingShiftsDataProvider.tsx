@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { getTimesheetApiUrlForEmployee } from "../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../common/constants";
 import { TimesheetData } from "../Timesheet/TimesheetDataProvider";
-import { UpcomingShiftsWidget } from "./TimesheetWidget";
+import { UpcomingShiftsWidget } from "./UpcomingShiftsWidget";
 
 export const getUpcomingShiftsData = async (
   employeeId: string,

@@ -18,7 +18,7 @@ export const TimesheetWidget = ({
   isLoading,
   timesheetData,
 }: TimesheetWidgetProps): JSX.Element => {
-  const getShiftDisplayTable = (shifts: Shift[]): JSX.Element => {
+  const getTimesheetTable = (shifts: Shift[]): JSX.Element => {
     return (
       <TableContainer>
         <Table>
@@ -33,7 +33,7 @@ export const TimesheetWidget = ({
           </TableHead>
           <TableBody>
             {shifts.map((shift: Shift) => (
-              <TableRow>
+              <TableRow key={shift.date}>
                 <TableCell>{shift.date}</TableCell>
                 <TableCell>{shift.shiftTitle}</TableCell>
                 <TableCell>{shift.startTime}</TableCell>
@@ -52,10 +52,7 @@ export const TimesheetWidget = ({
       {isLoading ? (
         <CircularProgress />
       ) : (
-        <>
-          <h2>Shift History</h2>
-          {getShiftDisplayTable(timesheetData.shifts)}
-        </>
+        getTimesheetTable(timesheetData.shifts)
       )}
     </div>
   );

@@ -33,7 +33,7 @@ export const UpcomingShiftsWidget = ({
           </TableHead>
           <TableBody>
             {shifts.map((shift: Shift) => (
-              <TableRow>
+              <TableRow key={shift.date}>
                 <TableCell>{shift.date}</TableCell>
                 <TableCell>{shift.shiftTitle}</TableCell>
                 <TableCell>{shift.startTime}</TableCell>

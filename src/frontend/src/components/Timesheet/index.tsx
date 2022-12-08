@@ -1,3 +1,3 @@
-import { Timesheet } from "./TimesheetDataProvider";
+import { Timesheet } from "./Timesheet";
 
 export default Timesheet;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import { useQuery } from "react-query";
 import { getTimesheetApiUrlForEmployee } from "../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../common/constants";
 import { TimesheetWidget } from "./TimesheetWidget";
@@ -35,7 +35,7 @@ export const getTimesheetData = async (
   }
 };
 
-const TimesheetDataProvider = (): JSX.Element => {
+export const TimesheetDataProvider = (): JSX.Element => {
   const EMPTY_DATA: TimesheetData = { shifts: [] };
 
   try {
@@ -56,13 +56,4 @@ const TimesheetDataProvider = (): JSX.Element => {
   } catch (err) {
     return <TimesheetWidget isLoading timesheetData={EMPTY_DATA} />;
   }
-};
-
-export const Timesheet = (): JSX.Element => {
-  const queryClient = new QueryClient();
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TimesheetDataProvider />
-    </QueryClientProvider>
-  );
 };
