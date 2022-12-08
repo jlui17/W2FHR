@@ -1,16 +1,14 @@
 package TimesheetConstants
 
 const (
-	TIMESHEET_SHEET_ID                = "14WqDRHFk92TDY18lDBTVUSJ43VW2zS37jN3Dl45jd6o"
-	MASTER_TIMESHEET_SHEET_NAME       = "Master Timesheet"
-	TIMESHEET_GET_RANGE               = "A2:J"
-	TIMESHEET_VIEWING_DATE_READ_RANGE = "B4:E4"
-	DATE_FORMAT                       = "Monday, January 2, 2006"
+	TIMESHEET_SHEET_ID          = "14WqDRHFk92TDY18lDBTVUSJ43VW2zS37jN3Dl45jd6o"
+	MASTER_TIMESHEET_SHEET_NAME = "Master Timesheet"
+	TIMESHEET_GET_RANGE         = "A2:J"
+	DATE_FORMAT                 = "Monday, January 2, 2006"
 )
 
 type Timesheet struct {
-	Shifts       *[]*EmployeeShift `json:"shifts"`
-	ViewingDates *[]string         `json:"viewingDates"`
+	Shifts *[]*EmployeeShift `json:"shifts"`
 }
 
 type EmployeeShift struct {
@@ -23,7 +21,6 @@ type EmployeeShift struct {
 
 var (
 	DEFAULT_TIMESHEET = &Timesheet{
-		Shifts:       &[]*EmployeeShift{},
-		ViewingDates: &[]string{},
+		Shifts: &[]*EmployeeShift{},
 	}
 )

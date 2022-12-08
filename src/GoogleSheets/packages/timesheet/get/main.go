@@ -78,14 +78,8 @@ func getUpcomingShiftsForEmployee(employeeId string, masterTimesheet *sheets.Val
 	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, upcomingShifts)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
-	viewingDates, err := TimeService.GetDatesForSettingAvailability(TimesheetConstants.TIMESHEET_VIEWING_DATE_READ_RANGE)
-	if err != nil {
-		return TimesheetConstants.DEFAULT_TIMESHEET, err
-	}
-
 	return &TimesheetConstants.Timesheet{
-		Shifts:       formattedEmployeeShifts,
-		ViewingDates: viewingDates,
+		Shifts: formattedEmployeeShifts,
 	}, nil
 }
 
@@ -93,14 +87,8 @@ func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange)
 	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
-	viewingDates, err := TimeService.GetDatesForSettingAvailability(TimesheetConstants.TIMESHEET_VIEWING_DATE_READ_RANGE)
-	if err != nil {
-		return TimesheetConstants.DEFAULT_TIMESHEET, err
-	}
-
 	return &TimesheetConstants.Timesheet{
-		Shifts:       formattedEmployeeShifts,
-		ViewingDates: viewingDates,
+		Shifts: formattedEmployeeShifts,
 	}, nil
 }
 

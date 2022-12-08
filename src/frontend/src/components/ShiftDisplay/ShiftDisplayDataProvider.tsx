@@ -14,7 +14,6 @@ export interface Shift {
 
 export interface TimesheetData {
   shifts: Shift[];
-  viewingDates: string[];
 }
 
 export const getTimesheetData = async (): Promise<TimesheetData> => {
@@ -33,7 +32,7 @@ export const getTimesheetData = async (): Promise<TimesheetData> => {
 };
 
 const ShiftDisplayDataProvider = (): JSX.Element => {
-  const EMPTY_DATA: TimesheetData = { shifts: [], viewingDates: [] };
+  const EMPTY_DATA: TimesheetData = { shifts: [] };
 
   try {
     const { isLoading, data } = useQuery("timesheetData", getTimesheetData);

@@ -56,11 +56,7 @@ export const ShiftDisplayWidget = (
       ) : (
         <>
           <h2>Shifts for This Week</h2>
-          {getShiftDisplayTable(
-            timesheetData.shifts.filter((shift: Shift) =>
-              timesheetData.viewingDates.includes(shift.date)
-            )
-          )}
+
           <h2>Total Shifts</h2>
           {getShiftDisplayTable(timesheetData.shifts)}
         </>
