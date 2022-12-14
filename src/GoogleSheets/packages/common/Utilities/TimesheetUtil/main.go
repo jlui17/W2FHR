@@ -7,8 +7,8 @@ import (
 func ConvertShiftInterfaceSliceToStringSlice(shiftInterfaceSlice []interface{}) []string {
 	shiftAsStringSlice := []string{}
 
-	for i := 0; i < len(shiftInterfaceSlice); i++ {
-		shiftInterfaceAsString := (shiftInterfaceSlice)[i].(string)
+	for _, shiftInterfaceValue := range shiftInterfaceSlice {
+		shiftInterfaceAsString := shiftInterfaceValue.(string)
 		shiftAsStringSlice = append(shiftAsStringSlice, shiftInterfaceAsString)
 	}
 
