@@ -24,7 +24,7 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 		}, err
 	}
 
-	employeeShifts, err := getShiftsForEmployee(employeeId, masterTimesheet, getUpcomingShifts)
+	employeeShifts, err := getShiftsForEmployee(employeeId, masterTimesheet.Values, getUpcomingShifts)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -57,8 +57,8 @@ func getMasterTimesheet() (*sheets.ValueRange, error) {
 	return response, nil
 }
 
-func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
-	shiftsToFilter := masterTimesheet.Values
+func getShiftsForEmployee(employeeId string, masterTimesheet [][]interface{}, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
+	shiftsToFilter := masterTimesheet
 	if getUpcomingShifts {
 		shiftsToFilter = filterForUpcomingShifts(shiftsToFilter)
 	}
