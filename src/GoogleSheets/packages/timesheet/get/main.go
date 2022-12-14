@@ -95,14 +95,15 @@ func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange)
 func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}) *[][]string {
 	employeeShifts := [][]string{}
 
-	for i := 0; i < len(masterTimesheet); i++ {
-		if (masterTimesheet)[i][0] == "" {
+	for _, shift := range masterTimesheet {
+		if shift[0] == "" {
 			break
 		}
 
-		isThisEmployeesShift := (masterTimesheet)[i][2].(string) == employeeId
+		employeeIdColumn := SharedConstants.LETTER_TO_NUMBER_MAP[TimesheetConstants.EMPLOYEE_ID_COLUMN]
+		isThisEmployeesShift := shift[employeeIdColumn].(string) == employeeId
 		if isThisEmployeesShift {
-			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(masterTimesheet[i])
+			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(shift)
 			employeeShifts = append(employeeShifts, convertedEmployeeShift)
 		}
 	}
