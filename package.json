@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "yarn test:Googlesheets",
+    "test:Googlesheets": "cd src/Googlesheets; go test ./...",
     "cdk": "cdk"
   },
   "devDependencies": {
