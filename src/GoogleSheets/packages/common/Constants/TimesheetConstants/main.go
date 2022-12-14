@@ -6,6 +6,11 @@ const (
 	TIMESHEET_GET_RANGE         = "A2:J"
 	DATE_FORMAT                 = "Monday, January 2, 2006"
 	EMPLOYEE_ID_COLUMN          = "C"
+	DATE_COLUMN                 = "D"
+	SHIFT_TITLE_COLUMN          = "E"
+	START_TIME_COLUMN           = "F"
+	END_TIME_COLUMN             = "G"
+	BREAK_DURATION_COLUMN       = "H"
 )
 
 type Timesheet struct {
