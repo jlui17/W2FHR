@@ -4,11 +4,11 @@ import (
 	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 )
 
-func ConvertShiftInterfaceSliceToStringSlice(shiftInterfaceSlice *[]interface{}) []string {
+func ConvertShiftInterfaceSliceToStringSlice(shiftInterfaceSlice []interface{}) []string {
 	shiftAsStringSlice := []string{}
 
-	for i := 0; i < len(*shiftInterfaceSlice); i++ {
-		shiftInterfaceAsString := (*shiftInterfaceSlice)[i].(string)
+	for i := 0; i < len(shiftInterfaceSlice); i++ {
+		shiftInterfaceAsString := (shiftInterfaceSlice)[i].(string)
 		shiftAsStringSlice = append(shiftAsStringSlice, shiftInterfaceAsString)
 	}
 

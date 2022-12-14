@@ -84,7 +84,7 @@ func getUpcomingShiftsForEmployee(employeeId string, masterTimesheet *sheets.Val
 }
 
 func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange) (*TimesheetConstants.Timesheet, error) {
-	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet)
+	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet.Values)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
 	return &TimesheetConstants.Timesheet{
@@ -92,17 +92,17 @@ func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange)
 	}, nil
 }
 
-func filterShiftsByEmployeeId(employeeId string, masterTimesheet *sheets.ValueRange) *[][]string {
+func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}) *[][]string {
 	employeeShifts := [][]string{}
 
-	for i := 0; i < len(masterTimesheet.Values); i++ {
-		if masterTimesheet.Values[i][0] == "" {
+	for i := 0; i < len(masterTimesheet); i++ {
+		if (masterTimesheet)[i][0] == "" {
 			break
 		}
 
-		isThisEmployeesShift := masterTimesheet.Values[i][2].(string) == employeeId
+		isThisEmployeesShift := (masterTimesheet)[i][2].(string) == employeeId
 		if isThisEmployeesShift {
-			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(&masterTimesheet.Values[i])
+			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(masterTimesheet[i])
 			employeeShifts = append(employeeShifts, convertedEmployeeShift)
 		}
 	}
@@ -110,7 +110,7 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet *sheets.ValueRa
 	return &employeeShifts
 }
 
-func filterForUpcomingShifts(masterTimesheet *sheets.ValueRange) *sheets.ValueRange {
+func filterForUpcomingShifts(masterTimesheet *sheets.ValueRange) [][]interface{} {
 	upcomingShifts := make([][]interface{}, 0)
 	today := TimeService.GetToday()
 
@@ -130,7 +130,5 @@ func filterForUpcomingShifts(masterTimesheet *sheets.ValueRange) *sheets.ValueRa
 	for i, j := 0, len(upcomingShifts)-1; i < j; i, j = i+1, j-1 { // reverse
 		upcomingShifts[i], upcomingShifts[j] = upcomingShifts[j], upcomingShifts[i]
 	}
-	return &sheets.ValueRange{
-		Values: upcomingShifts,
-	}
+	return upcomingShifts
 }
