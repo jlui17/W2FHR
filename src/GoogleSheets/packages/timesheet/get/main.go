@@ -23,24 +23,7 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 		}, err
 	}
 
-	if getUpcomingShifts {
-		employeeShifts, err := getUpcomingShiftsForEmployee(employeeId, masterTimesheet)
-		if err != nil {
-			return events.APIGatewayProxyResponse{
-				StatusCode: 500,
-				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			}, err
-		}
-		res, _ := json.Marshal(employeeShifts)
-
-		return events.APIGatewayProxyResponse{
-			StatusCode: 200,
-			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       fmt.Sprint(string(res)),
-		}, err
-	}
-
-	employeeShifts, err := getShiftsForEmployee(employeeId, masterTimesheet)
+	employeeShifts, err := getShiftsForEmployee(employeeId, masterTimesheet, getUpcomingShifts)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -73,18 +56,13 @@ func getMasterTimesheet() (*sheets.ValueRange, error) {
 	return response, nil
 }
 
-func getUpcomingShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange) (*TimesheetConstants.Timesheet, error) {
-	upcomingShifts := filterForUpcomingShifts(masterTimesheet)
-	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, upcomingShifts)
-	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
+func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
+	shiftsToFilter := masterTimesheet.Values
+	if getUpcomingShifts {
+		shiftsToFilter = filterForUpcomingShifts(masterTimesheet)
+	}
 
-	return &TimesheetConstants.Timesheet{
-		Shifts: formattedEmployeeShifts,
-	}, nil
-}
-
-func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange) (*TimesheetConstants.Timesheet, error) {
-	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, masterTimesheet.Values)
+	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, shiftsToFilter)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
 	return &TimesheetConstants.Timesheet{
