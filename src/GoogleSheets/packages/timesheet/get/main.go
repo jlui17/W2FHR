@@ -95,7 +95,7 @@ func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
 		shiftDate := masterTimesheet[i][dateCol].(string)
 		convertedDate := TimeService.ConvertDateToTime(shiftDate)
 
-		isThisShiftAfterToday := convertedDate.After(*today) || convertedDate.Equal(*today)
+		isThisShiftAfterToday := convertedDate.After(today) || convertedDate.Equal(today)
 		if !isThisShiftAfterToday {
 			break
 		}

@@ -41,12 +41,13 @@ func formatDates(unformattedDates *sheets.ValueRange) *[]string {
 	return &dates
 }
 
-func GetToday() *time.Time {
-	today := time.Now()
-	return &today
+func GetToday() time.Time {
+	y, m, d := time.Now().Date()
+	today := time.Date(y, m, d, 0, 0, 0, 0, time.Local)
+	return today
 }
 
 func ConvertDateToTime(date string) *time.Time {
-	t, _ := time.Parse(TimesheetConstants.DATE_FORMAT, date)
+	t, _ := time.ParseInLocation(TimesheetConstants.DATE_FORMAT, date, time.Local)
 	return &t
 }
