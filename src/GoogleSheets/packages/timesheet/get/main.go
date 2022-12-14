@@ -5,6 +5,7 @@ import (
 	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/TimeService"
+	"GoogleSheets/packages/common/Utilities/SharedUtil"
 	"GoogleSheets/packages/common/Utilities/TimesheetUtil"
 
 	"encoding/json"
@@ -78,7 +79,7 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}
 			break
 		}
 
-		employeeIdColumn := SharedConstants.LETTER_TO_NUMBER_MAP[TimesheetConstants.EMPLOYEE_ID_COLUMN]
+		employeeIdColumn := SharedUtil.GetIndexOfColumn(TimesheetConstants.EMPLOYEE_ID_COLUMN)
 		isThisEmployeesShift := shift[employeeIdColumn].(string) == employeeId
 		if isThisEmployeesShift {
 			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(shift)
@@ -94,7 +95,7 @@ func filterForUpcomingShifts(masterTimesheet *sheets.ValueRange) [][]interface{}
 	today := TimeService.GetToday()
 
 	for i := len(masterTimesheet.Values) - 1; i > -1; i-- {
-		dateCol := SharedConstants.LETTER_TO_NUMBER_MAP["D"]
+		dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
 		shiftDate := masterTimesheet.Values[i][dateCol].(string)
 		convertedDate := TimeService.ConvertDateToTime(shiftDate)
 

@@ -5,6 +5,7 @@ import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
+	"GoogleSheets/packages/common/Utilities/SharedUtil"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -53,7 +54,7 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	day1ColumnNumber := SharedConstants.LETTER_TO_NUMBER_MAP[AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN]
+	day1ColumnNumber := SharedUtil.GetIndexOfColumn(AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN)
 
 	isAvailableDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
 	isAvailableDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
