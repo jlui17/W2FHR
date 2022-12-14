@@ -75,10 +75,6 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}
 	employeeShifts := [][]string{}
 
 	for _, shift := range masterTimesheet {
-		if shift[0] == "" {
-			break
-		}
-
 		employeeIdColumn := SharedUtil.GetIndexOfColumn(TimesheetConstants.EMPLOYEE_ID_COLUMN)
 		isThisEmployeesShift := shift[employeeIdColumn].(string) == employeeId
 		if isThisEmployeesShift {
