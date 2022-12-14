@@ -16,8 +16,8 @@ func ConvertShiftInterfaceSliceToStringSlice(shiftInterfaceSlice []interface{}) 
 	return shiftAsStringSlice
 }
 
-func convertUnformattedShiftToEmployeeShift(unformattedShift []string) *TimesheetConstants.EmployeeShift {
-	return &TimesheetConstants.EmployeeShift{
+func convertUnformattedShiftToEmployeeShift(unformattedShift []string) TimesheetConstants.EmployeeShift {
+	return TimesheetConstants.EmployeeShift{
 		Date:          unformattedShift[SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)],
 		ShiftTitle:    unformattedShift[SharedUtil.GetIndexOfColumn(TimesheetConstants.SHIFT_TITLE_COLUMN)],
 		StartTime:     unformattedShift[SharedUtil.GetIndexOfColumn(TimesheetConstants.START_TIME_COLUMN)],
@@ -26,13 +26,13 @@ func convertUnformattedShiftToEmployeeShift(unformattedShift []string) *Timeshee
 	}
 }
 
-func FormatEmployeeShifts(unformattedEmployeeShifts *[][]string) *[]*TimesheetConstants.EmployeeShift {
-	formattedEmployeeShifts := []*TimesheetConstants.EmployeeShift{}
+func FormatEmployeeShifts(unformattedEmployeeShifts *[][]string) []TimesheetConstants.EmployeeShift {
+	formattedEmployeeShifts := []TimesheetConstants.EmployeeShift{}
 
 	for _, unformattedShift := range *unformattedEmployeeShifts {
 		convertedShift := convertUnformattedShiftToEmployeeShift(unformattedShift)
 		formattedEmployeeShifts = append(formattedEmployeeShifts, convertedShift)
 	}
 
-	return &formattedEmployeeShifts
+	return formattedEmployeeShifts
 }

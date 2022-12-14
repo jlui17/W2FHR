@@ -14,7 +14,7 @@ const (
 )
 
 type Timesheet struct {
-	Shifts *[]*EmployeeShift `json:"shifts"`
+	Shifts []EmployeeShift `json:"shifts"`
 }
 
 type EmployeeShift struct {
@@ -27,6 +27,6 @@ type EmployeeShift struct {
 
 var (
 	DEFAULT_TIMESHEET = &Timesheet{
-		Shifts: &[]*EmployeeShift{},
+		Shifts: []EmployeeShift{},
 	}
 )
