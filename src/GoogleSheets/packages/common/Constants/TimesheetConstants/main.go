@@ -8,9 +8,9 @@ const (
 	EMPLOYEE_ID_COLUMN          = "C"
 	DATE_COLUMN                 = "D"
 	SHIFT_TITLE_COLUMN          = "E"
-	START_TIME_COLUMN           = "F"
-	END_TIME_COLUMN             = "G"
-	BREAK_DURATION_COLUMN       = "H"
+	START_TIME_COLUMN           = "H"
+	END_TIME_COLUMN             = "I"
+	BREAK_DURATION_COLUMN       = "J"
 )
 
 type Timesheet struct {
