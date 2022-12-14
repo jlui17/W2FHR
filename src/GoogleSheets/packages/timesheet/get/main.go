@@ -60,7 +60,7 @@ func getMasterTimesheet() (*sheets.ValueRange, error) {
 func getShiftsForEmployee(employeeId string, masterTimesheet *sheets.ValueRange, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
 	shiftsToFilter := masterTimesheet.Values
 	if getUpcomingShifts {
-		shiftsToFilter = filterForUpcomingShifts(masterTimesheet)
+		shiftsToFilter = filterForUpcomingShifts(shiftsToFilter)
 	}
 
 	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, shiftsToFilter)
@@ -90,13 +90,13 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}
 	return &employeeShifts
 }
 
-func filterForUpcomingShifts(masterTimesheet *sheets.ValueRange) [][]interface{} {
+func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
 	upcomingShifts := make([][]interface{}, 0)
 	today := TimeService.GetToday()
 
-	for i := len(masterTimesheet.Values) - 1; i > -1; i-- {
+	for i := len(masterTimesheet) - 1; i > -1; i-- {
 		dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
-		shiftDate := masterTimesheet.Values[i][dateCol].(string)
+		shiftDate := masterTimesheet[i][dateCol].(string)
 		convertedDate := TimeService.ConvertDateToTime(shiftDate)
 
 		isThisShiftAfterToday := convertedDate.After(*today) || convertedDate.Equal(*today)
@@ -104,7 +104,7 @@ func filterForUpcomingShifts(masterTimesheet *sheets.ValueRange) [][]interface{}
 			break
 		}
 
-		upcomingShifts = append(upcomingShifts, masterTimesheet.Values[i])
+		upcomingShifts = append(upcomingShifts, masterTimesheet[i])
 	}
 
 	for i, j := 0, len(upcomingShifts)-1; i < j; i, j = i+1, j-1 { // reverse
