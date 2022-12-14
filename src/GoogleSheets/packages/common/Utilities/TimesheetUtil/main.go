@@ -29,8 +29,8 @@ func convertUnformattedShiftToEmployeeShift(unformattedShift []string) *Timeshee
 func FormatEmployeeShifts(unformattedEmployeeShifts *[][]string) *[]*TimesheetConstants.EmployeeShift {
 	formattedEmployeeShifts := []*TimesheetConstants.EmployeeShift{}
 
-	for i := 0; i < len(*unformattedEmployeeShifts); i++ {
-		convertedShift := convertUnformattedShiftToEmployeeShift((*unformattedEmployeeShifts)[i])
+	for _, unformattedShift := range *unformattedEmployeeShifts {
+		convertedShift := convertUnformattedShiftToEmployeeShift(unformattedShift)
 		formattedEmployeeShifts = append(formattedEmployeeShifts, convertedShift)
 	}
 
