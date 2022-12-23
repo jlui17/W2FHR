@@ -21,11 +21,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	getUpcomingShifts, getUpcomingShiftsExists := event.QueryStringParameters["upcoming"]
-	if getUpcomingShiftsExists && getUpcomingShifts == "true" {
-		return GetTimesheet.HandleRequest(employeeId, true)
-	}
-
-	return GetTimesheet.HandleRequest(employeeId, false)
+	return GetTimesheet.HandleRequest(employeeId, getUpcomingShiftsExists && getUpcomingShifts == "true")
 }
 
 func main() {
