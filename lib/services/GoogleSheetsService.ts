@@ -29,5 +29,10 @@ export class GoogleSheetsService extends Stack {
         moduleDir: MODULE_DIR,
       }
     );
+
+    new GoFunction(this, "GoogleSheetsGetEmployeeIdHandler", {
+      entry: `${SOURCE_PACKAGES_DIR}/auth`,
+      moduleDir: MODULE_DIR,
+    });
   }
 }
