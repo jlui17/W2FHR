@@ -8,4 +8,5 @@ export const ERROR_MESSAGSES = {
   EMPLOYEE_NOT_FOUND: "Employee not found",
   SERVER_ERROR:
     "Server error. Please contact Justin Lui (Manager) on Slack for support.",
+  UPDATE_DISABLED: "Updating availability is currently disabled",
 };

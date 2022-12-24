@@ -22,7 +22,7 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 			statusCode = 404
 		}
 		if err.Error() == AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR {
-			statusCode = 405
+			statusCode = 403
 		}
 		return events.APIGatewayProxyResponse{
 			StatusCode: statusCode,

@@ -68,6 +68,8 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
         }
         setAvailabilityData(response.data);
         return Promise.resolve();
+      case 403:
+        return Promise.reject(new Error(ERROR_MESSAGSES.UPDATE_DISABLED));
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
       default:
