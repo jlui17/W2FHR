@@ -10,3 +10,7 @@ export const getTimesheetApiUrlForEmployee = (
 export const getAvailabilityApiUrlForEmployee = (employeeId: string) => {
   return `${API_CONSTANTS.BASE_URL}/${API_CONSTANTS.AVAILABILITY}/${employeeId}`;
 };
+
+export const getAuthApiUrlForEmail = (email: string) => {
+  return `${API_CONSTANTS.BASE_URL}/${API_CONSTANTS.AUTH}/${email}`;
+};
