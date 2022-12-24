@@ -30,7 +30,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Headers:    map[string]string{"Content-Type": "application/json"},
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       employeeId,
 	}, nil
 }
