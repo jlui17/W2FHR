@@ -28,6 +28,7 @@ const AuthenticationDataProvider = () => {
 
   const { refetch } = useQuery("email", getEmployeeIdFromEmail, {
     enabled: false,
+    retry: 1,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
