@@ -2,7 +2,7 @@ package GetEmployeeId
 
 import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
-	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"errors"
 	"fmt"
@@ -59,5 +59,5 @@ func getEmployeeId(email string, staffListInfo AuthConstants.STAFF_LIST_INFO) (s
 		}
 	}
 
-	return "", errors.New(AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR)
+	return "", errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
 }

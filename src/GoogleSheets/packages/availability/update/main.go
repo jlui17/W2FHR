@@ -18,7 +18,7 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
 	if err != nil {
 		statusCode := 500
-		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR {
+		if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
 			statusCode = 404
 		}
 		if err.Error() == AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR {

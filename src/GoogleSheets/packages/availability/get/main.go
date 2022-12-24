@@ -20,7 +20,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 
 	if err != nil {
 		statusCode := 500
-		if err.Error() == AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR {
+		if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
 			statusCode = 404
 		}
 
@@ -92,7 +92,7 @@ func FindRowOfEmployeeAvailability(availabilityTimesheet *sheets.ValueRange, emp
 			return i, nil
 		}
 	}
-	return 0, errors.New(AvailabilityConstants.EMPLOYEE_AVAILABILITY_NOT_FOUND_ERROR)
+	return 0, errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
 }
 
 func CanUpdateAvailability() (bool, error) {
