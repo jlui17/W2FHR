@@ -19,7 +19,9 @@ export interface AvailabilityData {
 }
 
 const isAvailabilityData = (data: any): data is AvailabilityData => {
-  return data.day1 && data.day2 && data.day3 && data.day4 && data.canUpdate;
+  return (
+    data.day1 && data.day2 && data.day3 && data.day4 && data.canUpdate != null
+  );
 };
 
 const AvailabilityFormDataProvider = (props: any): JSX.Element => {

@@ -77,7 +77,12 @@ export const AvailabilityFormWidget = ({
             )}
           </FormGroup>
         </FormControl>
-        <Button onClick={updateAvailability}>Save</Button>
+        <Button
+          onClick={updateAvailability}
+          disabled={!availabilityData.canUpdate}
+        >
+          Save
+        </Button>
       </>
     );
   };
