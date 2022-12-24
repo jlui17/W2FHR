@@ -1,5 +1,6 @@
 import {
   Button,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -9,17 +10,21 @@ import {
 interface AuthenticationWidgetProps {
   email: string;
   password: string;
+  isLoading: boolean;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  refetch: () => void;
+  onSubmit: () => void;
 }
 
 export const AuthenticationWidget = ({
   email,
   password,
+  isLoading,
   handleChange,
-  refetch,
+  onSubmit,
 }: AuthenticationWidgetProps) => {
-  return (
+  return isLoading ? (
+    <CircularProgress />
+  ) : (
     <div
       style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
     >
@@ -51,7 +56,7 @@ export const AuthenticationWidget = ({
           />
         </FormGroup>
       </FormControl>
-      <Button onClick={refetch}>Submit</Button>
+      <Button onClick={onSubmit}>Submit</Button>
     </div>
   );
 };
