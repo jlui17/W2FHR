@@ -24,7 +24,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       "Error getting employee id.",
+			Body:       err.Error(),
 		}, nil
 	}
 
