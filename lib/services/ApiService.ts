@@ -12,6 +12,7 @@ interface ApiServiceProps {
   GoogleSheets: {
     availabilityHandler: GoFunction;
     timesheetHandler: GoFunction;
+    authHandler: GoFunction;
   };
 }
 
@@ -58,6 +59,13 @@ export class ApiService extends Stack {
     timesheetRoute.addMethod(
       "GET",
       new LambdaIntegration(props.GoogleSheets.timesheetHandler)
+    );
+
+    const baseAuthRoute = api.root.addResource("auth");
+    const authRoute = baseAuthRoute.addResource("{email}");
+    authRoute.addMethod(
+      "GET",
+      new LambdaIntegration(props.GoogleSheets.authHandler)
     );
   }
 

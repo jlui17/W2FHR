@@ -5,6 +5,7 @@ import { Construct } from "constructs";
 export class GoogleSheetsService extends Stack {
   public readonly availabilityHandler: GoFunction;
   public readonly timesheetHandler: GoFunction;
+  public readonly authHandler: GoFunction;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -30,9 +31,13 @@ export class GoogleSheetsService extends Stack {
       }
     );
 
-    new GoFunction(this, "GoogleSheetsGetEmployeeIdHandler", {
-      entry: `${SOURCE_PACKAGES_DIR}/auth`,
-      moduleDir: MODULE_DIR,
-    });
+    this.authHandler = new GoFunction(
+      this,
+      "GoogleSheetsGetEmployeeIdHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/auth`,
+        moduleDir: MODULE_DIR,
+      }
+    );
   }
 }
