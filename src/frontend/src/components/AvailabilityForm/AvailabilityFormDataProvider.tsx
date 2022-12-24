@@ -99,7 +99,6 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
         break;
     }
     setAvailabilityData(newAvailabilityData);
-    updateAvailability();
   };
 
   const { isLoading } = useQuery<void>("availability", fetchAvailability);
@@ -110,6 +109,7 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
         isLoading
         availabilityData={EMPTY_DATA}
         handleAvailabilityChange={handleAvailabilityChange}
+        updateAvailability={updateAvailability}
       />
     );
   }
@@ -119,6 +119,7 @@ const AvailabilityFormDataProvider = (props: any): JSX.Element => {
       isLoading={false}
       availabilityData={availabilityData}
       handleAvailabilityChange={handleAvailabilityChange}
+      updateAvailability={updateAvailability}
     />
   );
 };

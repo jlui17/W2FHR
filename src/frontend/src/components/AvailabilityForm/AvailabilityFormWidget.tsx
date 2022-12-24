@@ -1,4 +1,5 @@
 import {
+  Button,
   Checkbox,
   CircularProgress,
   FormControl,
@@ -14,12 +15,14 @@ interface AvailabilityFormWidgetProps {
   handleAvailabilityChange: (
     event: React.ChangeEvent<HTMLInputElement>
   ) => void;
+  updateAvailability: () => void;
 }
 
 export const AvailabilityFormWidget = ({
   isLoading,
   availabilityData,
   handleAvailabilityChange,
+  updateAvailability,
 }: AvailabilityFormWidgetProps): JSX.Element => {
   const getAvailabilityBoxes = () => {
     return (
@@ -74,6 +77,7 @@ export const AvailabilityFormWidget = ({
             )}
           </FormGroup>
         </FormControl>
+        <Button onClick={updateAvailability}>Save</Button>
       </>
     );
   };
