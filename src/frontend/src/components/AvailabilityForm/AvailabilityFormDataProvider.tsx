@@ -20,7 +20,11 @@ export interface AvailabilityData {
 
 const isAvailabilityData = (data: any): data is AvailabilityData => {
   return (
-    data.day1 && data.day2 && data.day3 && data.day4 && data.canUpdate != null
+    "day1" in data &&
+    "day2" in data &&
+    "day3" in data &&
+    "day4" in data &&
+    "canUpdate" in data
   );
 };
 
