@@ -1,15 +1,43 @@
+import {
+  CognitoUserAttribute,
+  CognitoUserPool,
+} from "amazon-cognito-identity-js";
 import axios from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../../common/constants";
 
+const USER_POOL_DATA = {
+  UserPoolId: "us-west-2_PVy3K8kAW",
+  ClientId: "1g3gnedq2i6naqdjrbsq10pb54",
+};
+const USER_POOL = new CognitoUserPool(USER_POOL_DATA);
+
 export const signUp = async (email: string, password: string) => {
   try {
     const employeeId = await getEmployeeIdFromEmail(email);
-    console.log(employeeId);
+    const employeeIdAttribute = new CognitoUserAttribute({
+      Name: "custom:employeeId",
+      Value: employeeId,
+    });
+
+    const user = await new Promise((resolve, reject) => {
+      USER_POOL.signUp(
+        email,
+        password,
+        [employeeIdAttribute],
+        [],
+        (err, result) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(result);
+        }
+      );
+    });
+    return Promise.resolve(user);
   } catch (err) {
-    console.log(err);
+    return Promise.reject(err);
   }
-  return Promise.resolve();
 };
 
 const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
