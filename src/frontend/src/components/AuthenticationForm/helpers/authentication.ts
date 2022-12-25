@@ -10,10 +10,14 @@ const USER_POOL_DATA = {
   UserPoolId: "us-west-2_PVy3K8kAW",
   ClientId: "1g3gnedq2i6naqdjrbsq10pb54",
 };
-const USER_POOL = new CognitoUserPool(USER_POOL_DATA);
+const createUserPool = () => {
+  return new CognitoUserPool(USER_POOL_DATA);
+};
 
 export const signUp = async (email: string, password: string) => {
   try {
+    const userPool = createUserPool();
+
     const employeeId = await getEmployeeIdFromEmail(email);
     const employeeIdAttribute = new CognitoUserAttribute({
       Name: "custom:employeeId",
@@ -21,7 +25,7 @@ export const signUp = async (email: string, password: string) => {
     });
 
     const user = await new Promise((resolve, reject) => {
-      USER_POOL.signUp(
+      userPool.signUp(
         email,
         password,
         [employeeIdAttribute],
