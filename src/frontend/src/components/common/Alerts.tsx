@@ -23,15 +23,7 @@ export const displayAlert = (
   return (
     <Alert
       severity={alert.type}
-      style={{
-        position: "absolute",
-        left: "0",
-        right: "0",
-        width: "30%",
-        marginLeft: "auto",
-        marginRight: "auto",
-        top: "10",
-      }}
+      className="absolute left-0 right-0 w-3/12 ml-auto mr-auto top-3"
       onClose={close}
     >
       {alert.message}
