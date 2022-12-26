@@ -1,5 +1,7 @@
+import { AxiosError } from "axios";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { AlertInfo, AlertType } from "../common/Alerts";
 import { AuthenticationWidget } from "./AuthenticationWidget";
 import { signUp } from "./helpers/authentication";
 
@@ -7,6 +9,7 @@ const AuthenticationDataProvider = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [alert, setAlert] = useState<AlertInfo | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -22,9 +25,29 @@ const AuthenticationDataProvider = () => {
     }
   };
 
+  const closeAlert = () => {
+    setAlert(null);
+  };
+
   const onSubmit = async () => {
     setIsLoading(true);
-    await signUp(email, password);
+    try {
+      await signUp(email, password);
+    } catch (err) {
+      if (!(err instanceof AxiosError || err instanceof Error)) {
+        console.log(err);
+      } else {
+        const alert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: err.message,
+        };
+
+        if (err instanceof AxiosError) {
+          alert.message = err.response?.data;
+        }
+        setAlert(alert);
+      }
+    }
     setIsLoading(false);
   };
 
@@ -33,8 +56,10 @@ const AuthenticationDataProvider = () => {
       email={email}
       password={password}
       isLoading={isLoading}
+      alert={alert}
       handleChange={handleChange}
       onSubmit={onSubmit}
+      closeAlert={closeAlert}
     />
   );
 };
