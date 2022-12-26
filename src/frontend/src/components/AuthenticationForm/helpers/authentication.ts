@@ -2,7 +2,7 @@ import {
   CognitoUserAttribute,
   CognitoUserPool,
 } from "amazon-cognito-identity-js";
-import axios from "axios";
+import get from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../../common/constants";
 
@@ -45,7 +45,7 @@ export const signUp = async (email: string, password: string) => {
 };
 
 const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
-  const response = await axios.get(getAuthApiUrlForEmail(email));
+  const response = await get(getAuthApiUrlForEmail(email));
 
   switch (response.status) {
     case 200:
