@@ -1,4 +1,5 @@
 import {
+  CognitoUser,
   CognitoUserAttribute,
   CognitoUserPool,
   ISignUpResult,
@@ -64,10 +65,27 @@ const doSignUp = async (
           return reject(err);
         }
         if (result === undefined) {
-          return reject(new Error(ERROR_MESSAGSES.REGISTRATION_ERROR));
+          return reject(new Error(ERROR_MESSAGSES.SIGNUP_ERROR));
         }
         return resolve(result);
       }
     );
+  });
+};
+
+export const verifySignup = async (
+  user: CognitoUser,
+  verificationCode: string
+) => {
+  return new Promise((resolve, reject) => {
+    user.confirmRegistration(verificationCode, false, (err, result) => {
+      console.log(`Verifying Signup:\n
+      Error: ${err}\n
+      Result: ${result}`);
+      if (err) {
+        return reject(err);
+      }
+      return resolve(result);
+    });
   });
 };

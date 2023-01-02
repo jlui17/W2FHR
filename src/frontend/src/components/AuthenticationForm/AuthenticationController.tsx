@@ -1,15 +1,21 @@
+import { CognitoUser } from "amazon-cognito-identity-js";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { AlertInfo, AlertType } from "../common/Alerts";
-import { signUp } from "./helpers/authentication";
+import { ERROR_MESSAGSES, SUCCESS_MESSAGES } from "../common/constants";
+import { signUp, verifySignup } from "./helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
+import { VerifySignupWidget } from "./VerifySignupWidget";
 
 const AuthenticationController = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<AlertInfo | null>(null);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isVerifyingSignup, setIsVerifyingSignup] = useState(false);
+  const [userToVerify, setUserToVerify] = useState<CognitoUser | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -20,6 +26,9 @@ const AuthenticationController = () => {
       case "password":
         setPassword(value);
         break;
+      case "verificationCode":
+        setVerificationCode(value);
+        break;
       default:
         break;
     }
@@ -29,10 +38,12 @@ const AuthenticationController = () => {
     setAlert(null);
   };
 
-  const onSubmit = async () => {
+  const onSignup = async () => {
     setIsLoading(true);
     try {
-      await signUp(email, password);
+      const unverifiedUser = await signUp(email, password);
+      setUserToVerify(unverifiedUser.user);
+      setIsVerifyingSignup(true);
     } catch (err) {
       if (!(err instanceof AxiosError || err instanceof Error)) {
         console.log(err);
@@ -51,14 +62,56 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
-  return (
+  const onVerifySignup = async () => {
+    if (userToVerify == null) {
+      setAlert({
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGSES.NO_USER_TO_VERIFY_ERROR,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await verifySignup(userToVerify, verificationCode);
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
+      });
+    } catch (err) {
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+      };
+      if (err instanceof Error) {
+        errorAlert.message = err.message;
+      }
+
+      console.error(err);
+      setAlert(errorAlert);
+    }
+    setIsLoading(false);
+    setUserToVerify(null);
+    setIsVerifyingSignup(false);
+  };
+
+  return isVerifyingSignup ? (
+    <VerifySignupWidget
+      isLoading={isLoading}
+      verificationCode={verificationCode}
+      onVerifySignup={onVerifySignup}
+      handleChange={handleChange}
+      alert={alert}
+      closeAlert={closeAlert}
+    />
+  ) : (
     <LoginSignupWidget
       email={email}
       password={password}
       isLoading={isLoading}
       alert={alert}
       handleChange={handleChange}
-      onSignup={onSubmit}
+      onSignup={onSignup}
       closeAlert={closeAlert}
     />
   );
