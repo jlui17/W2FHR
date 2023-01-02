@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import { AxiosError } from "axios";
 import { useState } from "react";
@@ -97,10 +96,10 @@ const AuthenticationController = () => {
   };
 
   return (
-    <Box className="border-grey-100 flex-inline m-1 max-w-md justify-center rounded-md border-2 p-4 align-middle">
+    <div className="m-1 inline-flex flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
       <img
         src="wun2free_logo.png"
-        className="mx-auto my-auto mb-10 aspect-auto w-48"
+        className="mx-auto my-auto mb-2 aspect-auto w-48"
       />
       {isVerifyingSignup ? (
         <VerifySignupWidget
@@ -122,7 +121,7 @@ const AuthenticationController = () => {
           closeAlert={closeAlert}
         />
       )}
-    </Box>
+    </div>
   );
 };
 

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.10.16",
     "amazon-cognito-identity-js": "^6.1.1",
     "autoprefixer": "^10.4.13",
