@@ -21,17 +21,19 @@ export const VerifySignupWidget = ({
   return (
     <>
       {displayAlert(alert, closeAlert)}
-      <p>Enter your verification code</p>
-      <TextField
-        variant="outlined"
-        name="verificationCode"
-        value={verificationCode}
-        onChange={handleChange}
-        disabled={isLoading}
-      />
-      <Button onClick={onVerifySignup} disabled={isLoading}>
-        Verify
-      </Button>
+      <div className="flex flex-col justify-center align-middle">
+        <p>Enter your verification code</p>
+        <TextField
+          variant="outlined"
+          name="verificationCode"
+          value={verificationCode}
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <Button onClick={onVerifySignup} disabled={isLoading}>
+          Verify
+        </Button>
+      </div>
     </>
   );
 };
