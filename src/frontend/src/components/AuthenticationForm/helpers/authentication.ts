@@ -1,6 +1,7 @@
 import {
   CognitoUserAttribute,
   CognitoUserPool,
+  ISignUpResult,
 } from "amazon-cognito-identity-js";
 import get from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
@@ -10,34 +11,16 @@ const USER_POOL_DATA = {
   UserPoolId: "us-west-2_PVy3K8kAW",
   ClientId: "1g3gnedq2i6naqdjrbsq10pb54",
 };
-const createUserPool = () => {
-  return new CognitoUserPool(USER_POOL_DATA);
-};
+const USER_POOL = new CognitoUserPool(USER_POOL_DATA);
 
-export const signUp = async (email: string, password: string) => {
+export const signUp = async (
+  email: string,
+  password: string
+): Promise<ISignUpResult> => {
   try {
-    const userPool = createUserPool();
-
     const employeeId = await getEmployeeIdFromEmail(email);
-    const employeeIdAttribute = new CognitoUserAttribute({
-      Name: "custom:employeeId",
-      Value: employeeId,
-    });
 
-    const user = await new Promise((resolve, reject) => {
-      userPool.signUp(
-        email,
-        password,
-        [employeeIdAttribute],
-        [],
-        (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve(result);
-        }
-      );
-    });
+    const user = await doSignUp(email, password, employeeId);
     return Promise.resolve(user);
   } catch (err) {
     return Promise.reject(err);
@@ -58,4 +41,33 @@ const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
     default:
       return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
   }
+};
+
+const doSignUp = async (
+  email: string,
+  password: string,
+  employeeId: string
+): Promise<ISignUpResult> => {
+  const employeeIdAttribute = new CognitoUserAttribute({
+    Name: "custom:employeeId",
+    Value: employeeId,
+  });
+
+  return new Promise<ISignUpResult>((resolve, reject) => {
+    USER_POOL.signUp(
+      email,
+      password,
+      [employeeIdAttribute],
+      [],
+      (err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        if (result === undefined) {
+          return reject(new Error(ERROR_MESSAGSES.REGISTRATION_ERROR));
+        }
+        return resolve(result);
+      }
+    );
+  });
 };
