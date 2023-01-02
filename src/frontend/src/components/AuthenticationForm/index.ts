@@ -1,3 +1,3 @@
-import { AuthenticationForm } from "./AuthenticationDataProvider";
+import { AuthenticationForm } from "./AuthenticationController";
 
 export default AuthenticationForm;
