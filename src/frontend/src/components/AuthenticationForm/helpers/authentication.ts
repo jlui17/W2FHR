@@ -22,18 +22,22 @@ const COGNITO_CLIENT = new CognitoIdentityProviderClient({
   region: "us-west-2",
 });
 
-export const signUp = async (
+export const signUpAndGetNeedToConfirm = async (
   email: string,
   password: string
-): Promise<void> => {
+): Promise<boolean> => {
   try {
     const employeeId = await getEmployeeIdFromEmail(email);
 
     const signUpResponse = await doSignUp(email, password, employeeId);
-    if (signUpResponse.UserSub == null) {
+    if (
+      signUpResponse.UserSub === undefined ||
+      signUpResponse.UserConfirmed === undefined
+    ) {
       return Promise.reject(new Error(ERROR_MESSAGSES.SIGNUP_ERROR));
     }
-    return Promise.resolve();
+
+    return Promise.resolve(!signUpResponse.UserConfirmed);
   } catch (err) {
     return Promise.reject(err);
   }
@@ -75,7 +79,7 @@ const doSignUp = async (
   return COGNITO_CLIENT.send(signUpCommand);
 };
 
-export const verifySignup = async (
+export const confirmAccount = async (
   email: string,
   verificationCode: string
 ): Promise<ConfirmSignUpCommandOutput> => {

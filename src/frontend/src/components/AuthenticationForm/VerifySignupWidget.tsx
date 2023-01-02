@@ -4,16 +4,16 @@ import { AlertInfo, displayAlert } from "../common/Alerts";
 interface VerifySignupWidgetProps {
   isLoading: boolean;
   verificationCode: string;
-  onVerifySignup: () => void;
+  onConfirmAccount: () => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   alert: AlertInfo | null;
   closeAlert: () => void;
 }
 
-export const VerifySignupWidget = ({
+export const ConfirmAccountWidget = ({
   isLoading,
   verificationCode,
-  onVerifySignup,
+  onConfirmAccount,
   handleChange,
   alert,
   closeAlert,
@@ -22,15 +22,24 @@ export const VerifySignupWidget = ({
     <>
       {displayAlert(alert, closeAlert)}
       <div className="flex flex-col justify-center align-middle">
-        <p>Enter your verification code</p>
+        <p className="break-normal">
+          A verification code has been sent to your email. Please check and
+          enter it here to complete registration.
+        </p>
         <TextField
+          className="mb-4"
           variant="outlined"
           name="verificationCode"
+          label="Verification Code"
           value={verificationCode}
           onChange={handleChange}
           disabled={isLoading}
         />
-        <Button onClick={onVerifySignup} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={onConfirmAccount}
+          disabled={isLoading}
+        >
           Verify
         </Button>
       </div>

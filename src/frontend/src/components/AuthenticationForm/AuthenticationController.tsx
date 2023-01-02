@@ -3,9 +3,12 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { AlertInfo, AlertType } from "../common/Alerts";
 import { ERROR_MESSAGSES, SUCCESS_MESSAGES } from "../common/constants";
-import { signUp, verifySignup } from "./helpers/authentication";
+import {
+  confirmAccount,
+  signUpAndGetNeedToConfirm,
+} from "./helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
-import { VerifySignupWidget } from "./VerifySignupWidget";
+import { ConfirmAccountWidget } from "./VerifySignupWidget";
 
 const AuthenticationController = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +16,7 @@ const AuthenticationController = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [verificationCode, setVerificationCode] = useState("");
-  const [isVerifyingSignup, setIsVerifyingSignup] = useState(false);
+  const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -39,8 +42,10 @@ const AuthenticationController = () => {
   const onSignup = async () => {
     setIsLoading(true);
     try {
-      signUp(email, password);
-      setIsVerifyingSignup(true);
+      const needToConfirm = await signUpAndGetNeedToConfirm(email, password);
+      if (needToConfirm) {
+        setIsConfirmingAccount(true);
+      }
     } catch (err) {
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
@@ -60,10 +65,10 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
-  const onVerifySignup = async () => {
+  const onConfirmAccount = async () => {
     setIsLoading(true);
     try {
-      await verifySignup(email, verificationCode);
+      await confirmAccount(email, verificationCode);
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
@@ -81,20 +86,20 @@ const AuthenticationController = () => {
       setAlert(errorAlert);
     }
     setIsLoading(false);
-    setIsVerifyingSignup(false);
+    setIsConfirmingAccount(false);
   };
 
   return (
-    <div className="m-1 inline-flex flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
+    <div className="m-1 inline-flex max-w-[500px] flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
       <img
         src="wun2free_logo.png"
         className="mx-auto my-auto mb-2 aspect-auto w-48"
       />
-      {isVerifyingSignup ? (
-        <VerifySignupWidget
+      {isConfirmingAccount ? (
+        <ConfirmAccountWidget
           isLoading={isLoading}
           verificationCode={verificationCode}
-          onVerifySignup={onVerifySignup}
+          onConfirmAccount={onConfirmAccount}
           handleChange={handleChange}
           alert={alert}
           closeAlert={closeAlert}
