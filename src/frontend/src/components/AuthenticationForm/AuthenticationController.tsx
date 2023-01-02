@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import { AxiosError } from "axios";
 import { useState } from "react";
@@ -95,25 +96,33 @@ const AuthenticationController = () => {
     setIsVerifyingSignup(false);
   };
 
-  return isVerifyingSignup ? (
-    <VerifySignupWidget
-      isLoading={isLoading}
-      verificationCode={verificationCode}
-      onVerifySignup={onVerifySignup}
-      handleChange={handleChange}
-      alert={alert}
-      closeAlert={closeAlert}
-    />
-  ) : (
-    <LoginSignupWidget
-      email={email}
-      password={password}
-      isLoading={isLoading}
-      alert={alert}
-      handleChange={handleChange}
-      onSignup={onSignup}
-      closeAlert={closeAlert}
-    />
+  return (
+    <Box className="border-grey-100 flex-inline m-1 max-w-md justify-center rounded-md border-2 p-4 align-middle">
+      <img
+        src="wun2free_logo.png"
+        className="mx-auto my-auto mb-10 aspect-auto w-48"
+      />
+      {isVerifyingSignup ? (
+        <VerifySignupWidget
+          isLoading={isLoading}
+          verificationCode={verificationCode}
+          onVerifySignup={onVerifySignup}
+          handleChange={handleChange}
+          alert={alert}
+          closeAlert={closeAlert}
+        />
+      ) : (
+        <LoginSignupWidget
+          email={email}
+          password={password}
+          isLoading={isLoading}
+          alert={alert}
+          handleChange={handleChange}
+          onSignup={onSignup}
+          closeAlert={closeAlert}
+        />
+      )}
+    </Box>
   );
 };
 
