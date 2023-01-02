@@ -45,19 +45,20 @@ const AuthenticationController = () => {
       setUserToVerify(unverifiedUser.user);
       setIsVerifyingSignup(true);
     } catch (err) {
-      if (!(err instanceof AxiosError || err instanceof Error)) {
-        console.log(err);
-      } else {
-        const alert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: err.message,
-        };
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+      };
 
-        if (err instanceof AxiosError) {
-          alert.message = err.response?.data;
-        }
-        setAlert(alert);
+      if (err instanceof Error) {
+        errorAlert.message = err.message;
       }
+
+      if (err instanceof AxiosError) {
+        errorAlert.message = err.response?.data;
+      }
+      console.error(`Signup Error: ${errorAlert.message}`);
+      setAlert(errorAlert);
     }
     setIsLoading(false);
   };
