@@ -7,25 +7,25 @@ import {
 } from "@mui/material";
 import { AlertInfo, displayAlert } from "../common/Alerts";
 
-interface AuthenticationWidgetProps {
+interface LoginSignupWidgetProps {
   email: string;
   password: string;
   isLoading: boolean;
   alert: AlertInfo | null;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: () => void;
+  onSignup: () => void;
   closeAlert: () => void;
 }
 
-export const AuthenticationWidget = ({
+export const LoginSignupWidget = ({
   email,
   password,
   isLoading,
   alert,
   handleChange,
-  onSubmit,
+  onSignup,
   closeAlert,
-}: AuthenticationWidgetProps) => {
+}: LoginSignupWidgetProps) => {
   return (
     <>
       {displayAlert(alert, closeAlert)}
@@ -66,8 +66,8 @@ export const AuthenticationWidget = ({
             />
           </FormGroup>
         </FormControl>
-        <Button onClick={onSubmit} disabled={isLoading}>
-          Submit
+        <Button onClick={onSignup} disabled={isLoading}>
+          Signup
         </Button>
       </div>
     </>

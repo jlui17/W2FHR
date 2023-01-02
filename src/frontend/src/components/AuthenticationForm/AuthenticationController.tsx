@@ -2,10 +2,10 @@ import { AxiosError } from "axios";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { AlertInfo, AlertType } from "../common/Alerts";
-import { AuthenticationWidget } from "./AuthenticationWidget";
 import { signUp } from "./helpers/authentication";
+import { LoginSignupWidget } from "./LoginSignupWidget";
 
-const AuthenticationDataProvider = () => {
+const AuthenticationController = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,13 +52,13 @@ const AuthenticationDataProvider = () => {
   };
 
   return (
-    <AuthenticationWidget
+    <LoginSignupWidget
       email={email}
       password={password}
       isLoading={isLoading}
       alert={alert}
       handleChange={handleChange}
-      onSubmit={onSubmit}
+      onSignup={onSubmit}
       closeAlert={closeAlert}
     />
   );
@@ -68,7 +68,7 @@ export const AuthenticationForm = () => {
   const client = new QueryClient();
   return (
     <QueryClientProvider client={client}>
-      <AuthenticationDataProvider />
+      <AuthenticationController />
     </QueryClientProvider>
   );
 };
