@@ -1,10 +1,4 @@
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  TextField,
-} from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { AlertInfo, displayAlert } from "../common/Alerts";
 
 interface LoginSignupWidgetProps {
@@ -29,46 +23,34 @@ export const LoginSignupWidget = ({
   return (
     <>
       {displayAlert(alert, closeAlert)}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: "300px",
-        }}
-      >
-        <FormControl>
-          <FormGroup>
-            <FormControlLabel
-              label="email"
-              labelPlacement="start"
-              control={
-                <TextField
-                  variant="outlined"
-                  name="email"
-                  value={email}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-              }
-            />
-            <FormControlLabel
-              label="password"
-              labelPlacement="start"
-              control={
-                <TextField
-                  variant="outlined"
-                  name="password"
-                  value={password}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-              }
-            />
-          </FormGroup>
-        </FormControl>
-        <Button onClick={onSignup} disabled={isLoading}>
-          Signup
-        </Button>
+      <div className="flex flex-col justify-center align-middle">
+        <h1 className="mb-4 inline-block text-lg">
+          Sign in to or sign up for an account
+        </h1>
+        <TextField
+          className="mb-4"
+          variant="outlined"
+          label="Email"
+          name="email"
+          value={email}
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <TextField
+          className="mb-4"
+          variant="outlined"
+          label="Password"
+          name="password"
+          value={password}
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <div className="flex w-auto justify-evenly align-middle">
+          <Button variant="contained">Login</Button>
+          <Button variant="contained" onClick={onSignup} disabled={isLoading}>
+            Sign up
+          </Button>
+        </div>
       </div>
     </>
   );
