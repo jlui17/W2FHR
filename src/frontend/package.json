@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.241.0",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.10.16",
-    "amazon-cognito-identity-js": "^6.1.1",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.20",
     "prettier": "^2.8.1",

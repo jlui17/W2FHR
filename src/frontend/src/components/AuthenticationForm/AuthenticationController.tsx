@@ -1,4 +1,3 @@
-import { CognitoUser } from "amazon-cognito-identity-js";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -15,7 +14,6 @@ const AuthenticationController = () => {
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerifyingSignup, setIsVerifyingSignup] = useState(false);
-  const [userToVerify, setUserToVerify] = useState<CognitoUser | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -41,8 +39,7 @@ const AuthenticationController = () => {
   const onSignup = async () => {
     setIsLoading(true);
     try {
-      const unverifiedUser = await signUp(email, password);
-      setUserToVerify(unverifiedUser.user);
+      signUp(email, password);
       setIsVerifyingSignup(true);
     } catch (err) {
       const errorAlert: AlertInfo = {
@@ -64,17 +61,9 @@ const AuthenticationController = () => {
   };
 
   const onVerifySignup = async () => {
-    if (userToVerify == null) {
-      setAlert({
-        type: AlertType.ERROR,
-        message: ERROR_MESSAGSES.NO_USER_TO_VERIFY_ERROR,
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
-      await verifySignup(userToVerify, verificationCode);
+      await verifySignup(email, verificationCode);
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
@@ -92,7 +81,6 @@ const AuthenticationController = () => {
       setAlert(errorAlert);
     }
     setIsLoading(false);
-    setUserToVerify(null);
     setIsVerifyingSignup(false);
   };
 

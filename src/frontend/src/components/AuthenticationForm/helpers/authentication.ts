@@ -1,9 +1,10 @@
 import {
-  CognitoUser,
-  CognitoUserAttribute,
-  CognitoUserPool,
-  ISignUpResult,
-} from "amazon-cognito-identity-js";
+  CognitoIdentityProviderClient,
+  ConfirmSignUpCommand,
+  ConfirmSignUpCommandOutput,
+  SignUpCommand,
+  SignUpCommandOutput,
+} from "@aws-sdk/client-cognito-identity-provider";
 import get from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../../common/constants";
@@ -12,17 +13,27 @@ const USER_POOL_DATA = {
   UserPoolId: "us-west-2_PVy3K8kAW",
   ClientId: "1g3gnedq2i6naqdjrbsq10pb54",
 };
-const USER_POOL = new CognitoUserPool(USER_POOL_DATA);
+
+const COGNITO_CONFIG = {
+  region: "us-west-2",
+  clientId: "1g3gnedq2i6naqdjrbsq10pb54",
+};
+const COGNITO_CLIENT = new CognitoIdentityProviderClient({
+  region: "us-west-2",
+});
 
 export const signUp = async (
   email: string,
   password: string
-): Promise<ISignUpResult> => {
+): Promise<void> => {
   try {
     const employeeId = await getEmployeeIdFromEmail(email);
 
-    const user = await doSignUp(email, password, employeeId);
-    return Promise.resolve(user);
+    const signUpResponse = await doSignUp(email, password, employeeId);
+    if (signUpResponse.UserSub == null) {
+      return Promise.reject(new Error(ERROR_MESSAGSES.SIGNUP_ERROR));
+    }
+    return Promise.resolve();
   } catch (err) {
     return Promise.reject(err);
   }
@@ -48,44 +59,31 @@ const doSignUp = async (
   email: string,
   password: string,
   employeeId: string
-): Promise<ISignUpResult> => {
-  const employeeIdAttribute = new CognitoUserAttribute({
-    Name: "custom:employeeId",
-    Value: employeeId,
+): Promise<SignUpCommandOutput> => {
+  const signUpCommand = new SignUpCommand({
+    ClientId: COGNITO_CONFIG.clientId,
+    Username: email,
+    Password: password,
+    UserAttributes: [
+      {
+        Name: "custom:employeeId",
+        Value: employeeId,
+      },
+    ],
   });
 
-  return new Promise<ISignUpResult>((resolve, reject) => {
-    USER_POOL.signUp(
-      email,
-      password,
-      [employeeIdAttribute],
-      [],
-      (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        if (result === undefined) {
-          return reject(new Error(ERROR_MESSAGSES.SIGNUP_ERROR));
-        }
-        return resolve(result);
-      }
-    );
-  });
+  return COGNITO_CLIENT.send(signUpCommand);
 };
 
 export const verifySignup = async (
-  user: CognitoUser,
+  email: string,
   verificationCode: string
-) => {
-  return new Promise((resolve, reject) => {
-    user.confirmRegistration(verificationCode, false, (err, result) => {
-      console.log(`Verifying Signup:\n
-      Error: ${err}\n
-      Result: ${result}`);
-      if (err) {
-        return reject(err);
-      }
-      return resolve(result);
-    });
+): Promise<ConfirmSignUpCommandOutput> => {
+  const confirmSignUpCommand = new ConfirmSignUpCommand({
+    ClientId: COGNITO_CONFIG.clientId,
+    Username: email,
+    ConfirmationCode: verificationCode,
   });
+
+  return COGNITO_CLIENT.send(confirmSignUpCommand);
 };
