@@ -1,7 +1,10 @@
 import {
+  AuthFlowType,
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
   ConfirmSignUpCommandOutput,
+  InitiateAuthCommand,
+  InitiateAuthCommandOutput,
   ResendConfirmationCodeCommand,
   SignUpCommand,
   SignUpCommandOutput,
@@ -101,4 +104,37 @@ export const sendVerificationCode = async (email: string): Promise<void> => {
   }
 
   return Promise.resolve();
+};
+
+export const loginAndGetAccessToken = async (
+  email: string,
+  password: string
+): Promise<string> => {
+  try {
+    const loginResponse = await doLogin(email, password);
+    if (loginResponse.AuthenticationResult === undefined) {
+      return Promise.reject(new Error(ERROR_MESSAGSES.UNKNOWN_ERROR));
+    }
+
+    return Promise.resolve(
+      loginResponse.AuthenticationResult.AccessToken as string
+    );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+const doLogin = async (
+  email: string,
+  password: string
+): Promise<InitiateAuthCommandOutput> => {
+  const loginCommand = new InitiateAuthCommand({
+    AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
+    ClientId: COGNITO_CONFIG.clientId,
+    AuthParameters: {
+      USERNAME: email,
+      PASSWORD: password,
+    },
+  });
+  return COGNITO_CLIENT.send(loginCommand);
 };

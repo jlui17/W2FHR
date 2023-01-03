@@ -8,6 +8,7 @@ interface LoginSignupWidgetProps {
   alert: AlertInfo | null;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSignup: () => void;
+  onLogin: () => void;
   closeAlert: () => void;
 }
 
@@ -18,6 +19,7 @@ export const LoginSignupWidget = ({
   alert,
   handleChange,
   onSignup,
+  onLogin,
   closeAlert,
 }: LoginSignupWidgetProps) => {
   return (
@@ -46,7 +48,12 @@ export const LoginSignupWidget = ({
           Forgot password?
         </Button>
         <div className="flex w-auto items-center justify-evenly">
-          <Button className="mr-4 w-[100%]" variant="contained">
+          <Button
+            className="mr-4 w-[100%]"
+            variant="contained"
+            disabled={isLoading}
+            onClick={onLogin}
+          >
             Login
           </Button>
           <Button

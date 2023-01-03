@@ -9,6 +9,7 @@ import {
 } from "../common/constants";
 import {
   confirmAccount,
+  loginAndGetAccessToken,
   sendVerificationCode,
   signUpAndGetNeedToConfirm,
 } from "./helpers/authentication";
@@ -117,6 +118,26 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
+  const onLogin = async () => {
+    setIsLoading(true);
+    try {
+      const accessToken = await loginAndGetAccessToken(email, password);
+      console.log(accessToken);
+    } catch (err) {
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+      };
+      if (err instanceof Error) {
+        errorAlert.message = err.message;
+      }
+
+      console.error(err);
+      setAlert(errorAlert);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className="m-1 inline-flex h-[400px] w-[500px] flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
       <img src="wun2free_logo.png" className="mx-auto my-2 aspect-auto w-48" />
@@ -138,6 +159,7 @@ const AuthenticationController = () => {
           alert={alert}
           handleChange={handleChange}
           onSignup={onSignup}
+          onLogin={onLogin}
           closeAlert={closeAlert}
         />
       )}
