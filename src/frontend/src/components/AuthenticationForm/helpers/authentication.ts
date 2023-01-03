@@ -1,4 +1,5 @@
 import {
+  AuthenticationResultType,
   AuthFlowType,
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
@@ -109,16 +110,14 @@ export const sendVerificationCode = async (email: string): Promise<void> => {
 export const loginAndGetAccessToken = async (
   email: string,
   password: string
-): Promise<string> => {
+): Promise<AuthenticationResultType> => {
   try {
     const loginResponse = await doLogin(email, password);
-    if (loginResponse.AuthenticationResult === undefined) {
+    if (loginResponse.AuthenticationResult == undefined) {
       return Promise.reject(new Error(ERROR_MESSAGSES.UNKNOWN_ERROR));
     }
 
-    return Promise.resolve(
-      loginResponse.AuthenticationResult.AccessToken as string
-    );
+    return Promise.resolve(loginResponse.AuthenticationResult);
   } catch (err) {
     return Promise.reject(err);
   }
