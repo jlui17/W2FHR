@@ -5,6 +5,7 @@ import { AlertInfo, AlertType } from "../common/Alerts";
 import { ERROR_MESSAGSES, SUCCESS_MESSAGES } from "../common/constants";
 import {
   confirmAccount,
+  resendVerificationCode,
   signUpAndGetNeedToConfirm,
 } from "./helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
@@ -89,6 +90,29 @@ const AuthenticationController = () => {
     setIsConfirmingAccount(false);
   };
 
+  const onResendVerificationCode = async () => {
+    setIsLoading(true);
+    try {
+      await resendVerificationCode(email);
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.SUCCESSFULLY_RESENT_VERIFICATION_CODE,
+      });
+    } catch (err) {
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+      };
+      if (err instanceof Error) {
+        errorAlert.message = err.message;
+      }
+
+      console.error(err);
+      setAlert(errorAlert);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className="m-1 inline-flex max-w-[500px] flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
       <img
@@ -100,6 +124,7 @@ const AuthenticationController = () => {
           isLoading={isLoading}
           verificationCode={verificationCode}
           onConfirmAccount={onConfirmAccount}
+          onResendVerificationCode={onResendVerificationCode}
           handleChange={handleChange}
           alert={alert}
           closeAlert={closeAlert}

@@ -2,6 +2,7 @@ import {
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
   ConfirmSignUpCommandOutput,
+  ResendConfirmationCodeCommand,
   SignUpCommand,
   SignUpCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
@@ -90,4 +91,19 @@ export const confirmAccount = async (
   });
 
   return COGNITO_CLIENT.send(confirmSignUpCommand);
+};
+
+export const resendVerificationCode = async (email: string): Promise<void> => {
+  const resendConfirmationCodeCommand = new ResendConfirmationCodeCommand({
+    ClientId: COGNITO_CONFIG.clientId,
+    Username: email,
+  });
+
+  try {
+    await COGNITO_CLIENT.send(resendConfirmationCodeCommand);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+
+  return Promise.resolve();
 };

@@ -5,6 +5,7 @@ interface VerifySignupWidgetProps {
   isLoading: boolean;
   verificationCode: string;
   onConfirmAccount: () => void;
+  onResendVerificationCode: () => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   alert: AlertInfo | null;
   closeAlert: () => void;
@@ -14,6 +15,7 @@ export const ConfirmAccountWidget = ({
   isLoading,
   verificationCode,
   onConfirmAccount,
+  onResendVerificationCode,
   handleChange,
   alert,
   closeAlert,
@@ -27,7 +29,6 @@ export const ConfirmAccountWidget = ({
           enter it here to complete registration.
         </p>
         <TextField
-          className="mb-4"
           variant="outlined"
           name="verificationCode"
           label="Verification Code"
@@ -35,6 +36,14 @@ export const ConfirmAccountWidget = ({
           onChange={handleChange}
           disabled={isLoading}
         />
+        <Button
+          className="mb-4 inline-block w-fit text-xs"
+          variant="text"
+          onClick={onResendVerificationCode}
+          disabled={isLoading}
+        >
+          Resend verification code
+        </Button>
         <Button
           variant="contained"
           onClick={onConfirmAccount}

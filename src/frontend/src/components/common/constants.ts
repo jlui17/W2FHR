@@ -22,4 +22,6 @@ export const ERROR_MESSAGSES = {
 export const SUCCESS_MESSAGES = {
   SUCCESSFUL_VERIFICATION:
     "Succesfully verified your account. You may now log in.",
+  SUCCESSFULLY_RESENT_VERIFICATION_CODE:
+    "A new verification code was sent to your email.",
 };
