@@ -19,7 +19,7 @@ function App() {
   return (
     <StyledEngineProvider injectFirst>
       <CssBaseline />
-      <div className="App">
+      <div className="flex h-[100vh] w-[100vw] items-center justify-center">
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<AuthenticationForm />} />
