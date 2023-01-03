@@ -23,10 +23,8 @@ export const LoginSignupWidget = ({
   return (
     <>
       {displayAlert(alert, closeAlert)}
-      <div className="flex flex-col justify-center align-middle">
-        <h1 className="mb-4 inline-block text-lg">
-          Sign in to or sign up for an account
-        </h1>
+      <div className="flex flex-col justify-center">
+        <h1 className="mx-auto mb-4 inline-block text-2xl">Employee Portal</h1>
         <TextField
           className="mb-4"
           variant="outlined"
@@ -47,7 +45,7 @@ export const LoginSignupWidget = ({
         <Button className="mb-4 w-fit text-xs" variant="text">
           Forgot password?
         </Button>
-        <div className="flex w-auto justify-evenly align-middle">
+        <div className="flex w-auto items-center justify-evenly">
           <Button className="mr-4 w-[100%]" variant="contained">
             Login
           </Button>
