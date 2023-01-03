@@ -37,6 +37,9 @@ export class AuthService extends Stack {
     this.userPool.addClient("employees-client", {
       userPoolClientName: "employees-client",
       generateSecret: false,
+      authFlows: {
+        userPassword: true,
+      },
     });
     this.userPool.addDomain("employees-domain", {
       cognitoDomain: {
