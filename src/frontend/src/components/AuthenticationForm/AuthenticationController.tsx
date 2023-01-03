@@ -118,7 +118,7 @@ const AuthenticationController = () => {
   };
 
   return (
-    <div className="m-1 inline-flex max-w-[500px] flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
+    <div className="m-1 inline-flex w-[500px] flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
       <img
         src="wun2free_logo.png"
         className="mx-auto my-auto mb-2 aspect-auto w-48"
