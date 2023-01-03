@@ -37,7 +37,6 @@ export const LoginSignupWidget = ({
           disabled={isLoading}
         />
         <TextField
-          className="mb-4"
           variant="outlined"
           label="Password"
           name="password"
@@ -45,6 +44,9 @@ export const LoginSignupWidget = ({
           onChange={handleChange}
           disabled={isLoading}
         />
+        <Button className="mb-4 w-fit text-xs" variant="text">
+          Forgot password?
+        </Button>
         <div className="flex w-auto justify-evenly align-middle">
           <Button className="mr-4 w-[100%]" variant="contained">
             Login
