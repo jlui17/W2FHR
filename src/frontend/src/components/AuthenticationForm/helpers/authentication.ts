@@ -107,7 +107,7 @@ export const sendVerificationCode = async (email: string): Promise<void> => {
   return Promise.resolve();
 };
 
-export const loginAndGetAccessToken = async (
+export const loginAndGetAuthSession = async (
   email: string,
   password: string
 ): Promise<AuthenticationResultType> => {

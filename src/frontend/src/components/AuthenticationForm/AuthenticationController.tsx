@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType } from "../common/Alerts";
 import {
   ERROR_MESSAGSES,
@@ -9,7 +10,7 @@ import {
 } from "../common/constants";
 import {
   confirmAccount,
-  loginAndGetAccessToken,
+  loginAndGetAuthSession,
   sendVerificationCode,
   signUpAndGetNeedToConfirm,
 } from "./helpers/authentication";
@@ -23,6 +24,7 @@ const AuthenticationController = () => {
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
+  const { setAuthSession } = useContext(AuthenticationContext);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -121,8 +123,9 @@ const AuthenticationController = () => {
   const onLogin = async () => {
     setIsLoading(true);
     try {
-      const accessToken = await loginAndGetAccessToken(email, password);
-      console.log(accessToken);
+      const authSession = await loginAndGetAuthSession(email, password);
+      console.log(authSession);
+      setAuthSession(authSession);
     } catch (err) {
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
