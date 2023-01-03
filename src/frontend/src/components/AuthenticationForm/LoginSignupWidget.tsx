@@ -46,8 +46,15 @@ export const LoginSignupWidget = ({
           disabled={isLoading}
         />
         <div className="flex w-auto justify-evenly align-middle">
-          <Button variant="contained">Login</Button>
-          <Button variant="contained" onClick={onSignup} disabled={isLoading}>
+          <Button className="mr-4 w-[100%]" variant="contained">
+            Login
+          </Button>
+          <Button
+            className="w-[100%]"
+            variant="contained"
+            onClick={onSignup}
+            disabled={isLoading}
+          >
             Sign up
           </Button>
         </div>
