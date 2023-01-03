@@ -1,6 +1,5 @@
 import { CssBaseline, StyledEngineProvider } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "./App.css";
 import AuthenticationForm from "./components/AuthenticationForm";
 import AvailabilityForm from "./components/AvailabilityForm";
 import Timesheet from "./components/Timesheet";
