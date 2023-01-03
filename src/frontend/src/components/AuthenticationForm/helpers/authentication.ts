@@ -10,11 +10,6 @@ import get from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../../common/constants";
 
-const USER_POOL_DATA = {
-  UserPoolId: "us-west-2_PVy3K8kAW",
-  ClientId: "1g3gnedq2i6naqdjrbsq10pb54",
-};
-
 const COGNITO_CONFIG = {
   region: "us-west-2",
   clientId: "1g3gnedq2i6naqdjrbsq10pb54",
@@ -93,7 +88,7 @@ export const confirmAccount = async (
   return COGNITO_CLIENT.send(confirmSignUpCommand);
 };
 
-export const resendVerificationCode = async (email: string): Promise<void> => {
+export const sendVerificationCode = async (email: string): Promise<void> => {
   const resendConfirmationCodeCommand = new ResendConfirmationCodeCommand({
     ClientId: COGNITO_CONFIG.clientId,
     Username: email,

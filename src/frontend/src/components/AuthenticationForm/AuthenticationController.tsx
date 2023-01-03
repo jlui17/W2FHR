@@ -2,10 +2,14 @@ import { AxiosError } from "axios";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { AlertInfo, AlertType } from "../common/Alerts";
-import { ERROR_MESSAGSES, SUCCESS_MESSAGES } from "../common/constants";
+import {
+  ERROR_MESSAGSES,
+  INFO_MESSAGES,
+  SUCCESS_MESSAGES,
+} from "../common/constants";
 import {
   confirmAccount,
-  resendVerificationCode,
+  sendVerificationCode,
   signUpAndGetNeedToConfirm,
 } from "./helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
@@ -90,13 +94,13 @@ const AuthenticationController = () => {
     setIsConfirmingAccount(false);
   };
 
-  const onResendVerificationCode = async () => {
+  const onSendVerificationCode = async () => {
     setIsLoading(true);
     try {
-      await resendVerificationCode(email);
+      await sendVerificationCode(email);
       setAlert({
-        type: AlertType.SUCCESS,
-        message: SUCCESS_MESSAGES.SUCCESSFULLY_RESENT_VERIFICATION_CODE,
+        type: AlertType.INFO,
+        message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
       });
     } catch (err) {
       const errorAlert: AlertInfo = {
@@ -124,7 +128,7 @@ const AuthenticationController = () => {
           isLoading={isLoading}
           verificationCode={verificationCode}
           onConfirmAccount={onConfirmAccount}
-          onResendVerificationCode={onResendVerificationCode}
+          onResendVerificationCode={onSendVerificationCode}
           handleChange={handleChange}
           alert={alert}
           closeAlert={closeAlert}
