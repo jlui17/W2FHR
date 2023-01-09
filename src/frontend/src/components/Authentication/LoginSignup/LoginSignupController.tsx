@@ -1,19 +1,19 @@
 import { AxiosError } from "axios";
 import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { AuthenticationContext } from "../AuthenticationContextProvider";
-import { AlertInfo, AlertType } from "../common/Alerts";
+import { AuthenticationContext } from "../../AuthenticationContextProvider";
+import { AlertInfo, AlertType } from "../../common/Alerts";
 import {
   ERROR_MESSAGSES,
   INFO_MESSAGES,
   SUCCESS_MESSAGES,
-} from "../common/constants";
+} from "../../common/constants";
 import {
   confirmAccount,
   loginAndGetAuthSession,
   sendVerificationCode,
   signUpAndGetNeedToConfirm,
-} from "./helpers/authentication";
+} from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
 import { ConfirmAccountWidget } from "./VerifySignupWidget";
 
@@ -170,7 +170,7 @@ const AuthenticationController = () => {
   );
 };
 
-export const Authentication = () => {
+export const LoginSignup = () => {
   const client = new QueryClient();
   return (
     <QueryClientProvider client={client}>

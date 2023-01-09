@@ -1,5 +1,5 @@
 import { Button, TextField } from "@mui/material";
-import { AlertInfo, displayAlert } from "../common/Alerts";
+import { AlertInfo, displayAlert } from "../../common/Alerts";
 
 interface LoginSignupWidgetProps {
   email: string;

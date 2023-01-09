@@ -1,6 +1,6 @@
 import { CssBaseline, StyledEngineProvider } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Authentication from "./components/Authentication";
+import LoginSignup from "./components/Authentication/LoginSignup";
 import { AuthenticationContextProvider } from "./components/AuthenticationContextProvider";
 import Dashboard from "./components/Dashboard";
 
@@ -12,7 +12,7 @@ function App() {
         <AuthenticationContextProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Authentication />} />
+              <Route path="/" element={<LoginSignup />} />
               <Route path="dashboard" element={<Dashboard />} />
             </Routes>
           </BrowserRouter>
