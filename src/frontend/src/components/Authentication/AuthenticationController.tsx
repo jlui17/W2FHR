@@ -170,7 +170,7 @@ const AuthenticationController = () => {
   );
 };
 
-export const AuthenticationForm = () => {
+export const Authentication = () => {
   const client = new QueryClient();
   return (
     <QueryClientProvider client={client}>

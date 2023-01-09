@@ -1,7 +1,7 @@
 import { CssBaseline, StyledEngineProvider } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Authentication from "./components/Authentication";
 import { AuthenticationContextProvider } from "./components/AuthenticationContextProvider";
-import AuthenticationForm from "./components/AuthenticationForm";
 import Dashboard from "./components/Dashboard";
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
         <AuthenticationContextProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<AuthenticationForm />} />
+              <Route path="/" element={<Authentication />} />
               <Route path="dashboard" element={<Dashboard />} />
             </Routes>
           </BrowserRouter>
