@@ -9,6 +9,7 @@ import {
   INFO_MESSAGES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
+import { VerifyWidget } from "../common/VerifyWidget";
 import {
   confirmAccount,
   loginAndGetAuthSession,
@@ -16,7 +17,6 @@ import {
   signUpAndGetNeedToConfirm,
 } from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
-import { ConfirmAccountWidget } from "./VerifySignupWidget";
 
 const AuthenticationController = () => {
   const [email, setEmail] = useState("");
@@ -146,7 +146,7 @@ const AuthenticationController = () => {
   const onResetPassword = () => navigate("/resetPassword");
 
   return isConfirmingAccount ? (
-    <ConfirmAccountWidget
+    <VerifyWidget
       isLoading={isLoading}
       verificationCode={verificationCode}
       onConfirmAccount={onConfirmAccount}

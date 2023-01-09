@@ -12,7 +12,7 @@ interface VerifySignupWidgetProps {
   closeAlert: () => void;
 }
 
-export const ConfirmAccountWidget = ({
+export const VerifyWidget = ({
   isLoading,
   verificationCode,
   onConfirmAccount,
