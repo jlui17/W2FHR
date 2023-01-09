@@ -9,6 +9,7 @@ interface LoginSignupWidgetProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSignup: () => void;
   onLogin: () => void;
+  onResetPassword: () => void;
   closeAlert: () => void;
 }
 
@@ -20,6 +21,7 @@ export const LoginSignupWidget = ({
   handleChange,
   onSignup,
   onLogin,
+  onResetPassword,
   closeAlert,
 }: LoginSignupWidgetProps) => {
   return (
@@ -44,7 +46,11 @@ export const LoginSignupWidget = ({
           onChange={handleChange}
           disabled={isLoading}
         />
-        <Button className="mb-4 w-fit text-xs" variant="text">
+        <Button
+          className="mb-4 w-fit text-xs"
+          variant="text"
+          onClick={onResetPassword}
+        >
           Forgot password?
         </Button>
         <div className="flex w-auto items-center justify-evenly">

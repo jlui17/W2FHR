@@ -1,6 +1,7 @@
 import { CssBaseline, StyledEngineProvider } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoginSignup from "./components/Authentication/LoginSignup";
+import ResetPassword from "./components/Authentication/ResetPassword";
 import { AuthenticationContextProvider } from "./components/AuthenticationContextProvider";
 import Dashboard from "./components/Dashboard";
 
@@ -13,6 +14,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<LoginSignup />} />
+              <Route path="resetPassword" element={<ResetPassword />} />
               <Route path="dashboard" element={<Dashboard />} />
             </Routes>
           </BrowserRouter>

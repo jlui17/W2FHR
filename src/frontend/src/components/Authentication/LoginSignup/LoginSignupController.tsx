@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
 import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType } from "../../common/Alerts";
 import {
@@ -26,6 +27,7 @@ const AuthenticationController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const { setAuthSession } = useContext(AuthenticationContext);
+  const navigate = useNavigate();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -142,6 +144,8 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
+  const onResetPassword = () => navigate("/resetPassword");
+
   return (
     <AuthWidget>
       {isConfirmingAccount ? (
@@ -163,6 +167,7 @@ const AuthenticationController = () => {
           handleChange={handleChange}
           onSignup={onSignup}
           onLogin={onLogin}
+          onResetPassword={onResetPassword}
           closeAlert={closeAlert}
         />
       )}
