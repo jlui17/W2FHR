@@ -8,6 +8,7 @@ import {
   INFO_MESSAGES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
+import { AuthWidget } from "../AuthWidget";
 import {
   confirmAccount,
   loginAndGetAuthSession,
@@ -142,8 +143,7 @@ const AuthenticationController = () => {
   };
 
   return (
-    <div className="m-1 inline-flex h-[400px] w-[500px] flex-col rounded-md border-2 border-solid border-gray-100 p-4 shadow-md">
-      <img src="wun2free_logo.png" className="mx-auto my-2 aspect-auto w-48" />
+    <AuthWidget>
       {isConfirmingAccount ? (
         <ConfirmAccountWidget
           isLoading={isLoading}
@@ -166,7 +166,7 @@ const AuthenticationController = () => {
           closeAlert={closeAlert}
         />
       )}
-    </div>
+    </AuthWidget>
   );
 };
 
