@@ -1,5 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import { AlertInfo, displayAlert } from "../../common/Alerts";
+import { AuthWidget } from "../AuthWidget";
 
 interface LoginSignupWidgetProps {
   email: string;
@@ -25,53 +26,51 @@ export const LoginSignupWidget = ({
   closeAlert,
 }: LoginSignupWidgetProps) => {
   return (
-    <>
+    <AuthWidget>
       {displayAlert(alert, closeAlert)}
-      <div className="flex flex-col justify-center">
-        <h1 className="mx-auto mb-4 inline-block text-2xl">Employee Portal</h1>
-        <TextField
-          className="mb-4"
-          variant="outlined"
-          label="Email"
-          name="email"
-          value={email}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <TextField
-          variant="outlined"
-          label="Password"
-          name="password"
-          value={password}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
+      <h1 className="mx-auto mb-4 inline-block text-2xl">Employee Portal</h1>
+      <TextField
+        className="mb-4"
+        variant="outlined"
+        label="Email"
+        name="email"
+        value={email}
+        onChange={handleChange}
+        disabled={isLoading}
+      />
+      <TextField
+        variant="outlined"
+        label="Password"
+        name="password"
+        value={password}
+        onChange={handleChange}
+        disabled={isLoading}
+      />
+      <Button
+        className="mb-4 w-fit text-xs"
+        variant="text"
+        onClick={onResetPassword}
+      >
+        Forgot password?
+      </Button>
+      <div className="flex w-auto items-center justify-evenly">
         <Button
-          className="mb-4 w-fit text-xs"
-          variant="text"
-          onClick={onResetPassword}
+          className="mr-4 w-[100%]"
+          variant="contained"
+          disabled={isLoading}
+          onClick={onLogin}
         >
-          Forgot password?
+          Login
         </Button>
-        <div className="flex w-auto items-center justify-evenly">
-          <Button
-            className="mr-4 w-[100%]"
-            variant="contained"
-            disabled={isLoading}
-            onClick={onLogin}
-          >
-            Login
-          </Button>
-          <Button
-            className="w-[100%]"
-            variant="contained"
-            onClick={onSignup}
-            disabled={isLoading}
-          >
-            Sign up
-          </Button>
-        </div>
+        <Button
+          className="w-[100%]"
+          variant="contained"
+          onClick={onSignup}
+          disabled={isLoading}
+        >
+          Sign up
+        </Button>
       </div>
-    </>
+    </AuthWidget>
   );
 };

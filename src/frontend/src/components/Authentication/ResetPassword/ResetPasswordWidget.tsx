@@ -1,3 +1,9 @@
+import { AuthWidget } from "../AuthWidget";
+
 export const ResetPassowrdWidget = () => {
-  return <div>Reset Password</div>;
+  return (
+    <AuthWidget>
+      <p>Reset Your Password</p>
+    </AuthWidget>
+  );
 };

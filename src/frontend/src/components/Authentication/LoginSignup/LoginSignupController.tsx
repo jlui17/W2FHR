@@ -9,7 +9,6 @@ import {
   INFO_MESSAGES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
-import { AuthWidget } from "../AuthWidget";
 import {
   confirmAccount,
   loginAndGetAuthSession,
@@ -146,32 +145,28 @@ const AuthenticationController = () => {
 
   const onResetPassword = () => navigate("/resetPassword");
 
-  return (
-    <AuthWidget>
-      {isConfirmingAccount ? (
-        <ConfirmAccountWidget
-          isLoading={isLoading}
-          verificationCode={verificationCode}
-          onConfirmAccount={onConfirmAccount}
-          onResendVerificationCode={onSendVerificationCode}
-          handleChange={handleChange}
-          alert={alert}
-          closeAlert={closeAlert}
-        />
-      ) : (
-        <LoginSignupWidget
-          email={email}
-          password={password}
-          isLoading={isLoading}
-          alert={alert}
-          handleChange={handleChange}
-          onSignup={onSignup}
-          onLogin={onLogin}
-          onResetPassword={onResetPassword}
-          closeAlert={closeAlert}
-        />
-      )}
-    </AuthWidget>
+  return isConfirmingAccount ? (
+    <ConfirmAccountWidget
+      isLoading={isLoading}
+      verificationCode={verificationCode}
+      onConfirmAccount={onConfirmAccount}
+      onResendVerificationCode={onSendVerificationCode}
+      handleChange={handleChange}
+      alert={alert}
+      closeAlert={closeAlert}
+    />
+  ) : (
+    <LoginSignupWidget
+      email={email}
+      password={password}
+      isLoading={isLoading}
+      alert={alert}
+      handleChange={handleChange}
+      onSignup={onSignup}
+      onLogin={onLogin}
+      onResetPassword={onResetPassword}
+      closeAlert={closeAlert}
+    />
   );
 };
 

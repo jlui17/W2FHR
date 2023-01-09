@@ -1,5 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import { AlertInfo, displayAlert } from "../../common/Alerts";
+import { AuthWidget } from "../AuthWidget";
 
 interface VerifySignupWidgetProps {
   isLoading: boolean;
@@ -21,13 +22,13 @@ export const ConfirmAccountWidget = ({
   closeAlert,
 }: VerifySignupWidgetProps) => {
   return (
-    <>
+    <AuthWidget>
       {displayAlert(alert, closeAlert)}
-      <div className="flex flex-col justify-center align-middle">
-        <p className="break-normal">
-          A verification code has been sent to your email. Please check and
-          enter it here to complete registration.
-        </p>
+      <p className="break-normal">
+        A verification code has been sent to your email. Please check and enter
+        it here to move on.
+      </p>
+      <div className="flex flex-col">
         <TextField
           variant="outlined"
           name="verificationCode"
@@ -36,6 +37,7 @@ export const ConfirmAccountWidget = ({
           onChange={handleChange}
           disabled={isLoading}
         />
+        <br />
         <Button
           className="mb-4 inline-block w-fit text-xs"
           variant="text"
@@ -44,14 +46,14 @@ export const ConfirmAccountWidget = ({
         >
           Resend verification code
         </Button>
-        <Button
-          variant="contained"
-          onClick={onConfirmAccount}
-          disabled={isLoading}
-        >
-          Verify
-        </Button>
       </div>
-    </>
+      <Button
+        variant="contained"
+        onClick={onConfirmAccount}
+        disabled={isLoading}
+      >
+        Verify
+      </Button>
+    </AuthWidget>
   );
 };
