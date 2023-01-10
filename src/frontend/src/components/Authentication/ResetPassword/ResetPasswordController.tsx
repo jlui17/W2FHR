@@ -1,7 +1,66 @@
+import React, { useState } from "react";
+import { AlertInfo } from "../../common/Alerts";
+import { VerifyWidget } from "../common/VerifyWidget";
 import { ResetPassowrdWidget } from "./ResetPasswordWidget";
 
+export enum ResetPasswordStep {
+  ENTER_EMAIL = "ENTER_EMAIL",
+  VERIFY_CODE = "VERIFY_CODE",
+  ENTER_NEW_PASSWORD = "ENTER_NEW_PASSWORD",
+}
+
 const ResetPasswordController = () => {
-  return <ResetPassowrdWidget />;
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [alert, setAlert] = useState<AlertInfo | null>(null);
+  const [step, setStep] = useState(ResetPasswordStep.ENTER_EMAIL);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    switch (name) {
+      case "email":
+        setEmail(value);
+        break;
+      case "newPassword":
+        setNewPassword(value);
+        break;
+      case "verificationCode":
+        setVerificationCode(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  if (step === ResetPasswordStep.VERIFY_CODE) {
+    return (
+      <VerifyWidget
+        isLoading={isLoading}
+        verificationCode={verificationCode}
+        alert={alert}
+        closeAlert={() => setAlert(null)}
+        onVerify={() => setStep(ResetPasswordStep.ENTER_NEW_PASSWORD)}
+        handleChange={handleChange}
+        onResendVerificationCode={() => {}}
+      />
+    );
+  }
+
+  return (
+    <ResetPassowrdWidget
+      isLoading={isLoading}
+      email={email}
+      newPassword={newPassword}
+      alert={alert}
+      closeAlert={() => setAlert(null)}
+      onSetNewPassword={() => {}}
+      handleChange={handleChange}
+      step={step}
+      goToVerifyingStep={() => setStep(ResetPasswordStep.VERIFY_CODE)}
+    />
+  );
 };
 
 export const ResetPassword = () => {

@@ -4,6 +4,7 @@ import {
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
   ConfirmSignUpCommandOutput,
+  ForgotPasswordCommand,
   InitiateAuthCommand,
   InitiateAuthCommandOutput,
   ResendConfirmationCodeCommand,
@@ -136,4 +137,18 @@ const doLogin = async (
     },
   });
   return COGNITO_CLIENT.send(loginCommand);
+};
+
+export const initiatePasswordReset = (email: string): Promise<void> => {
+  try {
+    const forgotPasswordCommand = new ForgotPasswordCommand({
+      ClientId: COGNITO_CONFIG.clientId,
+      Username: email,
+    });
+
+    COGNITO_CLIENT.send(forgotPasswordCommand);
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject(err);
+  }
 };
