@@ -5,7 +5,7 @@ import { AuthWidget } from "../AuthWidget";
 interface VerifySignupWidgetProps {
   isLoading: boolean;
   verificationCode: string;
-  onConfirmAccount: () => void;
+  onVerify: () => void;
   onResendVerificationCode: () => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   alert: AlertInfo | null;
@@ -15,7 +15,7 @@ interface VerifySignupWidgetProps {
 export const VerifyWidget = ({
   isLoading,
   verificationCode,
-  onConfirmAccount,
+  onVerify,
   onResendVerificationCode,
   handleChange,
   alert,
@@ -47,11 +47,7 @@ export const VerifyWidget = ({
           Resend verification code
         </Button>
       </div>
-      <Button
-        variant="contained"
-        onClick={onConfirmAccount}
-        disabled={isLoading}
-      >
+      <Button variant="contained" onClick={onVerify} disabled={isLoading}>
         Verify
       </Button>
     </AuthWidget>

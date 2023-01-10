@@ -149,7 +149,7 @@ const AuthenticationController = () => {
     <VerifyWidget
       isLoading={isLoading}
       verificationCode={verificationCode}
-      onConfirmAccount={onConfirmAccount}
+      onVerify={onConfirmAccount}
       onResendVerificationCode={onSendVerificationCode}
       handleChange={handleChange}
       alert={alert}
