@@ -1,3 +1,4 @@
+import { UserNotConfirmedException } from "@aws-sdk/client-cognito-identity-provider";
 import { AxiosError } from "axios";
 import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -132,17 +133,26 @@ const AuthenticationController = () => {
       console.log(authSession);
       setAuthSession(authSession);
     } catch (err) {
-      const errorAlert: AlertInfo = {
-        type: AlertType.ERROR,
-        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
-      };
-      if (err instanceof Error) {
-        errorAlert.message = err.message;
-      }
-
       console.error(err);
-      setAlert(errorAlert);
+      if (err instanceof UserNotConfirmedException) {
+        setVerificationCode("");
+        setIsConfirmingAccount(true);
+        await onSendVerificationCode();
+      } else {
+        const errorAlert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        };
+
+        if (err instanceof Error) {
+          errorAlert.message = err.message;
+        }
+
+        setAlert(errorAlert);
+      }
     }
+    setEmail("");
+    setPassword("");
     setIsLoading(false);
   };
 
