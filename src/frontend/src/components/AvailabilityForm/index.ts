@@ -1,3 +1,3 @@
-import { AvailabilityForm } from "./AvailabilityFormDataProvider";
+import { AvailabilityForm } from "./AvailabilityController";
 
 export default AvailabilityForm;

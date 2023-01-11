@@ -28,7 +28,7 @@ const isAvailabilityData = (data: any): data is AvailabilityData => {
   );
 };
 
-const AvailabilityFormDataProvider = (props: any): JSX.Element => {
+const AvailabilityFormController = (props: any): JSX.Element => {
   const EMPTY_DATA: AvailabilityData = {
     day1: { isAvailable: false, date: "" },
     day2: { isAvailable: false, date: "" },
@@ -134,7 +134,7 @@ export const AvailabilityForm = (): JSX.Element => {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <AvailabilityFormDataProvider />
+      <AvailabilityFormController />
     </QueryClientProvider>
   );
 };

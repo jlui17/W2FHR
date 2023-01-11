@@ -7,7 +7,7 @@ import {
   FormGroup,
 } from "@mui/material";
 import React from "react";
-import { AvailabilityData } from "./AvailabilityFormDataProvider";
+import { AvailabilityData } from "./AvailabilityController";
 
 interface AvailabilityFormWidgetProps {
   isLoading: boolean;
