@@ -1,7 +1,12 @@
+import { CodeMismatchException } from "@aws-sdk/client-cognito-identity-provider";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertInfo, AlertType } from "../../common/Alerts";
-import { ROUTES, SUCCESS_MESSAGES } from "../../common/constants";
+import {
+  ERROR_MESSAGSES,
+  ROUTES,
+  SUCCESS_MESSAGES,
+} from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
   confirmPasswordReset,
@@ -77,6 +82,16 @@ const ResetPasswordController = () => {
           type: AlertType.ERROR,
           message: err.message,
         });
+      } else {
+        setAlert({
+          type: AlertType.ERROR,
+          message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        });
+      }
+
+      if (err instanceof CodeMismatchException) {
+        setNewPassword("");
+        setStep(ResetPasswordStep.VERIFY_CODE);
       }
     }
     setIsLoading(false);
