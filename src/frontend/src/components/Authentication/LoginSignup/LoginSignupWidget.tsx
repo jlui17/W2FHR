@@ -48,6 +48,7 @@ export const LoginSignupWidget = ({
         showPassword={showPassword}
         handleChange={handleChange}
         onShowPassword={onShowPassword}
+        disabled={isLoading}
       />
       <Button
         className="mb-4 w-fit text-xs"
