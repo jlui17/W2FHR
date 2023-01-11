@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertInfo } from "../../common/Alerts";
+import { AlertInfo, AlertType } from "../../common/Alerts";
 import { VerifyWidget } from "../common/VerifyWidget";
+import { initiatePasswordReset } from "../helpers/authentication";
 import { ResetPassowrdWidget } from "./ResetPasswordWidget";
 
 export enum ResetPasswordStep {
@@ -37,6 +38,22 @@ const ResetPasswordController = () => {
     }
   };
 
+  const goToVerifyingStep = async () => {
+    setIsLoading(true);
+    try {
+      await initiatePasswordReset(email);
+      setStep(ResetPasswordStep.VERIFY_CODE);
+    } catch (err) {
+      if (err instanceof Error) {
+        setAlert({
+          type: AlertType.ERROR,
+          message: err.message,
+        });
+      }
+    }
+    setIsLoading(false);
+  };
+
   if (step === ResetPasswordStep.VERIFY_CODE) {
     return (
       <VerifyWidget
@@ -61,7 +78,7 @@ const ResetPasswordController = () => {
       onSetNewPassword={() => navigate("/")}
       handleChange={handleChange}
       step={step}
-      goToVerifyingStep={() => setStep(ResetPasswordStep.VERIFY_CODE)}
+      goToVerifyingStep={goToVerifyingStep}
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
     />

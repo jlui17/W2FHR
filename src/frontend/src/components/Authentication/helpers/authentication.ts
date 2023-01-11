@@ -139,7 +139,7 @@ const doLogin = async (
   return COGNITO_CLIENT.send(loginCommand);
 };
 
-export const initiatePasswordReset = (email: string): Promise<void> => {
+export const initiatePasswordReset = async (email: string): Promise<void> => {
   try {
     const forgotPasswordCommand = new ForgotPasswordCommand({
       ClientId: COGNITO_CONFIG.clientId,

@@ -40,6 +40,7 @@ export const ResetPassowrdWidget = ({
           email={email}
           handleChange={handleChange}
           goToVerifyingStep={goToVerifyingStep}
+          isLoading={isLoading}
         />
       )}
       {step === ResetPasswordStep.ENTER_NEW_PASSWORD && (
@@ -49,6 +50,7 @@ export const ResetPassowrdWidget = ({
           onSetNewPassword={onSetNewPassword}
           showPassword={showPassword}
           onShowPassword={onShowPassword}
+          isLoading={isLoading}
         />
       )}
     </AuthWidget>
@@ -59,10 +61,12 @@ const Step1 = ({
   email,
   handleChange,
   goToVerifyingStep,
+  isLoading,
 }: {
   email: ResetPassowrdWidgetProps["email"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
   goToVerifyingStep: ResetPassowrdWidgetProps["goToVerifyingStep"];
+  isLoading: ResetPassowrdWidgetProps["isLoading"];
 }) => {
   return (
     <>
@@ -73,8 +77,13 @@ const Step1 = ({
         name="email"
         value={email}
         onChange={handleChange}
+        disabled={isLoading}
       />
-      <Button variant="contained" onClick={goToVerifyingStep}>
+      <Button
+        variant="contained"
+        onClick={goToVerifyingStep}
+        disabled={isLoading}
+      >
         Reset Password
       </Button>
     </>
@@ -87,12 +96,14 @@ const Step2 = ({
   onSetNewPassword,
   showPassword,
   onShowPassword,
+  isLoading,
 }: {
   newPassword: ResetPassowrdWidgetProps["newPassword"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
   onSetNewPassword: ResetPassowrdWidgetProps["onSetNewPassword"];
   showPassword: ResetPassowrdWidgetProps["showPassword"];
   onShowPassword: ResetPassowrdWidgetProps["onShowPassword"];
+  isLoading: ResetPassowrdWidgetProps["isLoading"];
 }) => {
   return (
     <>
@@ -102,8 +113,13 @@ const Step2 = ({
         handleChange={handleChange}
         showPassword={showPassword}
         onShowPassword={onShowPassword}
+        disabled={isLoading}
       />
-      <Button variant="contained" onClick={onSetNewPassword}>
+      <Button
+        variant="contained"
+        onClick={onSetNewPassword}
+        disabled={isLoading}
+      >
         Set New Password
       </Button>
     </>
