@@ -13,7 +13,7 @@ import { VerifyWidget } from "../common/VerifyWidget";
 import {
   confirmAccount,
   loginAndGetAuthSession,
-  sendVerificationCode,
+  resendSignupVerificationCode,
   signUpAndGetNeedToConfirm,
 } from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
@@ -104,7 +104,7 @@ const AuthenticationController = () => {
   const onSendVerificationCode = async () => {
     setIsLoading(true);
     try {
-      await sendVerificationCode(email);
+      await resendSignupVerificationCode(email);
       setAlert({
         type: AlertType.INFO,
         message: INFO_MESSAGES.VERIFICATION_CODE_SENT,

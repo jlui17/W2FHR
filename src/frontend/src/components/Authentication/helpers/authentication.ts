@@ -93,7 +93,9 @@ export const confirmAccount = async (
   return COGNITO_CLIENT.send(confirmSignUpCommand);
 };
 
-export const sendVerificationCode = async (email: string): Promise<void> => {
+export const resendSignupVerificationCode = async (
+  email: string
+): Promise<void> => {
   const resendConfirmationCodeCommand = new ResendConfirmationCodeCommand({
     ClientId: COGNITO_CONFIG.clientId,
     Username: email,
