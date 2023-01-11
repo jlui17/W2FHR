@@ -6,6 +6,7 @@ interface PasswordFieldProps {
   showPassword: boolean;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onShowPassword: () => void;
+  disabled: boolean;
 }
 
 export const PasswordField = ({
@@ -13,6 +14,7 @@ export const PasswordField = ({
   showPassword,
   handleChange,
   onShowPassword,
+  disabled,
 }: PasswordFieldProps) => {
   return (
     <TextField
@@ -22,6 +24,7 @@ export const PasswordField = ({
       name="password"
       value={password}
       type={showPassword ? "text" : "password"}
+      disabled={disabled}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">
