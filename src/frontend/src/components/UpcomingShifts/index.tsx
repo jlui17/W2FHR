@@ -1,3 +1,3 @@
-import { UpcomingShifts } from "./UpcomingShiftsDataProvider";
+import { UpcomingShifts } from "./UpcomingShiftsController";
 
 export default UpcomingShifts;

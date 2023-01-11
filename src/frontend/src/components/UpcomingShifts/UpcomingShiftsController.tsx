@@ -24,7 +24,7 @@ export const getUpcomingShiftsData = async (
   }
 };
 
-const UpcomingShiftsDataProvider = (): JSX.Element => {
+const UpcomingShiftsController = (): JSX.Element => {
   const EMPTY_DATA: TimesheetData = { shifts: [] };
 
   try {
@@ -61,7 +61,7 @@ export const UpcomingShifts = (): JSX.Element => {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <UpcomingShiftsDataProvider />
+      <UpcomingShiftsController />
     </QueryClientProvider>
   );
 };
