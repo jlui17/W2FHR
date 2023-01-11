@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertInfo, AlertType } from "../../common/Alerts";
-import { SUCCESS_MESSAGES } from "../../common/constants";
+import { ROUTES, SUCCESS_MESSAGES } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
   confirmPasswordReset,
@@ -67,7 +67,7 @@ const ResetPasswordController = () => {
         message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
       });
       setTimeout(() => {
-        navigate("/");
+        navigate(ROUTES.LOGIN);
       }, 1000);
       return;
     } catch (err) {

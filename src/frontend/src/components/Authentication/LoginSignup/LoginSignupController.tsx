@@ -7,6 +7,7 @@ import { AlertInfo, AlertType } from "../../common/Alerts";
 import {
   ERROR_MESSAGSES,
   INFO_MESSAGES,
+  ROUTES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
@@ -145,7 +146,7 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
-  const onResetPassword = () => navigate("/resetPassword");
+  const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
 
   return isConfirmingAccount ? (
     <VerifyWidget

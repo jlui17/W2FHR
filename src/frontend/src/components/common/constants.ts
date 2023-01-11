@@ -29,3 +29,9 @@ export const SUCCESS_MESSAGES = {
 export const INFO_MESSAGES = {
   VERIFICATION_CODE_SENT: "A verification code was sent to your email.",
 };
+
+export const ROUTES = {
+  LOGIN: "/",
+  RESET_PASSWORD: "/resetPassword",
+  DASHBOARD: "/dashboard",
+};
