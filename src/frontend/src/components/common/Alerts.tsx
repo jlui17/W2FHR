@@ -22,9 +22,11 @@ export const displayAlert = (
     return null;
   }
 
-  setTimeout(() => {
-    close();
-  }, AUTO_CLOSE_DELAY);
+  if (alert.type !== AlertType.ERROR) {
+    setTimeout(() => {
+      close();
+    }, AUTO_CLOSE_DELAY);
+  }
 
   return (
     <Alert
