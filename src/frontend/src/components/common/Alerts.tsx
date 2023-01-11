@@ -12,6 +12,8 @@ export interface AlertInfo {
   message: string;
 }
 
+const AUTO_CLOSE_DELAY = 5000;
+
 export const displayAlert = (
   alert: AlertInfo | null,
   close: () => void
@@ -20,10 +22,14 @@ export const displayAlert = (
     return null;
   }
 
+  setTimeout(() => {
+    close();
+  }, AUTO_CLOSE_DELAY);
+
   return (
     <Alert
       severity={alert.type}
-      className="absolute left-0 right-0 w-3/12 ml-auto mr-auto top-3"
+      className="absolute left-0 right-0 top-3 ml-auto mr-auto w-3/12"
       onClose={close}
     >
       {alert.message}
