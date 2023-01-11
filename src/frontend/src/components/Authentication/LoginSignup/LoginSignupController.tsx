@@ -84,6 +84,7 @@ const AuthenticationController = () => {
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
       });
+      setVerificationCode("");
     } catch (err) {
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
