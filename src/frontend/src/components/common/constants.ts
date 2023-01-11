@@ -22,6 +22,8 @@ export const ERROR_MESSAGSES = {
 export const SUCCESS_MESSAGES = {
   SUCCESSFUL_VERIFICATION:
     "Succesfully verified your account. You may now log in.",
+  SUCCESSFUL_PASSWORD_RESET:
+    "Succesfully reset your password. You may now log in.",
 };
 
 export const INFO_MESSAGES = {

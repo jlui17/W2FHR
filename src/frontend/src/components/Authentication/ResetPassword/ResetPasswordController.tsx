@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertInfo, AlertType } from "../../common/Alerts";
+import { SUCCESS_MESSAGES } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
-import { initiatePasswordReset } from "../helpers/authentication";
+import {
+  confirmPasswordReset,
+  initiatePasswordReset,
+} from "../helpers/authentication";
 import { ResetPassowrdWidget } from "./ResetPasswordWidget";
 
 export enum ResetPasswordStep {
@@ -54,6 +58,30 @@ const ResetPasswordController = () => {
     setIsLoading(false);
   };
 
+  const onSetNewPassword = async () => {
+    setIsLoading(true);
+    try {
+      await confirmPasswordReset(email, newPassword, verificationCode);
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
+      });
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+      return;
+    } catch (err) {
+      console.error(`Error while resetting password:\n${err}`);
+      if (err instanceof Error) {
+        setAlert({
+          type: AlertType.ERROR,
+          message: err.message,
+        });
+      }
+    }
+    setIsLoading(false);
+  };
+
   if (step === ResetPasswordStep.VERIFY_CODE) {
     return (
       <VerifyWidget
@@ -76,7 +104,7 @@ const ResetPasswordController = () => {
       newPassword={newPassword}
       alert={alert}
       closeAlert={() => setAlert(null)}
-      onSetNewPassword={() => navigate("/")}
+      onSetNewPassword={onSetNewPassword}
       handleChange={handleChange}
       step={step}
       goToVerifyingStep={goToVerifyingStep}

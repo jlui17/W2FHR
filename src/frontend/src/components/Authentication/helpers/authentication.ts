@@ -2,6 +2,7 @@ import {
   AuthenticationResultType,
   AuthFlowType,
   CognitoIdentityProviderClient,
+  ConfirmForgotPasswordCommand,
   ConfirmSignUpCommand,
   ConfirmSignUpCommandOutput,
   ForgotPasswordCommand,
@@ -148,7 +149,27 @@ export const initiatePasswordReset = async (email: string): Promise<void> => {
       Username: email,
     });
 
-    COGNITO_CLIENT.send(forgotPasswordCommand);
+    await COGNITO_CLIENT.send(forgotPasswordCommand);
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+export const confirmPasswordReset = async (
+  email: string,
+  newPassword: string,
+  verificationCode: string
+) => {
+  try {
+    const confirmPasswordResetCommand = new ConfirmForgotPasswordCommand({
+      ClientId: COGNITO_CONFIG.clientId,
+      Username: email,
+      ConfirmationCode: verificationCode,
+      Password: newPassword,
+    });
+
+    await COGNITO_CLIENT.send(confirmPasswordResetCommand);
     return Promise.resolve();
   } catch (err) {
     return Promise.reject(err);
