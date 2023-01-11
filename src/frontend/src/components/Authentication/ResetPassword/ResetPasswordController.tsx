@@ -64,6 +64,7 @@ const ResetPasswordController = () => {
         onVerify={() => setStep(ResetPasswordStep.ENTER_NEW_PASSWORD)}
         handleChange={handleChange}
         onResendVerificationCode={() => {}}
+        showResendVerificationCode={false}
       />
     );
   }

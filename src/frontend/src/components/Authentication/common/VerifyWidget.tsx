@@ -10,6 +10,7 @@ interface VerifySignupWidgetProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   alert: AlertInfo | null;
   closeAlert: () => void;
+  showResendVerificationCode: boolean;
 }
 
 export const VerifyWidget = ({
@@ -20,6 +21,7 @@ export const VerifyWidget = ({
   handleChange,
   alert,
   closeAlert,
+  showResendVerificationCode,
 }: VerifySignupWidgetProps) => {
   return (
     <AuthWidget>
@@ -38,14 +40,16 @@ export const VerifyWidget = ({
           disabled={isLoading}
         />
         <br />
-        <Button
-          className="mb-4 inline-block w-fit text-xs"
-          variant="text"
-          onClick={onResendVerificationCode}
-          disabled={isLoading}
-        >
-          Resend verification code
-        </Button>
+        {showResendVerificationCode ? (
+          <Button
+            className="mb-4 inline-block w-fit text-xs"
+            variant="text"
+            onClick={onResendVerificationCode}
+            disabled={isLoading}
+          >
+            Resend verification code
+          </Button>
+        ) : null}
       </div>
       <Button variant="contained" onClick={onVerify} disabled={isLoading}>
         Verify

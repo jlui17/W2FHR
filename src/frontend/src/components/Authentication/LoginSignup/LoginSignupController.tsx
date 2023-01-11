@@ -156,6 +156,7 @@ const AuthenticationController = () => {
       handleChange={handleChange}
       alert={alert}
       closeAlert={closeAlert}
+      showResendVerificationCode={true}
     />
   ) : (
     <LoginSignupWidget
