@@ -25,6 +25,7 @@ const AuthenticationController = () => {
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { setAuthSession } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
@@ -166,6 +167,8 @@ const AuthenticationController = () => {
       onLogin={onLogin}
       onResetPassword={onResetPassword}
       closeAlert={closeAlert}
+      showPassword={showPassword}
+      onShowPassword={() => setShowPassword(!showPassword)}
     />
   );
 };

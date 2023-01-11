@@ -1,6 +1,7 @@
 import { Button, TextField } from "@mui/material";
 import { AlertInfo, displayAlert } from "../../common/Alerts";
 import { AuthWidget } from "../AuthWidget";
+import { PasswordField } from "../common/PasswordField";
 
 interface LoginSignupWidgetProps {
   email: string;
@@ -12,6 +13,8 @@ interface LoginSignupWidgetProps {
   onLogin: () => void;
   onResetPassword: () => void;
   closeAlert: () => void;
+  showPassword: boolean;
+  onShowPassword: () => void;
 }
 
 export const LoginSignupWidget = ({
@@ -24,6 +27,8 @@ export const LoginSignupWidget = ({
   onLogin,
   onResetPassword,
   closeAlert,
+  showPassword,
+  onShowPassword,
 }: LoginSignupWidgetProps) => {
   return (
     <AuthWidget>
@@ -38,13 +43,11 @@ export const LoginSignupWidget = ({
         onChange={handleChange}
         disabled={isLoading}
       />
-      <TextField
-        variant="outlined"
-        label="Password"
-        name="password"
-        value={password}
-        onChange={handleChange}
-        disabled={isLoading}
+      <PasswordField
+        password={password}
+        showPassword={showPassword}
+        handleChange={handleChange}
+        onShowPassword={onShowPassword}
       />
       <Button
         className="mb-4 w-fit text-xs"
