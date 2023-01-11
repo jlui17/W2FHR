@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AlertInfo } from "../../common/Alerts";
 import { VerifyWidget } from "../common/VerifyWidget";
 import { ResetPassowrdWidget } from "./ResetPasswordWidget";
@@ -16,6 +17,8 @@ const ResetPasswordController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [step, setStep] = useState(ResetPasswordStep.ENTER_EMAIL);
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -23,7 +26,7 @@ const ResetPasswordController = () => {
       case "email":
         setEmail(value);
         break;
-      case "newPassword":
+      case "password":
         setNewPassword(value);
         break;
       case "verificationCode":
@@ -55,10 +58,12 @@ const ResetPasswordController = () => {
       newPassword={newPassword}
       alert={alert}
       closeAlert={() => setAlert(null)}
-      onSetNewPassword={() => {}}
+      onSetNewPassword={() => navigate("/")}
       handleChange={handleChange}
       step={step}
       goToVerifyingStep={() => setStep(ResetPasswordStep.VERIFY_CODE)}
+      showPassword={showPassword}
+      onShowPassword={() => setShowPassword(!showPassword)}
     />
   );
 };

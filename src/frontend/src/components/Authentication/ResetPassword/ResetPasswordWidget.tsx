@@ -1,6 +1,7 @@
 import { Button, TextField } from "@mui/material";
 import { AlertInfo, displayAlert } from "../../common/Alerts";
 import { AuthWidget } from "../AuthWidget";
+import { PasswordField } from "../common/PasswordField";
 import { ResetPasswordStep } from "./ResetPasswordController";
 
 interface ResetPassowrdWidgetProps {
@@ -13,6 +14,8 @@ interface ResetPassowrdWidgetProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSetNewPassword: () => void;
   closeAlert: () => void;
+  showPassword: boolean;
+  onShowPassword: () => void;
 }
 
 export const ResetPassowrdWidget = ({
@@ -25,6 +28,8 @@ export const ResetPassowrdWidget = ({
   closeAlert,
   step,
   goToVerifyingStep,
+  showPassword,
+  onShowPassword,
 }: ResetPassowrdWidgetProps) => {
   return (
     <AuthWidget>
@@ -42,6 +47,8 @@ export const ResetPassowrdWidget = ({
           newPassword={newPassword}
           handleChange={handleChange}
           onSetNewPassword={onSetNewPassword}
+          showPassword={showPassword}
+          onShowPassword={onShowPassword}
         />
       )}
     </AuthWidget>
@@ -78,20 +85,23 @@ const Step2 = ({
   newPassword,
   handleChange,
   onSetNewPassword,
+  showPassword,
+  onShowPassword,
 }: {
   newPassword: ResetPassowrdWidgetProps["newPassword"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
   onSetNewPassword: ResetPassowrdWidgetProps["onSetNewPassword"];
+  showPassword: ResetPassowrdWidgetProps["showPassword"];
+  onShowPassword: ResetPassowrdWidgetProps["onShowPassword"];
 }) => {
   return (
     <>
       <p>Enter your new password.</p>
-      <TextField
-        variant="outlined"
-        label="New Password"
-        name="newPassword"
-        value={newPassword}
-        onChange={handleChange}
+      <PasswordField
+        password={newPassword}
+        handleChange={handleChange}
+        showPassword={showPassword}
+        onShowPassword={onShowPassword}
       />
       <Button variant="contained" onClick={onSetNewPassword}>
         Set New Password
