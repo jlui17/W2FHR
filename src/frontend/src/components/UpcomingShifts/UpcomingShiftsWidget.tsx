@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { Shift, TimesheetData } from "../Timesheet/TimesheetDataProvider";
+import { Shift, TimesheetData } from "../Timesheet/TimesheetController";
 
 interface UpcomingShiftsWidgetProps {
   isLoading: boolean;

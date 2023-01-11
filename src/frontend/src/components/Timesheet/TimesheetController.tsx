@@ -35,7 +35,7 @@ export const getTimesheetData = async (
   }
 };
 
-export const TimesheetDataProvider = (): JSX.Element => {
+export const TimesheetController = (): JSX.Element => {
   const EMPTY_DATA: TimesheetData = { shifts: [] };
 
   try {

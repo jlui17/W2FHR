@@ -2,7 +2,7 @@ import axios from "axios";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { getTimesheetApiUrlForEmployee } from "../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../common/constants";
-import { TimesheetData } from "../Timesheet/TimesheetDataProvider";
+import { TimesheetData } from "../Timesheet/TimesheetController";
 import { UpcomingShiftsWidget } from "./UpcomingShiftsWidget";
 
 export const getUpcomingShiftsData = async (

@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { Shift, TimesheetData } from "./TimesheetDataProvider";
+import { Shift, TimesheetData } from "./TimesheetController";
 
 interface TimesheetWidgetProps {
   isLoading: boolean;
