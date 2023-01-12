@@ -24,6 +24,9 @@ export const SUCCESS_MESSAGES = {
     "Succesfully verified your account. You may now log in.",
   SUCCESSFUL_PASSWORD_RESET:
     "Succesfully reset your password. You may now log in.",
+  AVAILABILITY: {
+    SUCESSFUL_UPDATE: "Your availability has been updated.",
+  },
 };
 
 export const INFO_MESSAGES = {

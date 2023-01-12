@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { AlertInfo } from "../common/Alerts";
+import { AlertInfo, AlertType } from "../common/Alerts";
+import { ERROR_MESSAGSES, SUCCESS_MESSAGES } from "../common/constants";
 import { AvailabilityFormWidget } from "./AvailabilityFormWidget";
 import { useAvailabilityData, useUpdateAvailability } from "./helpers/hooks";
 
@@ -31,15 +32,51 @@ const AvailabilityFormController = (props: any): JSX.Element => {
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
   const [alert, setAlert] = useState<AlertInfo | null>(null);
-  const { isLoading: isLoadingGet, error: getError } = useAvailabilityData(
-    employeeId,
-    setAvailabilityData
-  );
   const {
-    isLoading: isLoadingUpdate,
+    isFetching: isLoadingGet,
+    error: getError,
+    isRefetchError: errorOnRefetchGet,
+  } = useAvailabilityData(employeeId, setAvailabilityData);
+  const {
+    isFetching: isLoadingUpdate,
     refetch: updateAvailability,
     error: updateError,
+    isRefetchError: errorOnRefetchUpdate,
+    isSuccess: updateSucessful,
   } = useUpdateAvailability(employeeId, availabilityData, setAvailabilityData);
+
+  useEffect(() => {
+    setAlert(() => {
+      const error =
+        getError != null ? getError : updateError != null ? updateError : null;
+      if (error) {
+        console.error(`Error in AvailabilityForm:\n${error}`);
+        const errorAlert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        };
+        if (error instanceof Error) {
+          errorAlert.message = error.message;
+        }
+        return errorAlert;
+      }
+
+      if (updateSucessful) {
+        return {
+          type: AlertType.SUCCESS,
+          message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
+        };
+      }
+
+      return null;
+    });
+  }, [
+    getError,
+    updateError,
+    updateSucessful,
+    errorOnRefetchGet,
+    errorOnRefetchUpdate,
+  ]);
 
   const handleAvailabilityChange = (
     event: React.ChangeEvent<HTMLInputElement>
