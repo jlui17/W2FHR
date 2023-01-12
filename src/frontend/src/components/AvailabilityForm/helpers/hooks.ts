@@ -45,7 +45,7 @@ export const useUpdateAvailability = (
   availabilityData: AvailabilityData,
   setAvailabilityData: (data: AvailabilityData) => void
 ) => {
-  return async () => {
+  const updateAvailability = async (): Promise<void> => {
     const response = await axios.post(
       getAvailabilityApiUrlForEmployee(employeeId),
       availabilityData
@@ -66,4 +66,6 @@ export const useUpdateAvailability = (
         return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
     }
   };
+
+  return useQuery("updateAvailability", updateAvailability, { enabled: false });
 };
