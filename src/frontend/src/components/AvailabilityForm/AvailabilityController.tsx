@@ -31,12 +31,15 @@ const AvailabilityFormController = (props: any): JSX.Element => {
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
   const [alert, setAlert] = useState<AlertInfo | null>(null);
-  const { isLoading, error: getError } = useAvailabilityData(
+  const { isLoading: isLoadingGet, error: getError } = useAvailabilityData(
     employeeId,
     setAvailabilityData
   );
-  const { refetch: updateAvailability, error: updateError } =
-    useUpdateAvailability(employeeId, availabilityData, setAvailabilityData);
+  const {
+    isLoading: isLoadingUpdate,
+    refetch: updateAvailability,
+    error: updateError,
+  } = useUpdateAvailability(employeeId, availabilityData, setAvailabilityData);
 
   const handleAvailabilityChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -64,7 +67,7 @@ const AvailabilityFormController = (props: any): JSX.Element => {
 
   return (
     <AvailabilityFormWidget
-      isLoading={isLoading ? isLoading : false}
+      isLoading={isLoadingGet || isLoadingUpdate}
       availabilityData={availabilityData}
       handleAvailabilityChange={handleAvailabilityChange}
       updateAvailability={updateAvailability}
