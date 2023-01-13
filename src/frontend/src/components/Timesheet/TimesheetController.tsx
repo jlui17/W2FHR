@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { AlertInfo, AlertType } from "../common/Alerts";
+import { ERROR_MESSAGSES } from "../common/constants";
 import { useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
 
@@ -13,19 +16,47 @@ export interface TimesheetData {
   shifts: Shift[];
 }
 
+const EMPTY_DATA: TimesheetData = { shifts: [] };
+
 export const TimesheetController = (): JSX.Element => {
-  const EMPTY_DATA: TimesheetData = { shifts: [] };
+  const [alert, setAlert] = useState<AlertInfo | null>(null);
+  const { isFetching, data, isError, error, isRefetchError } = useTimesheetData(
+    "w2fnm150009",
+    false
+  );
 
-  const { isLoading: timesheetDataIsLoading, data: timesheetData } =
-    useTimesheetData("w2fnm150009", false);
+  useEffect(() => {
+    if (isError || isRefetchError) {
+      console.error(`Error while fetching timesheet:\n${error}`);
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+      };
 
-  if (timesheetDataIsLoading) {
-    return <TimesheetWidget isLoading timesheetData={EMPTY_DATA} />;
+      if (error instanceof Error) {
+        errorAlert.message = error.message;
+      }
+      setAlert(errorAlert);
+    }
+  }, [isError, isRefetchError, error]);
+
+  if (!data) {
+    return (
+      <TimesheetWidget
+        alert={alert}
+        closeAlert={() => setAlert(null)}
+        isLoading={false}
+        timesheetData={EMPTY_DATA}
+      />
+    );
   }
 
-  if (!timesheetData) {
-    return <TimesheetWidget isLoading={false} timesheetData={EMPTY_DATA} />;
-  }
-
-  return <TimesheetWidget isLoading={false} timesheetData={timesheetData} />;
+  return (
+    <TimesheetWidget
+      alert={alert}
+      closeAlert={() => setAlert(null)}
+      isLoading={isFetching}
+      timesheetData={data}
+    />
+  );
 };
