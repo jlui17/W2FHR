@@ -1,37 +1,14 @@
-import axios from "axios";
-import { QueryClient, QueryClientProvider, useQuery } from "react-query";
-import { getTimesheetApiUrlForEmployee } from "../common/ApiUrlUtil";
-import { ERROR_MESSAGSES } from "../common/constants";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { useTimesheetData } from "../Timesheet/helpers/hooks";
 import { TimesheetData } from "../Timesheet/TimesheetController";
 import { UpcomingShiftsWidget } from "./UpcomingShiftsWidget";
-
-export const getUpcomingShiftsData = async (
-  employeeId: string,
-  getUpcoming: boolean
-): Promise<TimesheetData> => {
-  const response = await axios.get(
-    getTimesheetApiUrlForEmployee(employeeId, getUpcoming)
-  );
-
-  switch (response.status) {
-    case 200:
-      const timesheetData = response.data as TimesheetData;
-      return Promise.resolve(timesheetData);
-    case 404:
-      return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
-    default:
-      return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
-  }
-};
 
 const UpcomingShiftsController = (): JSX.Element => {
   const EMPTY_DATA: TimesheetData = { shifts: [] };
 
   try {
     const { isLoading: upcomingShiftsDataIsLoading, data: upcomingShiftsData } =
-      useQuery("upcomingShiftsData", () =>
-        getUpcomingShiftsData("w2fnm150009", true)
-      );
+      useTimesheetData("w2fnm150009", true);
 
     if (upcomingShiftsDataIsLoading) {
       return <UpcomingShiftsWidget isLoading upcomingShiftsData={EMPTY_DATA} />;
