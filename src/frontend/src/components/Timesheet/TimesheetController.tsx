@@ -1,7 +1,7 @@
 import axios from "axios";
-import { useQuery } from "react-query";
 import { getTimesheetApiUrlForEmployee } from "../common/ApiUrlUtil";
 import { ERROR_MESSAGSES } from "../common/constants";
+import { useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
 
 export interface Shift {
@@ -38,22 +38,16 @@ export const getTimesheetData = async (
 export const TimesheetController = (): JSX.Element => {
   const EMPTY_DATA: TimesheetData = { shifts: [] };
 
-  try {
-    const { isLoading: timesheetDataIsLoading, data: timesheetData } = useQuery(
-      "timesheetData",
-      () => getTimesheetData("w2fnm150009", false)
-    );
+  const { isLoading: timesheetDataIsLoading, data: timesheetData } =
+    useTimesheetData("w2fnm150009", false);
 
-    if (timesheetDataIsLoading) {
-      return <TimesheetWidget isLoading timesheetData={EMPTY_DATA} />;
-    }
-
-    if (!timesheetData) {
-      return <TimesheetWidget isLoading={false} timesheetData={EMPTY_DATA} />;
-    }
-
-    return <TimesheetWidget isLoading={false} timesheetData={timesheetData} />;
-  } catch (err) {
+  if (timesheetDataIsLoading) {
     return <TimesheetWidget isLoading timesheetData={EMPTY_DATA} />;
   }
+
+  if (!timesheetData) {
+    return <TimesheetWidget isLoading={false} timesheetData={EMPTY_DATA} />;
+  }
+
+  return <TimesheetWidget isLoading={false} timesheetData={timesheetData} />;
 };
