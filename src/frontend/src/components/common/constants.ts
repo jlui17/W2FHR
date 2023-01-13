@@ -7,7 +7,7 @@ export const API_CONSTANTS = {
 
 const PLEASE_CONTACT_JUSTIN =
   "Please contact Justin Lui (Manager) on Slack for support.";
-export const ERROR_MESSAGSES = {
+export const ERROR_MESSAGES = {
   UNKNOWN_ERROR: "An unknown error has occurred. " + PLEASE_CONTACT_JUSTIN,
   EMPLOYEE_NOT_FOUND: "Employee not found",
   SERVER: {

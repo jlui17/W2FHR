@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useQuery } from "react-query";
 import { getTimesheetApiUrlForEmployee } from "../../common/ApiUrlUtil";
-import { ERROR_MESSAGSES } from "../../common/constants";
+import { ERROR_MESSAGES } from "../../common/constants";
 import { TimesheetData } from "../TimesheetController";
 
 const isTimesheetData = (data: any): data is TimesheetData => {
@@ -21,14 +21,14 @@ export const useTimesheetData = (employeeId: string, getUpcoming: boolean) => {
       case 200:
         if (!isTimesheetData(response.data)) {
           return Promise.reject(
-            new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
         return Promise.resolve(response.data);
       case 404:
-        return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
+        return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
       default:
-        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
     }
   };
 

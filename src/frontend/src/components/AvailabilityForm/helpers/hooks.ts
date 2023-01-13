@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useQuery } from "react-query";
 import { getAvailabilityApiUrlForEmployee } from "../../common/ApiUrlUtil";
-import { ERROR_MESSAGSES } from "../../common/constants";
+import { ERROR_MESSAGES } from "../../common/constants";
 import { AvailabilityData } from "../AvailabilityController";
 
 const isAvailabilityData = (data: any): data is AvailabilityData => {
@@ -27,15 +27,15 @@ export const useAvailabilityData = (
       case 200:
         if (!isAvailabilityData(response.data)) {
           return Promise.reject(
-            new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
         setAvailabilityData(response.data);
         return Promise.resolve();
       case 404:
-        return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
+        return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
       default:
-        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
     }
   };
 
@@ -57,17 +57,17 @@ export const useUpdateAvailability = (
       case 200:
         if (!isAvailabilityData(response.data)) {
           return Promise.reject(
-            new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
         setAvailabilityData(response.data);
         return Promise.resolve();
       case 403:
-        return Promise.reject(new Error(ERROR_MESSAGSES.UPDATE_DISABLED));
+        return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
       case 404:
-        return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
+        return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
       default:
-        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
     }
   };
 

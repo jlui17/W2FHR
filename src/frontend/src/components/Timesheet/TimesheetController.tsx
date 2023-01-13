@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertInfo, AlertType } from "../common/Alerts";
-import { ERROR_MESSAGSES } from "../common/constants";
+import { ERROR_MESSAGES } from "../common/constants";
 import { useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
 
@@ -30,7 +30,7 @@ export const TimesheetController = (): JSX.Element => {
       console.error(`Error while fetching timesheet:\n${error}`);
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
-        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
       };
 
       if (error instanceof Error) {

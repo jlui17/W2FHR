@@ -14,7 +14,7 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 import get from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
-import { ERROR_MESSAGSES } from "../../common/constants";
+import { ERROR_MESSAGES } from "../../common/constants";
 
 const COGNITO_CONFIG = {
   region: "us-west-2",
@@ -36,7 +36,7 @@ export const signUpAndGetNeedToConfirm = async (
       signUpResponse.UserSub === undefined ||
       signUpResponse.UserConfirmed === undefined
     ) {
-      return Promise.reject(new Error(ERROR_MESSAGSES.SIGNUP_ERROR));
+      return Promise.reject(new Error(ERROR_MESSAGES.SIGNUP_ERROR));
     }
 
     return Promise.resolve(!signUpResponse.UserConfirmed);
@@ -52,14 +52,14 @@ const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
     case 200:
       if (typeof response.data !== "string") {
         return Promise.reject(
-          new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+          new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
         );
       }
       return Promise.resolve(response.data);
     case 404:
-      return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
+      return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
     default:
-      return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
+      return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
   }
 };
 
@@ -120,7 +120,7 @@ export const loginAndGetAuthSession = async (
   try {
     const loginResponse = await doLogin(email, password);
     if (loginResponse.AuthenticationResult == undefined) {
-      return Promise.reject(new Error(ERROR_MESSAGSES.UNKNOWN_ERROR));
+      return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
 
     return Promise.resolve(loginResponse.AuthenticationResult);

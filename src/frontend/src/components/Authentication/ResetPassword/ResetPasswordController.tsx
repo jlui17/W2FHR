@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertInfo, AlertType } from "../../common/Alerts";
 import {
-  ERROR_MESSAGSES,
+  ERROR_MESSAGES,
   ROUTES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
@@ -85,7 +85,7 @@ const ResetPasswordController = () => {
       } else {
         setAlert({
           type: AlertType.ERROR,
-          message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+          message: ERROR_MESSAGES.UNKNOWN_ERROR,
         });
       }
 

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType } from "../../common/Alerts";
 import {
-  ERROR_MESSAGSES,
+  ERROR_MESSAGES,
   INFO_MESSAGES,
   ROUTES,
   SUCCESS_MESSAGES,
@@ -62,7 +62,7 @@ const AuthenticationController = () => {
     } catch (err) {
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
-        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
       };
 
       if (err instanceof Error) {
@@ -90,7 +90,7 @@ const AuthenticationController = () => {
     } catch (err) {
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
-        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
       };
       if (err instanceof Error) {
         errorAlert.message = err.message;
@@ -114,7 +114,7 @@ const AuthenticationController = () => {
     } catch (err) {
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
-        message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
       };
       if (err instanceof Error) {
         errorAlert.message = err.message;
@@ -141,7 +141,7 @@ const AuthenticationController = () => {
       } else {
         const errorAlert: AlertInfo = {
           type: AlertType.ERROR,
-          message: ERROR_MESSAGSES.UNKNOWN_ERROR,
+          message: ERROR_MESSAGES.UNKNOWN_ERROR,
         };
 
         if (err instanceof Error) {
