@@ -10,7 +10,10 @@ const PLEASE_CONTACT_JUSTIN =
 export const ERROR_MESSAGSES = {
   UNKNOWN_ERROR: "An unknown error has occurred. " + PLEASE_CONTACT_JUSTIN,
   EMPLOYEE_NOT_FOUND: "Employee not found",
-  SERVER_ERROR: "Server error. " + PLEASE_CONTACT_JUSTIN,
+  SERVER: {
+    GENERAL_ERROR: "Server error. " + PLEASE_CONTACT_JUSTIN,
+    DATA_INCONSISTENT: `A server error has occurred (DATA INCONSISTENT). ${PLEASE_CONTACT_JUSTIN}`,
+  },
   UPDATE_DISABLED: "Updating availability is currently disabled",
   SIGNUP_ERROR:
     "An error has occurred while trying to sign you up. " +

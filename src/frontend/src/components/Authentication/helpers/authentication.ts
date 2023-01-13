@@ -51,13 +51,15 @@ const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
   switch (response.status) {
     case 200:
       if (typeof response.data !== "string") {
-        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
+        return Promise.reject(
+          new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+        );
       }
       return Promise.resolve(response.data);
     case 404:
       return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
     default:
-      return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
+      return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
   }
 };
 

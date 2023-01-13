@@ -26,14 +26,16 @@ export const useAvailabilityData = (
     switch (response.status) {
       case 200:
         if (!isAvailabilityData(response.data)) {
-          return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
+          return Promise.reject(
+            new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+          );
         }
         setAvailabilityData(response.data);
         return Promise.resolve();
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
       default:
-        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
+        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
     }
   };
 
@@ -54,7 +56,9 @@ export const useUpdateAvailability = (
     switch (response.status) {
       case 200:
         if (!isAvailabilityData(response.data)) {
-          return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
+          return Promise.reject(
+            new Error(ERROR_MESSAGSES.SERVER.DATA_INCONSISTENT)
+          );
         }
         setAvailabilityData(response.data);
         return Promise.resolve();
@@ -63,7 +67,7 @@ export const useUpdateAvailability = (
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGSES.EMPLOYEE_NOT_FOUND));
       default:
-        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER_ERROR));
+        return Promise.reject(new Error(ERROR_MESSAGSES.SERVER.GENERAL_ERROR));
     }
   };
 
