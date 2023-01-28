@@ -1,11 +1,14 @@
 import { GoFunction } from "@aws-cdk/aws-lambda-go-alpha";
 import { Stack } from "aws-cdk-lib";
 import {
+  AuthorizationType,
+  CognitoUserPoolsAuthorizer,
   Cors,
   LambdaIntegration,
   MethodLoggingLevel,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
+import { UserPool } from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
 
 interface ApiServiceProps {
@@ -13,6 +16,9 @@ interface ApiServiceProps {
     availabilityHandler: GoFunction;
     timesheetHandler: GoFunction;
     authHandler: GoFunction;
+  };
+  AuthService: {
+    userPool: UserPool;
   };
 }
 
@@ -43,20 +49,40 @@ export class ApiService extends Stack {
       },
     });
 
+    const authorizer = new CognitoUserPoolsAuthorizer(
+      this,
+      "W2fhrApiAuthorizer",
+      {
+        cognitoUserPools: [props.AuthService.userPool],
+      }
+    );
+
     const availabilityRoute = api.root.addResource("availability");
     availabilityRoute.addMethod(
       "GET",
-      new LambdaIntegration(props.GoogleSheets.availabilityHandler)
+      new LambdaIntegration(props.GoogleSheets.availabilityHandler),
+      {
+        authorizer,
+        authorizationType: AuthorizationType.COGNITO,
+      }
     );
     availabilityRoute.addMethod(
       "POST",
-      new LambdaIntegration(props.GoogleSheets.availabilityHandler)
+      new LambdaIntegration(props.GoogleSheets.availabilityHandler),
+      {
+        authorizer,
+        authorizationType: AuthorizationType.COGNITO,
+      }
     );
 
     const timesheetRoute = api.root.addResource("timesheet");
     timesheetRoute.addMethod(
       "GET",
-      new LambdaIntegration(props.GoogleSheets.timesheetHandler)
+      new LambdaIntegration(props.GoogleSheets.timesheetHandler),
+      {
+        authorizer,
+        authorizationType: AuthorizationType.COGNITO,
+      }
     );
 
     const baseAuthRoute = api.root.addResource("auth");

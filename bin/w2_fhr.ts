@@ -7,14 +7,17 @@ import { GoogleSheetsService } from "../lib/services/GoogleSheetsService";
 
 const app = new cdk.App();
 const googleSheetsService = new GoogleSheetsService(app, "GoogleSheetsService");
-const authSerivce = new AuthService(app, "AuthService");
-const apiServiceDependencies = [googleSheetsService];
+const authService = new AuthService(app, "AuthService");
+const apiServiceDependencies = [googleSheetsService, authService];
 
 const apiService = new ApiService(app, "ApiService", {
   GoogleSheets: {
     availabilityHandler: googleSheetsService.availabilityHandler,
     timesheetHandler: googleSheetsService.timesheetHandler,
     authHandler: googleSheetsService.authHandler,
+  },
+  AuthService: {
+    userPool: authService.userPool,
   },
 });
 apiService.addDependencies(apiServiceDependencies);
