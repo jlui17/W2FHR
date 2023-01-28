@@ -1,9 +1,8 @@
 const BASE_URL = "https://v9kuc5lqq2.execute-api.us-west-2.amazonaws.com/v1";
 export const API_URLS = {
-  BASE_URL: "https://v9kuc5lqq2.execute-api.us-west-2.amazonaws.com/v1",
-  TIMESHEET: "timesheet",
+  TIMESHEET: `${BASE_URL}/timesheet`,
   AVAILABILITY: `${BASE_URL}/availability`,
-  AUTH: "auth",
+  AUTH: `${BASE_URL}/auth`,
 };
 
 const PLEASE_CONTACT_JUSTIN =

@@ -1,4 +1,5 @@
 import { Button, TextField } from "@mui/material";
+import { Link } from "react-router-dom";
 import { AlertInfo, displayAlert } from "../../common/Alerts";
 import { AuthWidget } from "../AuthWidget";
 import { PasswordField } from "../common/PasswordField";
@@ -75,6 +76,7 @@ export const LoginSignupWidget = ({
           Sign up
         </Button>
       </div>
+      <Link to="/dashboard">Dashboard</Link>
     </AuthWidget>
   );
 };

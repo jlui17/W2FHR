@@ -38,7 +38,7 @@ export const TimesheetWidget = ({
           </TableHead>
           <TableBody>
             {shifts.map((shift: Shift) => (
-              <TableRow key={shift.date}>
+              <TableRow key={shift.date + shift.startTime}>
                 <TableCell>{shift.date}</TableCell>
                 <TableCell>{shift.shiftTitle}</TableCell>
                 <TableCell>{shift.startTime}</TableCell>

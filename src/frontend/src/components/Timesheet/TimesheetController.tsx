@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType } from "../common/Alerts";
 import { ERROR_MESSAGES } from "../common/constants";
 import { useTimesheetData } from "./helpers/hooks";
@@ -20,9 +21,9 @@ const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 export const TimesheetController = (): JSX.Element => {
   const [alert, setAlert] = useState<AlertInfo | null>(null);
+  const { authSession } = useContext(AuthenticationContext);
   const { isFetching, data, isError, error, isRefetchError } = useTimesheetData(
-    "w2fnm150009",
-    false
+    { idToken: authSession?.IdToken || "", getUpcoming: false }
   );
 
   useEffect(() => {

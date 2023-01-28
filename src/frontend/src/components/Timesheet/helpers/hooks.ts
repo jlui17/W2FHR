@@ -8,13 +8,22 @@ const isTimesheetData = (data: any): data is TimesheetData => {
   return "shifts" in data;
 };
 
-export const useTimesheetData = (employeeId: string, getUpcoming: boolean) => {
-  const getTimesheetData = async (
-    employeeId: string,
-    getUpcoming: boolean
-  ): Promise<TimesheetData> => {
+interface UseTimesheetDataProps {
+  idToken: string;
+  getUpcoming: boolean;
+}
+export const useTimesheetData = ({
+  idToken,
+  getUpcoming,
+}: UseTimesheetDataProps) => {
+  const getTimesheetData = async (): Promise<TimesheetData> => {
     const response = await axios.get(
-      getTimesheetApiUrlForEmployee(employeeId, getUpcoming)
+      getTimesheetApiUrlForEmployee(getUpcoming),
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
     );
 
     switch (response.status) {
@@ -32,7 +41,5 @@ export const useTimesheetData = (employeeId: string, getUpcoming: boolean) => {
     }
   };
 
-  return useQuery("timesheetData", () =>
-    getTimesheetData(employeeId, getUpcoming)
-  );
+  return useQuery("timesheetData", getTimesheetData);
 };

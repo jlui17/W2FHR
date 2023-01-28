@@ -1,7 +1,7 @@
 package main
 
 import (
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	GetTimesheet "GoogleSheets/packages/timesheet/get"
 	"context"
 
@@ -11,12 +11,19 @@ import (
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	employeeId, employeeIdExists := event.PathParameters["employeeId"]
-	if !employeeIdExists {
+	idToken, exists := event.Headers["Authorization"]
+	if !exists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
-			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       "Please include employee id in request.",
+			Body:       "Please include Authorization header in request.",
+		}, nil
+	}
+
+	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
+			Body:       err.Error(),
 		}, nil
 	}
 
