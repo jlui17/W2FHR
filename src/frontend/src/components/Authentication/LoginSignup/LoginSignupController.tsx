@@ -157,7 +157,7 @@ const AuthenticationController = () => {
 
   const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
 
-  return isLoggedIn ? (
+  return isLoggedIn() ? (
     <Navigate to={ROUTES.DASHBOARD} />
   ) : isConfirmingAccount ? (
     <VerifyWidget

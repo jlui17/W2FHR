@@ -1,6 +1,6 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
 import jwtDecode from "jwt-decode";
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode } from "react";
 
 interface AuthenticationContextProviderProps {
   children: ReactNode;
@@ -9,12 +9,12 @@ interface AuthenticationContextProviderProps {
 const getInitialAuthenticationContext = (): {
   getAuthSession: () => AuthenticationResultType | null;
   saveAuthSession: (authSession: AuthenticationResultType | null) => void;
-  isLoggedIn: boolean;
+  isLoggedIn: () => boolean;
 } => {
   return {
     getAuthSession: () => null,
     saveAuthSession: (authSession: AuthenticationResultType | null) => {},
-    isLoggedIn: true,
+    isLoggedIn: () => false,
   };
 };
 
@@ -53,23 +53,16 @@ const getAuthSessionFromLocalStorage = (): AuthenticationResultType | null => {
 export const AuthenticationContextProvider = ({
   children,
 }: AuthenticationContextProviderProps) => {
-  const [authSession, setAuthSession] =
-    useState<AuthenticationResultType | null>(null);
-
   const saveAuthSession = (authSession: AuthenticationResultType | null) => {
-    setAuthSession(authSession);
     localStorage.setItem("authSession", JSON.stringify(authSession));
   };
 
   const getAuthSession = () => {
-    if (authSession) {
-      return authSession;
-    }
-
-    return getAuthSessionFromLocalStorage();
+    const savedAuthSession = getAuthSessionFromLocalStorage();
+    return savedAuthSession;
   };
 
-  const isLoggedIn = getAuthSession() !== null;
+  const isLoggedIn = () => getAuthSession() !== null;
 
   return (
     <AuthenticationContext.Provider

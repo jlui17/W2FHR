@@ -9,7 +9,7 @@ import UpcomingShifts from "../UpcomingShifts";
 const DashboardController = () => {
   const { isLoggedIn } = useContext(AuthenticationContext);
 
-  return isLoggedIn ? (
+  return isLoggedIn() ? (
     <div>
       <AvailabilityForm />
       <UpcomingShifts />
