@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { getAvailabilityApiUrlForEmployee } from "../../common/ApiUrlUtil";
-import { ERROR_MESSAGES } from "../../common/constants";
+import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 import { AvailabilityData } from "../AvailabilityController";
 
 const isAvailabilityData = (data: any): data is AvailabilityData => {
@@ -14,14 +13,20 @@ const isAvailabilityData = (data: any): data is AvailabilityData => {
   );
 };
 
-export const useAvailabilityData = (
-  employeeId: string,
-  setAvailabilityData: (data: AvailabilityData) => void
-) => {
+interface UseAvailabilityDataProps {
+  setAvailabilityData: (data: AvailabilityData) => void;
+  idToken: string;
+}
+export const useAvailabilityData = ({
+  setAvailabilityData,
+  idToken,
+}: UseAvailabilityDataProps) => {
   const fetchAvailability = async (): Promise<void> => {
-    const response = await axios.get(
-      getAvailabilityApiUrlForEmployee(employeeId)
-    );
+    const response = await axios.get(API_URLS.AVAILABILITY, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
 
     switch (response.status) {
       case 200:
@@ -42,16 +47,22 @@ export const useAvailabilityData = (
   return useQuery("availability", fetchAvailability);
 };
 
-export const useUpdateAvailability = (
-  employeeId: string,
-  availabilityData: AvailabilityData,
-  setAvailabilityData: (data: AvailabilityData) => void
-) => {
+interface UseUpdateAvailabilityProps {
+  availabilityData: AvailabilityData;
+  setAvailabilityData: (data: AvailabilityData) => void;
+  idToken: string;
+}
+export const useUpdateAvailability = ({
+  availabilityData,
+  setAvailabilityData,
+  idToken,
+}: UseUpdateAvailabilityProps) => {
   const updateAvailability = async (): Promise<void> => {
-    const response = await axios.post(
-      getAvailabilityApiUrlForEmployee(employeeId),
-      availabilityData
-    );
+    const response = await axios.post(API_URLS.AVAILABILITY, availabilityData, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
 
     switch (response.status) {
       case 200:

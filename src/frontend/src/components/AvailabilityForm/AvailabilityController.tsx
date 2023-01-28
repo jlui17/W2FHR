@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType } from "../common/Alerts";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
 import { AvailabilityFormWidget } from "./AvailabilityFormWidget";
@@ -26,24 +27,30 @@ const EMPTY_DATA: AvailabilityData = {
   canUpdate: false,
 };
 
-const employeeId = "w2fnm150009";
-
 const AvailabilityFormController = (props: any): JSX.Element => {
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
+  const { authSession } = useContext(AuthenticationContext);
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const {
     isFetching: isLoadingGet,
     error: getError,
     isRefetchError: errorOnRefetchGet,
-  } = useAvailabilityData(employeeId, setAvailabilityData);
+  } = useAvailabilityData({
+    setAvailabilityData: setAvailabilityData,
+    idToken: authSession?.IdToken || "",
+  });
   const {
     isFetching: isLoadingUpdate,
     refetch: updateAvailability,
     error: updateError,
     isRefetchError: errorOnRefetchUpdate,
     isSuccess: updateSucessful,
-  } = useUpdateAvailability(employeeId, availabilityData, setAvailabilityData);
+  } = useUpdateAvailability({
+    availabilityData: availabilityData,
+    setAvailabilityData: setAvailabilityData,
+    idToken: authSession?.IdToken || "",
+  });
 
   useEffect(() => {
     setAlert(() => {

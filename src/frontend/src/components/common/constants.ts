@@ -1,7 +1,8 @@
-export const API_CONSTANTS = {
+const BASE_URL = "https://v9kuc5lqq2.execute-api.us-west-2.amazonaws.com/v1";
+export const API_URLS = {
   BASE_URL: "https://v9kuc5lqq2.execute-api.us-west-2.amazonaws.com/v1",
   TIMESHEET: "timesheet",
-  AVAILABILITY: "availability",
+  AVAILABILITY: `${BASE_URL}/availability`,
   AUTH: "auth",
 };
 
@@ -20,6 +21,9 @@ export const ERROR_MESSAGES = {
     PLEASE_CONTACT_JUSTIN,
   NO_USER_TO_VERIFY_ERROR:
     "No user to verify. This is an error. " + PLEASE_CONTACT_JUSTIN,
+  AUTH: {
+    NOT_SIGNED_IN: "You are not signed in.",
+  },
 };
 
 export const SUCCESS_MESSAGES = {
