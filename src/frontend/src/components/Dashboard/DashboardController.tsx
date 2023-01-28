@@ -7,10 +7,9 @@ import Timesheet from "../Timesheet";
 import UpcomingShifts from "../UpcomingShifts";
 
 const DashboardController = () => {
-  const { getAuthSession } = useContext(AuthenticationContext);
-  const isLoggedin = getAuthSession() !== null;
+  const { isLoggedIn } = useContext(AuthenticationContext);
 
-  return isLoggedin ? (
+  return isLoggedIn ? (
     <div>
       <AvailabilityForm />
       <UpcomingShifts />

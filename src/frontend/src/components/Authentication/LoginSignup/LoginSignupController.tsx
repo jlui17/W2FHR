@@ -2,7 +2,7 @@ import { UserNotConfirmedException } from "@aws-sdk/client-cognito-identity-prov
 import { AxiosError } from "axios";
 import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType } from "../../common/Alerts";
 import {
@@ -28,7 +28,7 @@ const AuthenticationController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { saveAuthSession } = useContext(AuthenticationContext);
+  const { saveAuthSession, isLoggedIn } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,7 +130,6 @@ const AuthenticationController = () => {
     setIsLoading(true);
     try {
       const authSession = await loginAndGetAuthSession(email, password);
-      console.log(authSession);
       saveAuthSession(authSession);
     } catch (err) {
       console.error(err);
@@ -158,7 +157,9 @@ const AuthenticationController = () => {
 
   const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
 
-  return isConfirmingAccount ? (
+  return isLoggedIn ? (
+    <Navigate to={ROUTES.DASHBOARD} />
+  ) : isConfirmingAccount ? (
     <VerifyWidget
       isLoading={isLoading}
       verificationCode={verificationCode}

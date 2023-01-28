@@ -9,10 +9,12 @@ interface AuthenticationContextProviderProps {
 const getInitialAuthenticationContext = (): {
   getAuthSession: () => AuthenticationResultType | null;
   saveAuthSession: (authSession: AuthenticationResultType | null) => void;
+  isLoggedIn: boolean;
 } => {
   return {
     getAuthSession: () => null,
     saveAuthSession: (authSession: AuthenticationResultType | null) => {},
+    isLoggedIn: true,
   };
 };
 
@@ -67,8 +69,12 @@ export const AuthenticationContextProvider = ({
     return getAuthSessionFromLocalStorage();
   };
 
+  const isLoggedIn = getAuthSession() !== null;
+
   return (
-    <AuthenticationContext.Provider value={{ getAuthSession, saveAuthSession }}>
+    <AuthenticationContext.Provider
+      value={{ getAuthSession, saveAuthSession, isLoggedIn }}
+    >
       {children}
     </AuthenticationContext.Provider>
   );
