@@ -4,6 +4,7 @@ import (
 	GetAvailability "GoogleSheets/packages/availability/get"
 	UpdateAvailability "GoogleSheets/packages/availability/update"
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	"context"
 	"encoding/json"
@@ -18,7 +19,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if !exists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
-			Body:       "Please include Authorization header in request.",
+			Body:       SharedConstants.INCLUDE_AUTH_HEADER_ERROR,
 		}, nil
 	}
 
@@ -43,7 +44,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 400,
-		Body:       "Not a valid request",
+		Body:       SharedConstants.NOT_VALID_REQUEST_ERROR,
 	}, nil
 }
 

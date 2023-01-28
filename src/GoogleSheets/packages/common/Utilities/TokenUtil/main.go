@@ -41,5 +41,5 @@ func GetEmployeeIdFromBearerToken(bearerToken string) (string, error) {
 	if employeeId, ok := claims["custom:employeeId"]; ok {
 		return employeeId.(string), nil
 	}
-	return "", errors.New(SharedConstants.EMPLOYEE_ID_NOT_FOUND)
+	return "", errors.New(SharedConstants.EMPLOYEE_ID_NOT_FOUND_ERROR)
 }

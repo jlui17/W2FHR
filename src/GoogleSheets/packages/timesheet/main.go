@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	GetTimesheet "GoogleSheets/packages/timesheet/get"
 	"context"
@@ -15,7 +16,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if !exists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
-			Body:       "Please include Authorization header in request.",
+			Body:       SharedConstants.INCLUDE_AUTH_HEADER_ERROR,
 		}, nil
 	}
 
