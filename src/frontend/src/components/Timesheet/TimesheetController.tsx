@@ -21,9 +21,9 @@ const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 export const TimesheetController = (): JSX.Element => {
   const [alert, setAlert] = useState<AlertInfo | null>(null);
-  const { authSession } = useContext(AuthenticationContext);
+  const { getAuthSession } = useContext(AuthenticationContext);
   const { isFetching, data, isError, error, isRefetchError } = useTimesheetData(
-    { idToken: authSession?.IdToken || "", getUpcoming: false }
+    { idToken: getAuthSession()?.IdToken || "", getUpcoming: false }
   );
 
   useEffect(() => {

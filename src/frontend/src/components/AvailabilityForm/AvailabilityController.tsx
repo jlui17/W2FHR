@@ -30,7 +30,7 @@ const EMPTY_DATA: AvailabilityData = {
 const AvailabilityFormController = (props: any): JSX.Element => {
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
-  const { authSession } = useContext(AuthenticationContext);
+  const { getAuthSession } = useContext(AuthenticationContext);
   const [alert, setAlert] = useState<AlertInfo | null>(null);
   const {
     isFetching: isLoadingGet,
@@ -38,7 +38,7 @@ const AvailabilityFormController = (props: any): JSX.Element => {
     isRefetchError: errorOnRefetchGet,
   } = useAvailabilityData({
     setAvailabilityData: setAvailabilityData,
-    idToken: authSession?.IdToken || "",
+    idToken: getAuthSession()?.IdToken || "",
   });
   const {
     isFetching: isLoadingUpdate,
@@ -49,7 +49,7 @@ const AvailabilityFormController = (props: any): JSX.Element => {
   } = useUpdateAvailability({
     availabilityData: availabilityData,
     setAvailabilityData: setAvailabilityData,
-    idToken: authSession?.IdToken || "",
+    idToken: getAuthSession()?.IdToken || "",
   });
 
   useEffect(() => {

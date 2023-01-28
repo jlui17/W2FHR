@@ -28,7 +28,7 @@ const AuthenticationController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { setAuthSession } = useContext(AuthenticationContext);
+  const { saveAuthSession } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,7 +131,7 @@ const AuthenticationController = () => {
     try {
       const authSession = await loginAndGetAuthSession(email, password);
       console.log(authSession);
-      setAuthSession(authSession);
+      saveAuthSession(authSession);
     } catch (err) {
       console.error(err);
       if (err instanceof UserNotConfirmedException) {

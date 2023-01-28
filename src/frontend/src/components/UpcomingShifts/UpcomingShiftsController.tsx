@@ -8,12 +8,12 @@ import { UpcomingShiftsWidget } from "./UpcomingShiftsWidget";
 const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 const UpcomingShiftsController = (): JSX.Element => {
-  const { authSession } = useContext(AuthenticationContext);
+  const { getAuthSession } = useContext(AuthenticationContext);
 
   try {
     const { isLoading: upcomingShiftsDataIsLoading, data: upcomingShiftsData } =
       useTimesheetData({
-        idToken: authSession?.IdToken || "",
+        idToken: getAuthSession()?.IdToken || "",
         getUpcoming: true,
       });
 
