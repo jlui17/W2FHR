@@ -4,6 +4,7 @@ import (
 	GetAvailability "GoogleSheets/packages/availability/get"
 	UpdateAvailability "GoogleSheets/packages/availability/update"
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	"context"
 	"encoding/json"
 
@@ -13,14 +14,21 @@ import (
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	employeeId, exists := event.PathParameters["employeeId"]
+	idToken, exists := event.Headers["Authorization"]
 	if !exists {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
-			Body:       "Please include employee id in request.",
+			Body:       "Please include Authorization header in request.",
 		}, nil
 	}
 
+	employeeId, err := TokenUtil.GetEmployeeIdFromIdToken(idToken)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
+			Body:       err.Error(),
+		}, nil
+	}
 	requestMethod := event.HTTPMethod
 
 	switch requestMethod {
