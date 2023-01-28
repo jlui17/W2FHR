@@ -1,6 +1,7 @@
 package TokenUtil
 
 import (
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"errors"
 	"log"
 	"strings"
@@ -10,7 +11,7 @@ import (
 
 func getIdTokenFromBearerToken(bearerToken string) (string, error) {
 	if len(bearerToken) < 7 {
-		return "", errors.New("invalid idToken")
+		return "", errors.New(SharedConstants.INVALID_ID_TOKEN_ERROR)
 	}
 
 	idToken := strings.Split(bearerToken, " ")[1]
@@ -40,5 +41,5 @@ func GetEmployeeIdFromBearerToken(bearerToken string) (string, error) {
 	if employeeId, ok := claims["custom:employeeId"]; ok {
 		return employeeId.(string), nil
 	}
-	return "", errors.New("employeeId not found in idToken")
+	return "", errors.New(SharedConstants.EMPLOYEE_ID_NOT_FOUND)
 }

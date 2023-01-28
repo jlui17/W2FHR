@@ -9,4 +9,6 @@ type ErrorMessages string
 const (
 	NUM_OF_DATES             = 4
 	EMPLOYEE_NOT_FOUND_ERROR = "employee not found"
+	INVALID_ID_TOKEN_ERROR   = "invalid idToken"
+	EMPLOYEE_ID_NOT_FOUND    = "employeeId not found in idToken"
 )
