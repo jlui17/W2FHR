@@ -3,12 +3,21 @@ package TokenUtil
 import (
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
+func getIdTokenFromBearerToken(bearerToken string) (string, error) {
+	if len(bearerToken) < 7 {
+		return "", errors.New("invalid idToken")
+	}
+
+	idToken := strings.Split(bearerToken, " ")[1]
+	return idToken, nil
+}
+
 func parseIdToken(idToken string) (*jwt.Token, error) {
-	// parse idToken and skip claims validation
 	decodedIdToken, _, err := new(jwt.Parser).ParseUnverified(idToken, jwt.MapClaims{})
 	if err != nil {
 		log.Println(err)
@@ -17,7 +26,12 @@ func parseIdToken(idToken string) (*jwt.Token, error) {
 	return decodedIdToken, nil
 }
 
-func GetEmployeeIdFromIdToken(idToken string) (string, error) {
+func GetEmployeeIdFromBearerToken(bearerToken string) (string, error) {
+	idToken, err := getIdTokenFromBearerToken(bearerToken)
+	if err != nil {
+		return "", err
+	}
+
 	decodedIdToken, err := parseIdToken(idToken)
 	if err != nil {
 		return "", err

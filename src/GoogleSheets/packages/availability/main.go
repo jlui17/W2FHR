@@ -22,7 +22,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	employeeId, err := TokenUtil.GetEmployeeIdFromIdToken(idToken)
+	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
