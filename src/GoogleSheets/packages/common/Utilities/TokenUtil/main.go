@@ -9,6 +9,8 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+var jwtParser *jwt.Parser = jwt.NewParser()
+
 func getIdTokenFromBearerToken(bearerToken string) (string, error) {
 	if len(bearerToken) < 7 {
 		return "", errors.New(SharedConstants.INVALID_ID_TOKEN_ERROR)
@@ -19,7 +21,7 @@ func getIdTokenFromBearerToken(bearerToken string) (string, error) {
 }
 
 func parseIdToken(idToken string) (*jwt.Token, error) {
-	decodedIdToken, _, err := new(jwt.Parser).ParseUnverified(idToken, jwt.MapClaims{})
+	decodedIdToken, _, err := jwtParser.ParseUnverified(idToken, jwt.MapClaims{})
 	if err != nil {
 		log.Println(err)
 		return nil, err
