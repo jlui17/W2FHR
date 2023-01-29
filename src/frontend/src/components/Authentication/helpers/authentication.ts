@@ -12,7 +12,6 @@ import {
   SignUpCommand,
   SignUpCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
-import get from "axios";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGES } from "../../common/constants";
 
@@ -46,16 +45,19 @@ export const signUpAndGetNeedToConfirm = async (
 };
 
 const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
-  const response = await get(getAuthApiUrlForEmail(email));
+  const response = await fetch(getAuthApiUrlForEmail(email));
+  const data = await response.text();
+  console.log(response);
+  console.log(data);
 
   switch (response.status) {
     case 200:
-      if (typeof response.data !== "string") {
+      if (typeof data !== "string") {
         return Promise.reject(
           new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
         );
       }
-      return Promise.resolve(response.data);
+      return Promise.resolve(data);
     case 404:
       return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
     default:
