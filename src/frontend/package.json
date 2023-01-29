@@ -17,8 +17,6 @@
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "postcss": "^8.4.20",
-    "prettier": "^2.8.1",
-    "prettier-plugin-tailwindcss": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.6.1",
@@ -31,6 +29,8 @@
     "@types/react-dom": "^18.0.8",
     "@types/react-query": "^1.2.9",
     "@vitejs/plugin-react": "^2.2.0",
+    "prettier": "^2.8.3",
+    "prettier-plugin-tailwindcss": "^0.2.2",
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
   }
