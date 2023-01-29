@@ -60,7 +60,7 @@ export const LoginSignupWidget = ({
         </Button>
         <div className="flex w-auto items-center justify-evenly">
           <Button
-            className="mr-4 w-[100%]"
+            className="mr-4 w-full"
             variant="contained"
             disabled={isLoading}
             onClick={onLogin}
@@ -68,7 +68,7 @@ export const LoginSignupWidget = ({
             Login
           </Button>
           <Button
-            className="w-[100%]"
+            className="w-full"
             variant="contained"
             onClick={onSignup}
             disabled={isLoading}

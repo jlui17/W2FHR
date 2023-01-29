@@ -16,6 +16,7 @@ interface ResetPassowrdWidgetProps {
   closeAlert: () => void;
   showPassword: boolean;
   onShowPassword: () => void;
+  onCancel: () => void;
 }
 
 export const ResetPassowrdWidget = ({
@@ -30,6 +31,7 @@ export const ResetPassowrdWidget = ({
   goToVerifyingStep,
   showPassword,
   onShowPassword,
+  onCancel,
 }: ResetPassowrdWidgetProps) => {
   return (
     <AuthWidget>
@@ -41,6 +43,7 @@ export const ResetPassowrdWidget = ({
           handleChange={handleChange}
           goToVerifyingStep={goToVerifyingStep}
           isLoading={isLoading}
+          onCancel={onCancel}
         />
       )}
       {step === ResetPasswordStep.ENTER_NEW_PASSWORD && (
@@ -62,11 +65,13 @@ const Step1 = ({
   handleChange,
   goToVerifyingStep,
   isLoading,
+  onCancel,
 }: {
   email: ResetPassowrdWidgetProps["email"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
   goToVerifyingStep: ResetPassowrdWidgetProps["goToVerifyingStep"];
   isLoading: ResetPassowrdWidgetProps["isLoading"];
+  onCancel: ResetPassowrdWidgetProps["onCancel"];
 }) => {
   return (
     <>
@@ -79,13 +84,24 @@ const Step1 = ({
         onChange={handleChange}
         disabled={isLoading}
       />
-      <Button
-        variant="contained"
-        onClick={goToVerifyingStep}
-        disabled={isLoading}
-      >
-        Reset Password
-      </Button>
+      <div className="flex w-auto items-center justify-evenly">
+        <Button
+          variant="contained"
+          onClick={goToVerifyingStep}
+          disabled={isLoading}
+          className="mr-4 w-full"
+        >
+          Reset Password
+        </Button>
+        <Button
+          variant="contained"
+          disabled={isLoading}
+          onClick={onCancel}
+          className="w-full"
+        >
+          Cancel
+        </Button>
+      </div>
     </>
   );
 };

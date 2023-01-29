@@ -126,6 +126,7 @@ const ResetPasswordController = () => {
         goToVerifyingStep={goToVerifyingStep}
         showPassword={showPassword}
         onShowPassword={() => setShowPassword(!showPassword)}
+        onCancel={() => navigate(ROUTES.LOGIN)}
       />
     </div>
   );
