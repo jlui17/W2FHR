@@ -29,7 +29,7 @@ export class AuthService extends Stack {
       userVerification: {
         emailSubject: "[Wun2Free Entertainment] Verify your email address",
         emailBody:
-          "Congratulations! Your onboarding is almost complete. Once you are verified, you are all setup for the upcoming season. \n\nYour verification code is {####}",
+          "Your verification code is {####}. Please enter it in the verification page to complete your registration.",
         emailStyle: VerificationEmailStyle.CODE,
       },
     });
