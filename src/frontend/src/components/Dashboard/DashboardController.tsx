@@ -1,20 +1,21 @@
-import { useContext } from "react";
+import { lazy, Suspense, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
-import AvailabilityForm from "../AvailabilityForm";
 import { ROUTES } from "../common/constants";
-import Timesheet from "../Timesheet";
-import UpcomingShifts from "../UpcomingShifts";
+
+const DashboardWidget = lazy(() =>
+  import("./DashboardWidget").then((module) => ({
+    default: module.DashboardWidget,
+  }))
+);
 
 const DashboardController = () => {
   const { isLoggedIn } = useContext(AuthenticationContext);
 
   return isLoggedIn() ? (
-    <div>
-      <AvailabilityForm />
-      <UpcomingShifts />
-      <Timesheet />
-    </div>
+    <Suspense fallback={null}>
+      <DashboardWidget />
+    </Suspense>
   ) : (
     <Navigate to={ROUTES.LOGIN} />
   );
