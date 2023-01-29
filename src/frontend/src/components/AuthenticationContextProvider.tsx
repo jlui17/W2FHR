@@ -10,11 +10,13 @@ const getInitialAuthenticationContext = (): {
   getAuthSession: () => AuthenticationResultType | null;
   saveAuthSession: (authSession: AuthenticationResultType | null) => void;
   isLoggedIn: () => boolean;
+  logout: () => void;
 } => {
   return {
     getAuthSession: () => null,
     saveAuthSession: (authSession: AuthenticationResultType | null) => {},
     isLoggedIn: () => false,
+    logout: () => {},
   };
 };
 
@@ -64,9 +66,13 @@ export const AuthenticationContextProvider = ({
 
   const isLoggedIn = () => getAuthSession() !== null;
 
+  const logout = () => {
+    localStorage.removeItem("authSession");
+  };
+
   return (
     <AuthenticationContext.Provider
-      value={{ getAuthSession, saveAuthSession, isLoggedIn }}
+      value={{ getAuthSession, saveAuthSession, isLoggedIn, logout }}
     >
       {children}
     </AuthenticationContext.Provider>
