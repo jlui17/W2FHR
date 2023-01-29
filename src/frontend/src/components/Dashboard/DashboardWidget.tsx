@@ -5,9 +5,11 @@ import UpcomingShifts from "../UpcomingShifts";
 export const DashboardWidget = () => {
   return (
     <div>
-      <AvailabilityForm />
-      <UpcomingShifts />
-      <Timesheet />
+      <div>
+        <AvailabilityForm />
+        <UpcomingShifts />
+        <Timesheet />
+      </div>
     </div>
   );
 };

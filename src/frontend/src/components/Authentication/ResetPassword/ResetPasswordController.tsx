@@ -113,19 +113,21 @@ const ResetPasswordController = () => {
   }
 
   return (
-    <ResetPassowrdWidget
-      isLoading={isLoading}
-      email={email}
-      newPassword={newPassword}
-      alert={alert}
-      closeAlert={() => setAlert(null)}
-      onSetNewPassword={onSetNewPassword}
-      handleChange={handleChange}
-      step={step}
-      goToVerifyingStep={goToVerifyingStep}
-      showPassword={showPassword}
-      onShowPassword={() => setShowPassword(!showPassword)}
-    />
+    <div className="flex h-screen w-screen place-items-center">
+      <ResetPassowrdWidget
+        isLoading={isLoading}
+        email={email}
+        newPassword={newPassword}
+        alert={alert}
+        closeAlert={() => setAlert(null)}
+        onSetNewPassword={onSetNewPassword}
+        handleChange={handleChange}
+        step={step}
+        goToVerifyingStep={goToVerifyingStep}
+        showPassword={showPassword}
+        onShowPassword={() => setShowPassword(!showPassword)}
+      />
+    </div>
   );
 };
 

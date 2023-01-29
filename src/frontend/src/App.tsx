@@ -10,17 +10,15 @@ function App() {
   return (
     <StyledEngineProvider injectFirst>
       <CssBaseline />
-      <div className="flex h-[100vh] w-[100vw] items-center justify-center">
-        <AuthenticationContextProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path={ROUTES.LOGIN} element={<LoginSignup />} />
-              <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
-              <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthenticationContextProvider>
-      </div>
+      <AuthenticationContextProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path={ROUTES.LOGIN} element={<LoginSignup />} />
+            <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
+            <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthenticationContextProvider>
     </StyledEngineProvider>
   );
 }
