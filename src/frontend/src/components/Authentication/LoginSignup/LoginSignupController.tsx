@@ -1,5 +1,4 @@
 import { UserNotConfirmedException } from "@aws-sdk/client-cognito-identity-provider";
-import { AxiosError } from "axios";
 import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -69,9 +68,6 @@ const AuthenticationController = () => {
         errorAlert.message = err.message;
       }
 
-      if (err instanceof AxiosError) {
-        errorAlert.message = err.response?.data;
-      }
       console.error(`Signup Error: ${errorAlert.message}`);
       setAlert(errorAlert);
     }
