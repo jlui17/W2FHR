@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useQuery } from "react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 import { AvailabilityData } from "../AvailabilityController";
@@ -22,20 +21,22 @@ export const useAvailabilityData = ({
   idToken,
 }: UseAvailabilityDataProps) => {
   const fetchAvailability = async (): Promise<void> => {
-    const response = await axios.get(API_URLS.AVAILABILITY, {
+    const response = await fetch(API_URLS.AVAILABILITY, {
       headers: {
         Authorization: `Bearer ${idToken}`,
       },
+      mode: "cors",
     });
 
     switch (response.status) {
       case 200:
-        if (!isAvailabilityData(response.data)) {
+        const data = await response.json();
+        if (!isAvailabilityData(data)) {
           return Promise.reject(
             new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
-        setAvailabilityData(response.data);
+        setAvailabilityData(data);
         return Promise.resolve();
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
@@ -58,20 +59,24 @@ export const useUpdateAvailability = ({
   idToken,
 }: UseUpdateAvailabilityProps) => {
   const updateAvailability = async (): Promise<void> => {
-    const response = await axios.post(API_URLS.AVAILABILITY, availabilityData, {
+    const response = await fetch(API_URLS.AVAILABILITY, {
       headers: {
         Authorization: `Bearer ${idToken}`,
       },
+      method: "POST",
+      mode: "cors",
+      body: JSON.stringify(availabilityData),
     });
 
     switch (response.status) {
       case 200:
-        if (!isAvailabilityData(response.data)) {
+        const data = await response.json();
+        if (!isAvailabilityData(data)) {
           return Promise.reject(
             new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
-        setAvailabilityData(response.data);
+        setAvailabilityData(data);
         return Promise.resolve();
       case 403:
         return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
