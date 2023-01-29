@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useQuery } from "react-query";
 import { getTimesheetApiUrlForEmployee } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGES } from "../../common/constants";
@@ -17,23 +16,22 @@ export const useTimesheetData = ({
   getUpcoming,
 }: UseTimesheetDataProps) => {
   const getTimesheetData = async (): Promise<TimesheetData> => {
-    const response = await axios.get(
-      getTimesheetApiUrlForEmployee(getUpcoming),
-      {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      }
-    );
+    const response = await fetch(getTimesheetApiUrlForEmployee(getUpcoming), {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+      mode: "cors",
+    });
 
     switch (response.status) {
       case 200:
-        if (!isTimesheetData(response.data)) {
+        const data = await response.json();
+        if (!isTimesheetData(data)) {
           return Promise.reject(
             new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
-        return Promise.resolve(response.data);
+        return Promise.resolve(data);
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
       default:
@@ -41,5 +39,5 @@ export const useTimesheetData = ({
     }
   };
 
-  return useQuery("timesheetData", getTimesheetData);
+  return useQuery("timesheetData" + getUpcoming, getTimesheetData);
 };
