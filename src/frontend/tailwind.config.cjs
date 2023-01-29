@@ -8,5 +8,6 @@ module.exports = {
   corePlugins: {
     preflight: false,
   },
+  jit: true,
   important: "#root",
 };
