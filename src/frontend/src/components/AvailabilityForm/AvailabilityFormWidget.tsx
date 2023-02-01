@@ -102,7 +102,7 @@ export const AvailabilityFormWidget = ({
   };
 
   return (
-    <Card className="inline-block">
+    <Card className="w-72">
       <CardContent>
         <Typography className="text-lg font-bold">Availability</Typography>
         {isLoading ? <CircularProgress /> : getAvailabilityBoxes()}
