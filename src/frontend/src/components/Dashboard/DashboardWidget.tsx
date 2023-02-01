@@ -7,7 +7,7 @@ export const DashboardWidget = () => {
   return (
     <div className="h-screen w-screen">
       <Header />
-      <div>
+      <div className="mx-auto max-w-screen-md py-6">
         <AvailabilityForm />
         <UpcomingShifts />
         <Timesheet />
