@@ -6,7 +6,7 @@ interface HeaderWidgetProps {
 }
 export const HeaderWidget = ({ onLogout }: HeaderWidgetProps) => {
   return (
-    <AppBar position="static" color="transparent">
+    <AppBar position="static" className="bg-white shadow-md">
       <Container className="max-w-screen-md">
         <Toolbar disableGutters>
           <img
@@ -15,8 +15,7 @@ export const HeaderWidget = ({ onLogout }: HeaderWidgetProps) => {
             className="aspect-auto h-8 md:h-12"
           />
           <Button
-            color="inherit"
-            className="ml-auto text-xs md:text-base"
+            className="ml-auto text-xs text-black md:text-base"
             onClick={onLogout}
           >
             Logout
