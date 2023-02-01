@@ -1,10 +1,14 @@
 import {
   Button,
+  Card,
+  CardActions,
+  CardContent,
   Checkbox,
   CircularProgress,
   FormControl,
   FormControlLabel,
   FormGroup,
+  Typography,
 } from "@mui/material";
 import React from "react";
 import { AlertInfo, displayAlert } from "../common/Alerts";
@@ -83,20 +87,26 @@ export const AvailabilityFormWidget = ({
             )}
           </FormGroup>
         </FormControl>
-        <Button
-          onClick={updateAvailability}
-          disabled={!availabilityData.canUpdate}
-        >
-          Save
-        </Button>
+        <CardActions className="p-0">
+          <Button
+            onClick={updateAvailability}
+            disabled={!availabilityData.canUpdate}
+            variant="contained"
+            className="w-full"
+          >
+            Save
+          </Button>
+        </CardActions>
       </>
     );
   };
 
   return (
-    <div>
-      <h1>Availability</h1>
-      {isLoading ? <CircularProgress /> : getAvailabilityBoxes()}
-    </div>
+    <Card className="inline-block">
+      <CardContent>
+        <Typography className="text-lg font-bold">Availability</Typography>
+        {isLoading ? <CircularProgress /> : getAvailabilityBoxes()}
+      </CardContent>
+    </Card>
   );
 };
