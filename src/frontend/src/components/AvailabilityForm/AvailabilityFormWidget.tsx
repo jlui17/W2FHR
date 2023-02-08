@@ -48,6 +48,7 @@ export const AvailabilityFormWidget = ({
                   onChange={handleAvailabilityChange}
                 />
               }
+              className="hover:bg-slate-50"
               label={availabilityData.day1.date}
             />
             <FormControlLabel
@@ -59,6 +60,7 @@ export const AvailabilityFormWidget = ({
                   onChange={handleAvailabilityChange}
                 />
               }
+              className="hover:bg-slate-50"
               label={availabilityData.day2.date}
             />
             <FormControlLabel
@@ -70,6 +72,7 @@ export const AvailabilityFormWidget = ({
                   onChange={handleAvailabilityChange}
                 />
               }
+              className="hover:bg-slate-50"
               label={availabilityData.day3.date}
             />
             {availabilityData.day4.date !== "" && (
@@ -82,6 +85,7 @@ export const AvailabilityFormWidget = ({
                     onChange={handleAvailabilityChange}
                   />
                 }
+                className="hover:bg-slate-50"
                 label={availabilityData.day4.date}
               />
             )}
