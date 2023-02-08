@@ -1,11 +1,9 @@
 import {
+  Card,
+  CardContent,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Divider,
+  Typography,
 } from "@mui/material";
 import { Shift, TimesheetData } from "../Timesheet/TimesheetController";
 
@@ -18,46 +16,38 @@ export const UpcomingShiftsWidget = ({
   isLoading,
   upcomingShiftsData,
 }: UpcomingShiftsWidgetProps): JSX.Element => {
-  const getUpcomingShiftsTable = (shifts: Shift[]): JSX.Element => {
+  const displayUpcomingShifts = () => {
     return (
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Shift Title</TableCell>
-              <TableCell>Start Time</TableCell>
-              <TableCell>End Time</TableCell>
-              <TableCell>Break Duration</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {shifts.map((shift: Shift) => (
-              <TableRow key={shift.date + shift.startTime}>
-                <TableCell>{shift.date}</TableCell>
-                <TableCell>{shift.shiftTitle}</TableCell>
-                <TableCell>{shift.startTime}</TableCell>
-                <TableCell>{shift.endTime}</TableCell>
-                <TableCell>{shift.breakDuration}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <div className="mt-2 grid grid-cols-5">
+        {upcomingShiftsData.shifts.map((shift: Shift, i: number) => {
+          return (
+            <>
+              <div className="col-span-4 flex flex-col items-start justify-between">
+                <p className="text-md">{shift.date}</p>
+                <p className="text-sm text-gray-600">{shift.shiftTitle}</p>
+              </div>
+              <div className="flex flex-col items-end justify-between">
+                <p className="text-sm">{shift.startTime}</p>
+                <p className="text-sm text-gray-600">{shift.endTime}</p>
+              </div>
+              {i + 1 === upcomingShiftsData.shifts.length ? null : (
+                <Divider className="col-span-5 my-2" />
+              )}
+            </>
+          );
+        })}
+      </div>
     );
   };
 
   return (
-    <div>
-      <h1>Shifts</h1>
-      {isLoading ? (
-        <CircularProgress />
-      ) : (
+    <Card className="w-80">
+      <CardContent>
         <>
-          <h2>Upcoming Shifts</h2>
-          {getUpcomingShiftsTable(upcomingShiftsData.shifts)}
+          <Typography className="text-lg font-bold">Upcoming Shifts</Typography>
+          {isLoading ? <CircularProgress /> : displayUpcomingShifts()}
         </>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
