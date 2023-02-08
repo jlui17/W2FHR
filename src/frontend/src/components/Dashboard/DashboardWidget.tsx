@@ -7,7 +7,7 @@ export const DashboardWidget = () => {
   return (
     <div className="h-screen w-screen bg-slate-50">
       <Header />
-      <div className="mx-auto flex h-screen max-w-screen-md flex-col items-center p-6 sm:block">
+      <div className="mx-auto flex h-screen max-w-screen-md flex-col items-center justify-start p-6 sm:block md:flex md:max-w-screen-md md:flex-row md:flex-wrap md:items-start md:justify-evenly">
         <AvailabilityForm />
         <UpcomingShifts />
         <Timesheet />
