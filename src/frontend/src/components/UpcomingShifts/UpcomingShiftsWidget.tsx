@@ -41,7 +41,7 @@ export const UpcomingShiftsWidget = ({
   };
 
   return (
-    <Card className="mt-6 w-80">
+    <Card className="mt-6 w-80 md:mt-0">
       <CardContent>
         <>
           <Typography className="text-lg font-bold">Upcoming Shifts</Typography>
