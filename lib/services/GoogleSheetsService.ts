@@ -1,5 +1,5 @@
 import { GoFunction } from "@aws-cdk/aws-lambda-go-alpha";
-import { Stack } from "aws-cdk-lib";
+import { Duration, Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class GoogleSheetsService extends Stack {
@@ -19,6 +19,7 @@ export class GoogleSheetsService extends Stack {
       {
         entry: `${SOURCE_PACKAGES_DIR}/availability`,
         moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(5),
       }
     );
 
@@ -28,6 +29,7 @@ export class GoogleSheetsService extends Stack {
       {
         entry: `${SOURCE_PACKAGES_DIR}/timesheet`,
         moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
       }
     );
 
