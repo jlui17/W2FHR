@@ -5,9 +5,14 @@ import React from "react";
 interface ExpandableCardProps {
   headerTitle: string;
   children: JSX.Element;
+  className: string;
 }
 
-const ExpandableCard = ({ headerTitle, children }: ExpandableCardProps) => {
+const ExpandableCard = ({
+  headerTitle,
+  children,
+  className,
+}: ExpandableCardProps) => {
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
@@ -30,15 +35,7 @@ const ExpandableCard = ({ headerTitle, children }: ExpandableCardProps) => {
   };
 
   return (
-    <Card
-      sx={{
-        maxWidth: "1000px",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <Card className={className}>
       <CardHeader
         action={
           <ExpandableHeader

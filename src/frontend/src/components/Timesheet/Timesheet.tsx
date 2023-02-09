@@ -5,10 +5,13 @@ import { TimesheetController } from "./TimesheetController";
 export const Timesheet = (): JSX.Element => {
   const queryClient = new QueryClient();
   return (
-    <ExpandableCard headerTitle="Shift History">
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ExpandableCard
+        className="flex w-full max-w-screen-md flex-col items-center justify-center"
+        headerTitle="Shift History"
+      >
         <TimesheetController />
-      </QueryClientProvider>
-    </ExpandableCard>
+      </ExpandableCard>
+    </QueryClientProvider>
   );
 };
