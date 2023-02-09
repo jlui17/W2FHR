@@ -7,7 +7,7 @@ export const Timesheet = (): JSX.Element => {
   return (
     <QueryClientProvider client={queryClient}>
       <ExpandableCard
-        className="flex w-full max-w-screen-md flex-col items-center justify-center"
+        className="my-6 flex w-full max-w-screen-md flex-col items-center justify-center"
         headerTitle="Shift History"
       >
         <TimesheetController />
