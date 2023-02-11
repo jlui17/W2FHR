@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
-import { AlertInfo, AlertType } from "../common/Alerts";
+import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
 import { AvailabilityFormWidget } from "./AvailabilityFormWidget";
 import { useAvailabilityData, useUpdateAvailability } from "./helpers/hooks";
@@ -31,7 +31,7 @@ const AvailabilityFormController = (props: any): JSX.Element => {
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
   const { getAuthSession } = useContext(AuthenticationContext);
-  const [alert, setAlert] = useState<AlertInfo | null>(null);
+  const { setAlert } = useAlert();
   const {
     isFetching: isLoadingGet,
     error: getError,
@@ -53,30 +53,26 @@ const AvailabilityFormController = (props: any): JSX.Element => {
   });
 
   useEffect(() => {
-    setAlert(() => {
-      const error =
-        getError != null ? getError : updateError != null ? updateError : null;
-      if (error) {
-        console.error(`Error in AvailabilityForm:\n${error}`);
-        const errorAlert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: ERROR_MESSAGES.UNKNOWN_ERROR,
-        };
-        if (error instanceof Error) {
-          errorAlert.message = error.message;
-        }
-        return errorAlert;
+    const error =
+      getError != null ? getError : updateError != null ? updateError : null;
+    if (error) {
+      console.error(`Error in AvailabilityForm:\n${error}`);
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
+      };
+      if (error instanceof Error) {
+        errorAlert.message = error.message;
       }
+      setAlert(errorAlert);
+    }
 
-      if (updateSucessful) {
-        return {
-          type: AlertType.SUCCESS,
-          message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
-        };
-      }
-
-      return null;
-    });
+    if (updateSucessful) {
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
+      });
+    }
   }, [
     getError,
     updateError,
@@ -115,8 +111,6 @@ const AvailabilityFormController = (props: any): JSX.Element => {
       availabilityData={availabilityData}
       handleAvailabilityChange={handleAvailabilityChange}
       updateAvailability={updateAvailability}
-      alert={alert}
-      closeAlert={() => setAlert(null)}
     />
   );
 };

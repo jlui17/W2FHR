@@ -11,7 +11,6 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-import { AlertInfo, displayAlert } from "../common/Alerts";
 import { AvailabilityData } from "./AvailabilityController";
 
 interface AvailabilityFormWidgetProps {
@@ -21,8 +20,6 @@ interface AvailabilityFormWidgetProps {
     event: React.ChangeEvent<HTMLInputElement>
   ) => void;
   updateAvailability: () => void;
-  alert: AlertInfo | null;
-  closeAlert: () => void;
 }
 
 export const AvailabilityFormWidget = ({
@@ -30,13 +27,10 @@ export const AvailabilityFormWidget = ({
   availabilityData,
   handleAvailabilityChange,
   updateAvailability,
-  alert,
-  closeAlert,
 }: AvailabilityFormWidgetProps): JSX.Element => {
   const getAvailabilityBoxes = () => {
     return (
       <>
-        {displayAlert(alert, closeAlert)}
         <FormControl>
           <FormGroup>
             <FormControlLabel
