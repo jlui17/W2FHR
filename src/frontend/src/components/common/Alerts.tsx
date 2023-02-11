@@ -32,7 +32,7 @@ export const displayAlert = (
   return (
     <Alert
       severity={alert.type}
-      className="absolute left-0 right-0 top-3 z-50 ml-auto mr-auto w-3/12"
+      className="absolute left-0 right-0 top-3 z-50 ml-auto mr-auto w-11/12 md:w-3/12"
       onClose={close}
     >
       {alert.message}
