@@ -9,7 +9,7 @@ const PLEASE_CONTACT_JUSTIN =
   "Please contact Justin Lui (Manager) on Slack for support.";
 export const ERROR_MESSAGES = {
   UNKNOWN_ERROR: "An unknown error has occurred. " + PLEASE_CONTACT_JUSTIN,
-  EMPLOYEE_NOT_FOUND: "Employee not found",
+  EMPLOYEE_NOT_FOUND: "Employee is not onboarded. Please contact a manager.",
   SERVER: {
     GENERAL_ERROR: "Server error. " + PLEASE_CONTACT_JUSTIN,
     DATA_INCONSISTENT: `A server error has occurred (DATA INCONSISTENT). ${PLEASE_CONTACT_JUSTIN}`,
@@ -23,6 +23,12 @@ export const ERROR_MESSAGES = {
   AUTH: {
     NOT_SIGNED_IN: "You are not signed in.",
   },
+};
+
+export const RESPONSE_ERROR_MESSAGE_MAP: {
+  [key: string]: string;
+} = {
+  "employee not found": ERROR_MESSAGES.EMPLOYEE_NOT_FOUND,
 };
 
 export const SUCCESS_MESSAGES = {

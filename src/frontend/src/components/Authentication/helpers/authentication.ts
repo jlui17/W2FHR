@@ -13,7 +13,10 @@ import {
   SignUpCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
-import { ERROR_MESSAGES } from "../../common/constants";
+import {
+  ERROR_MESSAGES,
+  RESPONSE_ERROR_MESSAGE_MAP,
+} from "../../common/constants";
 
 const COGNITO_CONFIG = {
   region: "us-west-2",
@@ -47,8 +50,6 @@ export const signUpAndGetNeedToConfirm = async (
 const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
   const response = await fetch(getAuthApiUrlForEmail(email));
   const data = await response.text();
-  console.log(response);
-  console.log(data);
 
   switch (response.status) {
     case 200:
@@ -58,9 +59,11 @@ const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
         );
       }
       return Promise.resolve(data);
-    case 404:
-      return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
     default:
+      const errorMessage = RESPONSE_ERROR_MESSAGE_MAP[data];
+      if (errorMessage !== undefined) {
+        return Promise.reject(new Error(errorMessage));
+      }
       return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
   }
 };
