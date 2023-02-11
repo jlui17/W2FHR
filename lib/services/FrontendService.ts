@@ -46,6 +46,14 @@ export class FrontendService extends Stack {
             responsePagePath: "/index.html",
           },
         ],
+        viewerCertificate: {
+          aliases: ["employees.wun2free.com", "www.employees.wun2free.com"],
+          props: {
+            acmCertificateArn:
+              "arn:aws:acm:us-east-1:268847659094:certificate/9d07d255-1fba-4718-a166-610c727b9777", // created manually, must be in us-east-1
+            sslSupportMethod: "sni-only",
+          },
+        },
       }
     );
 
