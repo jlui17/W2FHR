@@ -1,7 +1,7 @@
 import { CodeMismatchException } from "@aws-sdk/client-cognito-identity-provider";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertInfo, AlertType } from "../../common/Alerts";
+import { AlertType, useAlert } from "../../common/Alerts";
 import {
   ERROR_MESSAGES,
   ROUTES,
@@ -25,10 +25,10 @@ const ResetPasswordController = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [step, setStep] = useState(ResetPasswordStep.ENTER_EMAIL);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { setAlert } = useAlert();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -99,16 +99,16 @@ const ResetPasswordController = () => {
 
   if (step === ResetPasswordStep.VERIFY_CODE) {
     return (
-      <VerifyWidget
-        isLoading={isLoading}
-        verificationCode={verificationCode}
-        alert={alert}
-        closeAlert={() => setAlert(null)}
-        onVerify={() => setStep(ResetPasswordStep.ENTER_NEW_PASSWORD)}
-        handleChange={handleChange}
-        onResendVerificationCode={() => {}}
-        showResendVerificationCode={false}
-      />
+      <div className="flex h-screen w-screen place-items-center">
+        <VerifyWidget
+          isLoading={isLoading}
+          verificationCode={verificationCode}
+          onVerify={() => setStep(ResetPasswordStep.ENTER_NEW_PASSWORD)}
+          handleChange={handleChange}
+          onResendVerificationCode={() => {}}
+          showResendVerificationCode={false}
+        />
+      </div>
     );
   }
 
@@ -118,8 +118,6 @@ const ResetPasswordController = () => {
         isLoading={isLoading}
         email={email}
         newPassword={newPassword}
-        alert={alert}
-        closeAlert={() => setAlert(null)}
         onSetNewPassword={onSetNewPassword}
         handleChange={handleChange}
         step={step}

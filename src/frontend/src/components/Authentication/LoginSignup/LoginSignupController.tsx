@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
-import { AlertContext, AlertInfo, AlertType } from "../../common/Alerts";
+import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
 import {
   ERROR_MESSAGES,
   INFO_MESSAGES,
@@ -28,7 +28,7 @@ const AuthenticationController = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { saveAuthSession, isLoggedIn } = useContext(AuthenticationContext);
   const navigate = useNavigate();
-  const { setAlert } = useContext(AlertContext);
+  const { setAlert } = useAlert();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;

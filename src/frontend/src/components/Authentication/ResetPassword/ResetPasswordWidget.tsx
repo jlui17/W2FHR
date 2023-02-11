@@ -1,5 +1,4 @@
 import { Button, TextField } from "@mui/material";
-import { AlertInfo, displayAlert } from "../../common/Alerts";
 import { AuthWidget } from "../AuthWidget";
 import { PasswordField } from "../common/PasswordField";
 import { ResetPasswordStep } from "./ResetPasswordController";
@@ -8,12 +7,10 @@ interface ResetPassowrdWidgetProps {
   isLoading: boolean;
   email: string;
   newPassword: string;
-  alert: AlertInfo | null;
   step: ResetPasswordStep;
   goToVerifyingStep: () => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSetNewPassword: () => void;
-  closeAlert: () => void;
   showPassword: boolean;
   onShowPassword: () => void;
   onCancel: () => void;
@@ -23,10 +20,8 @@ export const ResetPassowrdWidget = ({
   isLoading,
   email,
   newPassword,
-  alert,
   handleChange,
   onSetNewPassword,
-  closeAlert,
   step,
   goToVerifyingStep,
   showPassword,
@@ -35,7 +30,6 @@ export const ResetPassowrdWidget = ({
 }: ResetPassowrdWidgetProps) => {
   return (
     <AuthWidget>
-      {displayAlert(alert, closeAlert)}
       <h1 className="mx-auto text-2xl">Reset Password</h1>
       {step === ResetPasswordStep.ENTER_EMAIL && (
         <Step1

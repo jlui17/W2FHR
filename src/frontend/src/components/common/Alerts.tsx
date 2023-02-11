@@ -1,5 +1,5 @@
 import { Alert } from "@mui/material";
-import { createContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 export enum AlertType {
   SUCCESS = "success",
@@ -49,8 +49,7 @@ const getInitialAlertContext = () => {
     setAlert: (alert: AlertInfo | null) => {},
   };
 };
-
-export const AlertContext = createContext(getInitialAlertContext());
+const AlertContext = createContext(getInitialAlertContext());
 
 export const AlertContextProvider = ({
   children,
@@ -67,4 +66,10 @@ export const AlertContextProvider = ({
       {children}
     </AlertContext.Provider>
   );
+};
+
+export const useAlert = (): {
+  setAlert: (alert: AlertInfo | null) => void;
+} => {
+  return useContext(AlertContext);
 };
