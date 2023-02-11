@@ -7,21 +7,16 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { AlertInfo, displayAlert } from "../common/Alerts";
 import { Shift, TimesheetData } from "./TimesheetController";
 
 interface TimesheetWidgetProps {
   isLoading: boolean;
   timesheetData: TimesheetData;
-  alert: AlertInfo | null;
-  closeAlert: () => void;
 }
 
 export const TimesheetWidget = ({
   isLoading,
   timesheetData,
-  alert,
-  closeAlert,
 }: TimesheetWidgetProps): JSX.Element => {
   const getTimesheetTable = (shifts: Shift[]): JSX.Element => {
     return (
@@ -54,7 +49,6 @@ export const TimesheetWidget = ({
 
   return (
     <div>
-      {displayAlert(alert, closeAlert)}
       {isLoading ? (
         <CircularProgress />
       ) : (

@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
-import { AlertInfo, AlertType } from "../common/Alerts";
+import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES } from "../common/constants";
 import { useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
@@ -20,7 +20,7 @@ export interface TimesheetData {
 const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 export const TimesheetController = (): JSX.Element => {
-  const [alert, setAlert] = useState<AlertInfo | null>(null);
+  const { setAlert } = useAlert();
   const { getAuthSession } = useContext(AuthenticationContext);
   const { isFetching, data, isError, error, isRefetchError } = useTimesheetData(
     { idToken: getAuthSession()?.IdToken || "", getUpcoming: false }
@@ -42,22 +42,8 @@ export const TimesheetController = (): JSX.Element => {
   }, [isError, isRefetchError, error]);
 
   if (!data) {
-    return (
-      <TimesheetWidget
-        alert={alert}
-        closeAlert={() => setAlert(null)}
-        isLoading={false}
-        timesheetData={EMPTY_DATA}
-      />
-    );
+    return <TimesheetWidget isLoading={false} timesheetData={EMPTY_DATA} />;
   }
 
-  return (
-    <TimesheetWidget
-      alert={alert}
-      closeAlert={() => setAlert(null)}
-      isLoading={isFetching}
-      timesheetData={data}
-    />
-  );
+  return <TimesheetWidget isLoading={isFetching} timesheetData={data} />;
 };
