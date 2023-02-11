@@ -1,4 +1,5 @@
 import { Alert } from "@mui/material";
+import { createContext, useState } from "react";
 
 export enum AlertType {
   SUCCESS = "success",
@@ -31,10 +32,39 @@ export const displayAlert = (
   return (
     <Alert
       severity={alert.type}
-      className="absolute left-0 right-0 top-3 ml-auto mr-auto w-3/12"
+      className="absolute left-0 right-0 top-3 z-50 ml-auto mr-auto w-3/12"
       onClose={close}
     >
       {alert.message}
     </Alert>
+  );
+};
+
+interface AlertContextProviderProps {
+  children: React.ReactNode;
+}
+
+const getInitialAlertContext = () => {
+  return {
+    setAlert: (alert: AlertInfo | null) => {},
+  };
+};
+
+export const AlertContext = createContext(getInitialAlertContext());
+
+export const AlertContextProvider = ({
+  children,
+}: AlertContextProviderProps) => {
+  const [alert, setAlert] = useState<AlertInfo | null>(null);
+
+  return (
+    <AlertContext.Provider
+      value={{
+        setAlert,
+      }}
+    >
+      {displayAlert(alert, () => setAlert(null))}
+      {children}
+    </AlertContext.Provider>
   );
 };

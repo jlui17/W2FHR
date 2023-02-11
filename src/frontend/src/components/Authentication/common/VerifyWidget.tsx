@@ -1,5 +1,4 @@
 import { Button, TextField } from "@mui/material";
-import { AlertInfo, displayAlert } from "../../common/Alerts";
 import { AuthWidget } from "../AuthWidget";
 
 interface VerifySignupWidgetProps {
@@ -8,8 +7,6 @@ interface VerifySignupWidgetProps {
   onVerify: () => void;
   onResendVerificationCode: () => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  alert: AlertInfo | null;
-  closeAlert: () => void;
   showResendVerificationCode: boolean;
 }
 
@@ -19,13 +16,10 @@ export const VerifyWidget = ({
   onVerify,
   onResendVerificationCode,
   handleChange,
-  alert,
-  closeAlert,
   showResendVerificationCode,
 }: VerifySignupWidgetProps) => {
   return (
     <AuthWidget>
-      {displayAlert(alert, closeAlert)}
       <p className="break-normal">
         A verification code has been sent to your email. Please check and enter
         it here to move on.

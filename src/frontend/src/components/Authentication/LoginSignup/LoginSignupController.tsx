@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
-import { AlertInfo, AlertType } from "../../common/Alerts";
+import { AlertContext, AlertInfo, AlertType } from "../../common/Alerts";
 import {
   ERROR_MESSAGES,
   INFO_MESSAGES,
@@ -23,12 +23,12 @@ const AuthenticationController = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [alert, setAlert] = useState<AlertInfo | null>(null);
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { saveAuthSession, isLoggedIn } = useContext(AuthenticationContext);
   const navigate = useNavigate();
+  const { setAlert } = useContext(AlertContext);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -45,10 +45,6 @@ const AuthenticationController = () => {
       default:
         break;
     }
-  };
-
-  const closeAlert = () => {
-    setAlert(null);
   };
 
   const onSignup = async () => {
@@ -162,8 +158,6 @@ const AuthenticationController = () => {
       onVerify={onConfirmAccount}
       onResendVerificationCode={onSendVerificationCode}
       handleChange={handleChange}
-      alert={alert}
-      closeAlert={closeAlert}
       showResendVerificationCode={true}
     />
   ) : (
@@ -171,12 +165,10 @@ const AuthenticationController = () => {
       email={email}
       password={password}
       isLoading={isLoading}
-      alert={alert}
       handleChange={handleChange}
       onSignup={onSignup}
       onLogin={onLogin}
       onResetPassword={onResetPassword}
-      closeAlert={closeAlert}
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
     />
