@@ -28,8 +28,13 @@ const ExpandableCard = ({
   }): JSX.Element => {
     return (
       <Button onClick={handleExpandClick}>
-        <h2>{headerTitle}</h2>
-        <ExpandMore sx={{ rotate: expanded ? "180deg" : "0deg" }} />
+        <h1 className="text-lg font-bold normal-case text-black">
+          {headerTitle}
+        </h1>
+        <ExpandMore
+          className="text-black"
+          sx={{ rotate: expanded ? "180deg" : "0deg" }}
+        />
       </Button>
     );
   };
@@ -45,7 +50,7 @@ const ExpandableCard = ({
         }
       />
       <Collapse in={expanded}>
-        <CardContent>{expanded ? children : null}</CardContent>
+        <CardContent className="pt-0">{expanded ? children : null}</CardContent>
       </Collapse>
     </Card>
   );

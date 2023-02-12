@@ -1,13 +1,5 @@
-import {
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
-import { Shift, TimesheetData } from "./TimesheetController";
+import { CircularProgress, Divider } from "@mui/material";
+import { TimesheetData } from "./TimesheetController";
 
 interface TimesheetWidgetProps {
   isLoading: boolean;
@@ -18,42 +10,28 @@ export const TimesheetWidget = ({
   isLoading,
   timesheetData,
 }: TimesheetWidgetProps): JSX.Element => {
-  const getTimesheetTable = (shifts: Shift[]): JSX.Element => {
+  const getTimesheetTable = (): JSX.Element => {
     return (
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Shift Title</TableCell>
-              <TableCell>Start Time</TableCell>
-              <TableCell>End Time</TableCell>
-              <TableCell>Break Duration</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {shifts.map((shift: Shift) => (
-              <TableRow key={shift.date + shift.startTime}>
-                <TableCell>{shift.date}</TableCell>
-                <TableCell>{shift.shiftTitle}</TableCell>
-                <TableCell>{shift.startTime}</TableCell>
-                <TableCell>{shift.endTime}</TableCell>
-                <TableCell>{shift.breakDuration}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <div className="mt-2 flex flex-col">
+        {timesheetData.shifts.map((shift, i) => {
+          return (
+            <div className="flex flex-col">
+              <p className="text-md">{shift.date}</p>
+              <p className="text-sm">{shift.shiftTitle}</p>
+              <p className="text-sm text-gray-600">Start: {shift.startTime}</p>
+              <p className="text-sm text-gray-600">End: {shift.endTime}</p>
+              <p className="text-sm text-gray-600">
+                Break Duration: {shift.breakDuration}
+              </p>
+              {i + 1 !== timesheetData.shifts.length ? (
+                <Divider className="my-2" />
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
     );
   };
 
-  return (
-    <div>
-      {isLoading ? (
-        <CircularProgress />
-      ) : (
-        getTimesheetTable(timesheetData.shifts)
-      )}
-    </div>
-  );
+  return <div>{isLoading ? <CircularProgress /> : getTimesheetTable()}</div>;
 };
