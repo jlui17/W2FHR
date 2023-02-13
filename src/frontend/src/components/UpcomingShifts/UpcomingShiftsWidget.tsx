@@ -16,6 +16,16 @@ export const UpcomingShiftsWidget = ({
   isLoading,
   upcomingShiftsData,
 }: UpcomingShiftsWidgetProps): JSX.Element => {
+  const hasNoUpcomingShifts = upcomingShiftsData.shifts.length === 0;
+
+  const displayNoUpcomingShifts = () => {
+    return (
+      <div className="mt-2 flex flex-col items-center justify-center">
+        <p className="text-sm text-gray-600">You have no upcoming shifts</p>
+      </div>
+    );
+  };
+
   const displayUpcomingShifts = () => {
     return (
       <div className="mt-2 grid grid-cols-5">
@@ -45,7 +55,13 @@ export const UpcomingShiftsWidget = ({
       <CardContent>
         <>
           <Typography className="text-lg font-bold">Upcoming Shifts</Typography>
-          {isLoading ? <CircularProgress /> : displayUpcomingShifts()}
+          {isLoading ? (
+            <CircularProgress />
+          ) : hasNoUpcomingShifts ? (
+            displayNoUpcomingShifts()
+          ) : (
+            displayUpcomingShifts()
+          )}
         </>
       </CardContent>
     </Card>
