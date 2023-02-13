@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import React, { useContext, useState } from "react";
+import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
+import { ERROR_MESSAGES } from "../common/constants";
 import { AvailabilityFormWidget } from "./AvailabilityFormWidget";
 import { useAvailabilityData, useUpdateAvailability } from "./helpers/hooks";
 
@@ -27,59 +27,20 @@ const EMPTY_DATA: AvailabilityData = {
   canUpdate: false,
 };
 
-const AvailabilityFormController = (props: any): JSX.Element => {
+const AvailabilityFormController = (): JSX.Element => {
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
   const { getAuthSession } = useContext(AuthenticationContext);
-  const { setAlert } = useAlert();
-  const {
-    isFetching: isLoadingGet,
-    error: getError,
-    isRefetchError: errorOnRefetchGet,
-  } = useAvailabilityData({
+  const { isFetching: isLoadingGet } = useAvailabilityData({
     setAvailabilityData: setAvailabilityData,
     idToken: getAuthSession()?.IdToken || "",
   });
-  const {
-    isFetching: isLoadingUpdate,
-    refetch: updateAvailability,
-    error: updateError,
-    isRefetchError: errorOnRefetchUpdate,
-    isSuccess: updateSucessful,
-  } = useUpdateAvailability({
-    availabilityData: availabilityData,
-    setAvailabilityData: setAvailabilityData,
-    idToken: getAuthSession()?.IdToken || "",
-  });
-
-  useEffect(() => {
-    const error =
-      getError != null ? getError : updateError != null ? updateError : null;
-    if (error) {
-      console.error(`Error in AvailabilityForm:\n${error}`);
-      const errorAlert: AlertInfo = {
-        type: AlertType.ERROR,
-        message: ERROR_MESSAGES.UNKNOWN_ERROR,
-      };
-      if (error instanceof Error) {
-        errorAlert.message = error.message;
-      }
-      setAlert(errorAlert);
-    }
-
-    if (updateSucessful) {
-      setAlert({
-        type: AlertType.SUCCESS,
-        message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
-      });
-    }
-  }, [
-    getError,
-    updateError,
-    updateSucessful,
-    errorOnRefetchGet,
-    errorOnRefetchUpdate,
-  ]);
+  const { isFetching: isLoadingUpdate, refetch: updateAvailability } =
+    useUpdateAvailability({
+      availabilityData: availabilityData,
+      setAvailabilityData: setAvailabilityData,
+      idToken: getAuthSession()?.IdToken || "",
+    });
 
   const handleAvailabilityChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -116,7 +77,23 @@ const AvailabilityFormController = (props: any): JSX.Element => {
 };
 
 export const AvailabilityForm = (): JSX.Element => {
-  const queryClient = new QueryClient();
+  const { setAlert } = useAlert();
+
+  const queryClient = new QueryClient({
+    queryCache: new QueryCache({
+      onError: (error) => {
+        console.error(`Error in AvailabilityForm:\n${error}`);
+        const errorAlert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: ERROR_MESSAGES.UNKNOWN_ERROR,
+        };
+        if (error instanceof Error) {
+          errorAlert.message = error.message;
+        }
+        setAlert(errorAlert);
+      },
+    }),
+  });
   return (
     <QueryClientProvider client={queryClient}>
       <AvailabilityFormController />
