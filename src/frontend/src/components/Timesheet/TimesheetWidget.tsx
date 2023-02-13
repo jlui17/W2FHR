@@ -10,7 +10,19 @@ export const TimesheetWidget = ({
   isLoading,
   timesheetData,
 }: TimesheetWidgetProps): JSX.Element => {
-  const getTimesheetTable = (): JSX.Element => {
+  const hasNoShifts = timesheetData.shifts.length === 0;
+
+  const displayEmptyTimesheet = (): JSX.Element => {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <p className="text-sm text-gray-600">
+          You haven't worked any shifts yet
+        </p>
+      </div>
+    );
+  };
+
+  const displayTimesheet = (): JSX.Element => {
     return (
       <div className="mt-2 flex flex-col">
         {timesheetData.shifts.map((shift, i) => {
@@ -33,5 +45,15 @@ export const TimesheetWidget = ({
     );
   };
 
-  return <div>{isLoading ? <CircularProgress /> : getTimesheetTable()}</div>;
+  return (
+    <div>
+      {isLoading ? (
+        <CircularProgress />
+      ) : hasNoShifts ? (
+        displayEmptyTimesheet()
+      ) : (
+        displayTimesheet()
+      )}
+    </div>
+  );
 };
