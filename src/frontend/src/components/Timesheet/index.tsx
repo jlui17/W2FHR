@@ -1,3 +1,3 @@
-import { Timesheet } from "./Timesheet";
+import { Timesheet } from "./TimesheetController";
 
 export default Timesheet;
