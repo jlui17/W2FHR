@@ -1,5 +1,5 @@
-import { useContext, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { useContext } from "react";
+import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES } from "../common/constants";
@@ -11,34 +11,15 @@ const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 const UpcomingShiftsController = (): JSX.Element => {
   const { getAuthSession } = useContext(AuthenticationContext);
-  const { setAlert } = useAlert();
 
   try {
     const {
       isFetching: upcomingShiftsDataIsLoading,
       data: upcomingShiftsData,
-      isError,
-      error,
-      isRefetchError,
     } = useTimesheetData({
       idToken: getAuthSession()?.IdToken || "",
       getUpcoming: true,
     });
-
-    useEffect(() => {
-      if (isError || isRefetchError) {
-        console.error(`Error while fetching upcoming shifts:\n${error}`);
-        const errorAlert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: ERROR_MESSAGES.UNKNOWN_ERROR,
-        };
-
-        if (error instanceof Error) {
-          errorAlert.message = error.message;
-        }
-        setAlert(errorAlert);
-      }
-    }, [isError, isRefetchError, error]);
 
     if (upcomingShiftsDataIsLoading) {
       return <UpcomingShiftsWidget isLoading upcomingShiftsData={EMPTY_DATA} />;
@@ -65,7 +46,23 @@ const UpcomingShiftsController = (): JSX.Element => {
 };
 
 export const UpcomingShifts = (): JSX.Element => {
-  const queryClient = new QueryClient();
+  const { setAlert } = useAlert();
+
+  const queryClient = new QueryClient({
+    queryCache: new QueryCache({
+      onError: (error) => {
+        console.error(`Error in UpcomingShifts:\n${error}`);
+        const errorAlert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: ERROR_MESSAGES.UNKNOWN_ERROR,
+        };
+        if (error instanceof Error) {
+          errorAlert.message = error.message;
+        }
+        setAlert(errorAlert);
+      },
+    }),
+  });
   return (
     <QueryClientProvider client={queryClient}>
       <UpcomingShiftsController />
