@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 import { AvailabilityData } from "../AvailabilityController";
 
@@ -50,15 +50,17 @@ export const useAvailabilityData = ({
 
 interface UseUpdateAvailabilityProps {
   availabilityData: AvailabilityData;
-  setAvailabilityData: (data: AvailabilityData) => void;
   idToken: string;
+  onSuccess: (data: AvailabilityData) => void;
+  onError: (err: unknown) => void;
 }
 export const useUpdateAvailability = ({
   availabilityData,
-  setAvailabilityData,
   idToken,
+  onSuccess,
+  onError,
 }: UseUpdateAvailabilityProps) => {
-  const updateAvailability = async (): Promise<void> => {
+  const updateAvailability = async (): Promise<AvailabilityData> => {
     const response = await fetch(API_URLS.AVAILABILITY, {
       headers: {
         Authorization: `Bearer ${idToken}`,
@@ -76,8 +78,7 @@ export const useUpdateAvailability = ({
             new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
           );
         }
-        setAvailabilityData(data);
-        return Promise.resolve();
+        return Promise.resolve(data);
       case 403:
         return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
       case 404:
@@ -87,5 +88,8 @@ export const useUpdateAvailability = ({
     }
   };
 
-  return useQuery("updateAvailability", updateAvailability, { enabled: false });
+  return useMutation(updateAvailability, {
+    onSuccess: onSuccess,
+    onError: onError,
+  });
 };

@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
-import { ERROR_MESSAGES } from "../common/constants";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
 import { AvailabilityFormWidget } from "./AvailabilityFormWidget";
 import { useAvailabilityData, useUpdateAvailability } from "./helpers/hooks";
 
@@ -28,6 +28,7 @@ const EMPTY_DATA: AvailabilityData = {
 };
 
 const AvailabilityFormController = (): JSX.Element => {
+  const { setAlert } = useAlert();
   const [availabilityData, setAvailabilityData] =
     useState<AvailabilityData>(EMPTY_DATA);
   const { getAuthSession } = useContext(AuthenticationContext);
@@ -35,12 +36,33 @@ const AvailabilityFormController = (): JSX.Element => {
     setAvailabilityData: setAvailabilityData,
     idToken: getAuthSession()?.IdToken || "",
   });
-  const { isFetching: isLoadingUpdate, refetch: updateAvailability } =
+  const { mutate: updateAvailability, isLoading: isLoadingUpdate } =
     useUpdateAvailability({
       availabilityData: availabilityData,
-      setAvailabilityData: setAvailabilityData,
       idToken: getAuthSession()?.IdToken || "",
+      onSuccess: (data: AvailabilityData) => onSuccessfulUpdate(data),
+      onError: (error: unknown) => onFailedUpdate(error),
     });
+
+  const onSuccessfulUpdate = (data: AvailabilityData): void => {
+    setAlert({
+      type: AlertType.SUCCESS,
+      message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
+    });
+    setAvailabilityData(data);
+  };
+
+  const onFailedUpdate = (error: unknown): void => {
+    console.error(`Error in Availability:\n${error}`);
+    const errorAlert: AlertInfo = {
+      type: AlertType.ERROR,
+      message: ERROR_MESSAGES.UNKNOWN_ERROR,
+    };
+    if (error instanceof Error) {
+      errorAlert.message = error.message;
+    }
+    setAlert(errorAlert);
+  };
 
   const handleAvailabilityChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -82,7 +104,7 @@ export const AvailabilityForm = (): JSX.Element => {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
       onError: (error) => {
-        console.error(`Error in AvailabilityForm:\n${error}`);
+        console.error(`Error in Availability:\n${error}`);
         const errorAlert: AlertInfo = {
           type: AlertType.ERROR,
           message: ERROR_MESSAGES.UNKNOWN_ERROR,
