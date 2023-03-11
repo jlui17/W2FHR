@@ -91,8 +91,9 @@ const AuthenticationController = () => {
       console.error(err);
       setAlert(errorAlert);
     }
-    setIsLoading(false);
     setIsConfirmingAccount(false);
+    setEmail("");
+    setIsLoading(false);
   };
 
   const onSendVerificationCode = async () => {
@@ -142,7 +143,6 @@ const AuthenticationController = () => {
         setAlert(errorAlert);
       }
     }
-    setEmail("");
     setPassword("");
     setIsLoading(false);
   };
