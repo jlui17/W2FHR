@@ -152,14 +152,16 @@ const AuthenticationController = () => {
   return isLoggedIn() ? (
     <Navigate to={ROUTES.DASHBOARD} />
   ) : isConfirmingAccount ? (
-    <VerifyWidget
-      isLoading={isLoading}
-      verificationCode={verificationCode}
-      onVerify={onConfirmAccount}
-      onResendVerificationCode={onSendVerificationCode}
-      handleChange={handleChange}
-      showResendVerificationCode={true}
-    />
+    <div className="flex h-screen w-screen place-items-center">
+      <VerifyWidget
+        isLoading={isLoading}
+        verificationCode={verificationCode}
+        onVerify={onConfirmAccount}
+        onResendVerificationCode={onSendVerificationCode}
+        handleChange={handleChange}
+        showResendVerificationCode={true}
+      />
+    </div>
   ) : (
     <LoginSignupWidget
       email={email}
