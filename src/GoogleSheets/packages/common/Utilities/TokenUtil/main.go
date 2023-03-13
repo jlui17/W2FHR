@@ -16,8 +16,13 @@ func getIdTokenFromBearerToken(bearerToken string) (string, error) {
 		return "", errors.New(SharedConstants.INVALID_ID_TOKEN_ERROR)
 	}
 
-	idToken := strings.Split(bearerToken, " ")[1]
-	return idToken, nil
+	splitBearerToken := strings.Split(bearerToken, " ")
+	if len(splitBearerToken) != 2 {
+		return "", errors.New(SharedConstants.NOT_A_BEARER_TOKEN_ERROR)
+	}
+
+	// ["bearer", idToken]
+	return splitBearerToken[1], nil
 }
 
 func parseIdToken(idToken string) (*jwt.Token, error) {
