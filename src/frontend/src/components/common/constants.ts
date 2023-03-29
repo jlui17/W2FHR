@@ -10,7 +10,7 @@ const PLEASE_CONTACT_JUSTIN =
 export const ERROR_MESSAGES = {
   UNKNOWN_ERROR: "An unknown error has occurred. " + PLEASE_CONTACT_JUSTIN,
   EMPLOYEE_NOT_FOUND:
-    "Email not found. Make sure you're using the same email provided during on-boarding (case-sensitive). If the problem persists, please contact a manager.",
+    "Email not found. Make sure you're using the same email provided during on-boarding. If the problem persists, please contact a manager.",
   SERVER: {
     GENERAL_ERROR: "Server error. " + PLEASE_CONTACT_JUSTIN,
     DATA_INCONSISTENT: `A server error has occurred (DATA INCONSISTENT). ${PLEASE_CONTACT_JUSTIN}`,
