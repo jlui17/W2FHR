@@ -55,7 +55,7 @@ func getStaffListInfo() (AuthConstants.STAFF_LIST_INFO, error) {
 
 func getEmployeeId(email string, staffListInfo AuthConstants.STAFF_LIST_INFO) (string, error) {
 	for i, staffEmail := range staffListInfo.Emails {
-		if strings.EqualFold(email, staffEmail.(string)) {
+		if strings.EqualFold(email, strings.TrimSpace(staffEmail.(string))) {
 			return staffListInfo.EmployeeIds[i].(string), nil
 		}
 	}
