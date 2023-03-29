@@ -11,6 +11,7 @@ export class AuthService extends Stack {
     this.userPool = new UserPool(this, "employees", {
       userPoolName: "employees",
       selfSignUpEnabled: true,
+      signInCaseSensitive: false,
       signInAliases: {
         email: true,
       },
