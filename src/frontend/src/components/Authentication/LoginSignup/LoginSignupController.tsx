@@ -34,13 +34,13 @@ const AuthenticationController = () => {
     const { name, value } = event.target;
     switch (name) {
       case "email":
-        setEmail(value);
+        setEmail(value.trim());
         break;
       case "password":
         setPassword(value);
         break;
       case "verificationCode":
-        setVerificationCode(value);
+        setVerificationCode(value.trim());
         break;
       default:
         break;
@@ -92,7 +92,6 @@ const AuthenticationController = () => {
       setAlert(errorAlert);
     }
     setIsConfirmingAccount(false);
-    setEmail("");
     setIsLoading(false);
   };
 
