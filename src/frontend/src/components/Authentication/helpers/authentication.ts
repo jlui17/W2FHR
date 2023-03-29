@@ -20,7 +20,7 @@ import {
 
 const COGNITO_CONFIG = {
   region: "us-west-2",
-  clientId: "1g3gnedq2i6naqdjrbsq10pb54",
+  clientId: "4kkjr0at3bjoeli3uuprqrthru",
 };
 const COGNITO_CLIENT = new CognitoIdentityProviderClient({
   region: "us-west-2",
