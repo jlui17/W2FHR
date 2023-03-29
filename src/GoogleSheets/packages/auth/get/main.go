@@ -6,6 +6,7 @@ import (
 	"GoogleSheets/packages/common/GoogleClient"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 func HandleRequest(email string) (string, error) {
@@ -54,7 +55,7 @@ func getStaffListInfo() (AuthConstants.STAFF_LIST_INFO, error) {
 
 func getEmployeeId(email string, staffListInfo AuthConstants.STAFF_LIST_INFO) (string, error) {
 	for i, staffEmail := range staffListInfo.Emails {
-		if staffEmail.(string) == email {
+		if strings.EqualFold(email, staffEmail.(string)) {
 			return staffListInfo.EmployeeIds[i].(string), nil
 		}
 	}
