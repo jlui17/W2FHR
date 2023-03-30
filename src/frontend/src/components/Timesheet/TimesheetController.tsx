@@ -29,7 +29,9 @@ const TimesheetController = (): JSX.Element => {
   });
 
   if (!data) {
-    return <TimesheetWidget isLoading={false} timesheetData={EMPTY_DATA} />;
+    return (
+      <TimesheetWidget isLoading={isFetching} timesheetData={EMPTY_DATA} />
+    );
   }
 
   return <TimesheetWidget isLoading={isFetching} timesheetData={data} />;
