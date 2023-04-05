@@ -1,98 +1,44 @@
-package UpdateAvailability
+package main
 
 import (
-	GetAvailability "GoogleSheets/packages/availability/get"
+	UpdateAvailability "GoogleSheets/packages/availability/update/helpers"
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
+	"GoogleSheets/packages/common/Utilities/TokenUtil"
+	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
-	"google.golang.org/api/sheets/v4"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (events.APIGatewayProxyResponse, error) {
-	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
-	if err != nil {
-		statusCode := 500
-		if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
-			statusCode = 404
-		}
-		if err.Error() == AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR {
-			statusCode = 403
-		}
+func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	idToken, exists := event.Headers["Authorization"]
+	if !exists {
 		return events.APIGatewayProxyResponse{
-			StatusCode: statusCode,
-			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			StatusCode: 401,
+			Body:       SharedConstants.INCLUDE_AUTH_HEADER_ERROR,
+		}, nil
+	}
+
+	GoogleClient.ConnectSheetsServiceIfNecessary()
+	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
 			Body:       err.Error(),
 		}, nil
 	}
-	res, _ := json.Marshal(updatedEmployeeAvailability)
-	return events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-		Body:       fmt.Sprint(string(res)),
-	}, nil
+
+	newAvailabilityFromRequestBody := event.Body
+	newEmployeeAvailability := AvailabilityConstants.EmployeeAvailability{}
+	json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
+
+	return UpdateAvailability.HandleRequest(employeeId, &newEmployeeAvailability)
 }
 
-func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
-	canUpdate, err := GetAvailability.CanUpdateAvailability()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	if !canUpdate {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, errors.New(AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR)
-	}
-
-	availabilityTimesheet, err := GetAvailability.GetAvailabilityTimesheet()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	employeeAvailabilityRow, err := GetAvailability.FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	return updateAvailabilityOnRow(employeeAvailabilityRow+AvailabilityConstants.GOOGLESHEETS_ROW_OFFSET, newEmployeeAvailability)
-}
-
-func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
-	sheetsService := GoogleClient.GetSheetsService()
-
-	updateRange := AvailabilityConstants.GetUpdateAvailabilityRangeFromRow(employeeAvailabilityRow)
-	updateValueRange := createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability)
-	updateResponse, err := sheetsService.Spreadsheets.Values.Update(AvailabilityConstants.AVAILABILITY_SHEET_ID, updateRange, updateValueRange).ValueInputOption("RAW").IncludeValuesInResponse(true).Do()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	return getEmployeeAvailabilityFromUpdateResponse(updateResponse)
-}
-
-func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) *sheets.ValueRange {
-	updatedValues := make([][]interface{}, 0)
-	updatedValues = append(
-		updatedValues,
-		[]interface{}{
-			newEmployeeAvailability.Day1.IsAvailable,
-			newEmployeeAvailability.Day2.IsAvailable,
-			newEmployeeAvailability.Day3.IsAvailable,
-			newEmployeeAvailability.Day4.IsAvailable})
-	updatedValueRange := sheets.ValueRange{Values: updatedValues}
-	return &updatedValueRange
-}
-
-func getEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) (*AvailabilityConstants.EmployeeAvailability, error) {
-	updateResponseValueRange := updateResponse.UpdatedData
-	isAvailableDay1 := updateResponseValueRange.Values[0][0] == "TRUE"
-	isAvailableDay2 := updateResponseValueRange.Values[0][1] == "TRUE"
-	isAvailableDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
-	isAvailableDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
-
-	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4, true)
+func main() {
+	lambda.Start(HandleRequest)
 }

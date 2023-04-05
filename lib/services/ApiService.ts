@@ -13,7 +13,8 @@ import { Construct } from "constructs";
 
 interface ApiServiceProps {
   GoogleSheets: {
-    availabilityHandler: GoFunction;
+    getAvailabilityHandler: GoFunction;
+    updateAvailabilityHandler: GoFunction;
     timesheetHandler: GoFunction;
     authHandler: GoFunction;
   };
@@ -60,7 +61,7 @@ export class ApiService extends Stack {
     const availabilityRoute = api.root.addResource("availability");
     availabilityRoute.addMethod(
       "GET",
-      new LambdaIntegration(props.GoogleSheets.availabilityHandler),
+      new LambdaIntegration(props.GoogleSheets.getAvailabilityHandler),
       {
         authorizer,
         authorizationType: AuthorizationType.COGNITO,
@@ -68,7 +69,7 @@ export class ApiService extends Stack {
     );
     availabilityRoute.addMethod(
       "POST",
-      new LambdaIntegration(props.GoogleSheets.availabilityHandler),
+      new LambdaIntegration(props.GoogleSheets.updateAvailabilityHandler),
       {
         authorizer,
         authorizationType: AuthorizationType.COGNITO,

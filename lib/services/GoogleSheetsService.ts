@@ -4,7 +4,8 @@ import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
 export class GoogleSheetsService extends Stack {
-  public readonly availabilityHandler: GoFunction;
+  public readonly getAvailabilityHandler: GoFunction;
+  public readonly updateAvailabilityHandler: GoFunction;
   public readonly timesheetHandler: GoFunction;
   public readonly authHandler: GoFunction;
 
@@ -20,11 +21,24 @@ export class GoogleSheetsService extends Stack {
       "G_SERVICE_CONFIG"
     );
 
-    this.availabilityHandler = new GoFunction(
+    this.getAvailabilityHandler = new GoFunction(
       this,
-      "GoogleSheetsAvailabilityHandler",
+      "GoogleSheetsGetAvailabilityHandler",
       {
-        entry: `${SOURCE_PACKAGES_DIR}/availability`,
+        entry: `${SOURCE_PACKAGES_DIR}/availability/get`,
+        moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(5),
+        environment: {
+          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+        },
+      }
+    );
+
+    this.updateAvailabilityHandler = new GoFunction(
+      this,
+      "GoogleSheetsUpdateAvailabilityHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/availability/update`,
         moduleDir: MODULE_DIR,
         timeout: Duration.seconds(5),
         environment: {

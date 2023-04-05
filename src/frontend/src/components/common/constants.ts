@@ -1,4 +1,4 @@
-const BASE_URL = "https://gny5j59mo3.execute-api.us-west-2.amazonaws.com/v1";
+const BASE_URL = "https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1";
 export const API_URLS = {
   TIMESHEET: `${BASE_URL}/timesheet`,
   AVAILABILITY: `${BASE_URL}/availability`,

@@ -13,7 +13,8 @@ const apiServiceDependencies = [googleSheetsService, authService];
 
 const apiService = new ApiService(app, "ApiService", {
   GoogleSheets: {
-    availabilityHandler: googleSheetsService.availabilityHandler,
+    getAvailabilityHandler: googleSheetsService.getAvailabilityHandler,
+    updateAvailabilityHandler: googleSheetsService.updateAvailabilityHandler,
     timesheetHandler: googleSheetsService.timesheetHandler,
     authHandler: googleSheetsService.authHandler,
   },
