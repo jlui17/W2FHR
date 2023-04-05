@@ -3,7 +3,6 @@ import { Stack } from "aws-cdk-lib";
 import {
   AuthorizationType,
   CognitoUserPoolsAuthorizer,
-  Cors,
   LambdaIntegration,
   MethodLoggingLevel,
   RestApi,
@@ -40,7 +39,10 @@ export class ApiService extends Stack {
         ],
         allowMethods: ["GET", "POST", "DELETE"],
         allowCredentials: true,
-        allowOrigins: Cors.ALL_ORIGINS,
+        allowOrigins: [
+          "https://employees.wun2free.com",
+          "https://www.employees.wun2free.com",
+        ],
       },
 
       deployOptions: {
