@@ -1,12 +1,12 @@
 package GoogleClient
 
 import (
-	"GoogleSheets/packages/common/ConfigService"
 	"context"
+	"os"
 
 	"google.golang.org/api/sheets/v4"
 
-	"golang.org/x/oauth2/jwt"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
@@ -15,18 +15,13 @@ const (
 	READ_WRITE_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 )
 
-func getConfig(scope string) *jwt.Config {
-	return &jwt.Config{
-		Email:        ConfigService.GetClientEmail(),
-		PrivateKey:   []byte(ConfigService.GetPrivateKey()),
-		PrivateKeyID: ConfigService.GetPrivateKeyId(),
-		TokenURL:     ConfigService.GetTokenUrl(),
-		Scopes:       []string{scope},
-	}
-}
-
 func GetReadOnlyService() (*sheets.Service, error) {
-	client := getConfig(READ_ONLY_SCOPE).Client(context.Background())
+	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets.readonly")
+	if err != nil {
+		return &sheets.Service{}, nil
+	}
+
+	client := token.Client(context.Background())
 	service, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
 	if err != nil {
 		return service, err
@@ -35,7 +30,12 @@ func GetReadOnlyService() (*sheets.Service, error) {
 }
 
 func GetReadWriteService() (*sheets.Service, error) {
-	client := getConfig(READ_WRITE_SCOPE).Client(context.Background())
+	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets")
+	if err != nil {
+		return &sheets.Service{}, nil
+	}
+
+	client := token.Client(context.Background())
 	service, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
 	if err != nil {
 		return service, err
