@@ -15,30 +15,26 @@ const (
 	READ_WRITE_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 )
 
-func GetReadOnlyService() (*sheets.Service, error) {
-	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets.readonly")
-	if err != nil {
-		return &sheets.Service{}, nil
-	}
+var (
+	sheetsService *sheets.Service
+)
 
-	client := token.Client(context.Background())
-	service, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
-	if err != nil {
-		return service, err
-	}
-	return service, nil
+func GetSheetsService() *sheets.Service {
+	return sheetsService
 }
 
-func GetReadWriteService() (*sheets.Service, error) {
-	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets")
+func ConnectSheetsServiceIfNecessary() error {
+	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
-		return &sheets.Service{}, nil
+		return nil
 	}
 
 	client := token.Client(context.Background())
 	service, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
 	if err != nil {
-		return service, err
+		return err
 	}
-	return service, nil
+
+	sheetsService = service
+	return nil
 }

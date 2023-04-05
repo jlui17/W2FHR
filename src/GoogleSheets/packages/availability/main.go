@@ -5,6 +5,7 @@ import (
 	UpdateAvailability "GoogleSheets/packages/availability/update"
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	"context"
 	"encoding/json"
@@ -23,6 +24,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	GoogleClient.ConnectSheetsServiceIfNecessary()
 	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

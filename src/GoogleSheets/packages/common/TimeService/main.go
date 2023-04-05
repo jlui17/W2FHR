@@ -11,10 +11,7 @@ import (
 )
 
 func GetDatesForSettingAvailability(datesReadRange string) (*[]string, error) {
-	sheetsService, err := GoogleClient.GetReadOnlyService()
-	if err != nil {
-		return nil, err
-	}
+	sheetsService := GoogleClient.GetSheetsService()
 
 	readRange := datesReadRange
 

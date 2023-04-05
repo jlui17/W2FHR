@@ -3,6 +3,7 @@ package main
 import (
 	GetEmployeeId "GoogleSheets/packages/auth/get"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"GoogleSheets/packages/common/GoogleClient"
 	"context"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -19,6 +20,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	GoogleClient.ConnectSheetsServiceIfNecessary()
 	employeeId, err := GetEmployeeId.HandleRequest(email)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

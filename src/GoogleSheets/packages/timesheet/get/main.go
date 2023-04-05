@@ -41,10 +41,7 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 }
 
 func getMasterTimesheet() (*sheets.ValueRange, error) {
-	sheetsService, err := GoogleClient.GetReadOnlyService()
-	if err != nil {
-		return &sheets.ValueRange{}, err
-	}
+	sheetsService := GoogleClient.GetSheetsService()
 
 	sheetId := TimesheetConstants.TIMESHEET_SHEET_ID
 	readRange := fmt.Sprintf("%s!%s", TimesheetConstants.MASTER_TIMESHEET_SHEET_NAME, TimesheetConstants.TIMESHEET_GET_RANGE)

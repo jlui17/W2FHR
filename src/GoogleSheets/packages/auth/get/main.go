@@ -28,10 +28,7 @@ func HandleRequest(email string) (string, error) {
 }
 
 func getStaffListInfo() (AuthConstants.STAFF_LIST_INFO, error) {
-	sheetsService, err := GoogleClient.GetReadOnlyService()
-	if err != nil {
-		return *AuthConstants.DEFAULT_STAFF_LIST_INFO, err
-	}
+	sheetsService := GoogleClient.GetSheetsService()
 
 	sheetId := AuthConstants.STAFF_LIST_SHEET_ID
 

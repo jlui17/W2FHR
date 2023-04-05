@@ -2,6 +2,7 @@ package main
 
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	GetTimesheet "GoogleSheets/packages/timesheet/get"
 	"context"
@@ -20,6 +21,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	GoogleClient.ConnectSheetsServiceIfNecessary()
 	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

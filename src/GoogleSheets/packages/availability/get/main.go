@@ -70,10 +70,7 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 }
 
 func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
-	sheetsService, err := GoogleClient.GetReadOnlyService()
-	if err != nil {
-		return &sheets.ValueRange{}, err
-	}
+	sheetsService := GoogleClient.GetSheetsService()
 
 	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
 	readRange := AvailabilityConstants.AVAILABILITY_TIMESHEET_GET_RANGE
@@ -96,10 +93,7 @@ func FindRowOfEmployeeAvailability(availabilityTimesheet *sheets.ValueRange, emp
 }
 
 func CanUpdateAvailability() (bool, error) {
-	sheetsService, err := GoogleClient.GetReadOnlyService()
-	if err != nil {
-		return false, err
-	}
+	sheetsService := GoogleClient.GetSheetsService()
 
 	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
 	readRange := AvailabilityConstants.AVAILABILITY_CAN_UPDATE_CELL

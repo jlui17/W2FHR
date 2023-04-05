@@ -62,10 +62,7 @@ func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *Avai
 }
 
 func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
-	sheetsService, err := GoogleClient.GetReadWriteService()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
+	sheetsService := GoogleClient.GetSheetsService()
 
 	updateRange := AvailabilityConstants.GetUpdateAvailabilityRangeFromRow(employeeAvailabilityRow)
 	updateValueRange := createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability)
