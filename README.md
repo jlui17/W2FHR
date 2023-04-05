@@ -1,14 +1,24 @@
-# Welcome to your CDK TypeScript project
+# Wun2Free Entertainment HR System
 
-This is a blank project for CDK development with TypeScript.
+## System Breakdown
+### [Website](https://employees.wun2free.com): Our customer built all-in-one hub for our employees for weekly scheduling. Employees can:
+- See the operations days (changes weekly)
+- Set their availability
+- See their upcoming shifts
+- See their shift history
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+Tech: 
+- TypeScript
+- React
+- Vite
+- TailwindCSS
+- React Router
+- AWS Cognito SDK 
+- Deployed with S3
 
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+### Backend: An API that allows our website to interact with out Google Sheets database.
+Tech:
+- Golang
+- Google Sheets SDK
+- AWS Lambda
+- AWS APIGateway

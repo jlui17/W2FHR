@@ -1,7 +1,7 @@
 package SharedConstants
 
 var (
-	ALLOW_ORIGINS_HEADER = map[string]string{"Access-Control-Allow-Origin": "https://employees.wun2free.com"}
+	ALLOW_ORIGINS_HEADER = map[string]string{"Access-Control-Allow-Origin": "*"}
 )
 
 type ErrorMessages string
