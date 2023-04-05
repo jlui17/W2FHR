@@ -57,13 +57,5 @@ export class GoogleSheetsService extends Stack {
         },
       }
     );
-
-    new GoFunction(this, "Test", {
-      entry: `${SOURCE_PACKAGES_DIR}/test`,
-      moduleDir: MODULE_DIR,
-      environment: {
-        G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
-      },
-    });
   }
 }
