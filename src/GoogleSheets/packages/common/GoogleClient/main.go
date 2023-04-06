@@ -24,9 +24,13 @@ func GetSheetsService() *sheets.Service {
 }
 
 func ConnectSheetsServiceIfNecessary() error {
+	if sheetsService != nil {
+		return nil
+	}
+
 	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
-		return nil
+		return err
 	}
 
 	client := token.Client(context.Background())
