@@ -28,7 +28,7 @@ func ConnectSheetsServiceIfNecessary() error {
 		return nil
 	}
 
-	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets.readonly")
+	token, err := google.JWTConfigFromJSON([]byte(os.Getenv("G_SERVICE_CONFIG_JSON")), "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
 		return err
 	}
