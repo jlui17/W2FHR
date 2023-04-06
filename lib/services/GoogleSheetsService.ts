@@ -27,7 +27,7 @@ export class GoogleSheetsService extends Stack {
       {
         entry: `${SOURCE_PACKAGES_DIR}/availability/get`,
         moduleDir: MODULE_DIR,
-        timeout: Duration.seconds(5),
+        timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
         },
@@ -40,7 +40,7 @@ export class GoogleSheetsService extends Stack {
       {
         entry: `${SOURCE_PACKAGES_DIR}/availability/update`,
         moduleDir: MODULE_DIR,
-        timeout: Duration.seconds(5),
+        timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
         },
@@ -66,6 +66,7 @@ export class GoogleSheetsService extends Stack {
       {
         entry: `${SOURCE_PACKAGES_DIR}/auth`,
         moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
         },
