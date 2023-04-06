@@ -8,6 +8,7 @@ import (
 	"GoogleSheets/packages/common/Utilities/TokenUtil"
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -34,7 +35,9 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	newAvailabilityFromRequestBody := event.Body
 	newEmployeeAvailability := AvailabilityConstants.EmployeeAvailability{}
+	log.Printf("New Availability: %s", newAvailabilityFromRequestBody)
 	json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
+	log.Printf("Successfully parsed request body: %v", newEmployeeAvailability)
 
 	return UpdateAvailability.HandleRequest(employeeId, &newEmployeeAvailability)
 }

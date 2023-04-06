@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"google.golang.org/api/sheets/v4"
@@ -17,6 +18,7 @@ import (
 func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (events.APIGatewayProxyResponse, error) {
 	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
 	if err != nil {
+		log.Printf("Error while updating availability: %s", err.Error())
 		statusCode := 500
 		if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
 			statusCode = 404
