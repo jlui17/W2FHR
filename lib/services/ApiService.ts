@@ -1,5 +1,5 @@
 import { GoFunction } from "@aws-cdk/aws-lambda-go-alpha";
-import { Stack } from "aws-cdk-lib";
+import { Duration, Stack } from "aws-cdk-lib";
 import {
   AuthorizationType,
   CognitoUserPoolsAuthorizer,
@@ -8,15 +8,10 @@ import {
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
 interface ApiServiceProps {
-  GoogleSheets: {
-    getAvailabilityHandler: GoFunction;
-    updateAvailabilityHandler: GoFunction;
-    timesheetHandler: GoFunction;
-    authHandler: GoFunction;
-  };
   AuthService: {
     userPool: UserPool;
   };
@@ -27,6 +22,68 @@ export class ApiService extends Stack {
 
   constructor(scope: Construct, id: string, props: ApiServiceProps) {
     super(scope, id);
+
+    const SOURCE_DIR = "src/GoogleSheets";
+    const MODULE_DIR = `${SOURCE_DIR}/go.mod`;
+    const SOURCE_PACKAGES_DIR = `${SOURCE_DIR}/packages`;
+
+    const G_CLOUD_CONFIG = Secret.fromSecretNameV2(
+      this,
+      "G_CLOUD_CONFIG_SECRET",
+      "G_SERVICE_CONFIG"
+    );
+
+    const getAvailabilityHandler = new GoFunction(
+      this,
+      "GoogleSheetsGetAvailabilityHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/availability/get`,
+        moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
+        environment: {
+          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+        },
+      }
+    );
+
+    const updateAvailabilityHandler = new GoFunction(
+      this,
+      "GoogleSheetsUpdateAvailabilityHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/availability/update`,
+        moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
+        environment: {
+          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+        },
+      }
+    );
+
+    const timesheetHandler = new GoFunction(
+      this,
+      "GoogleSheetsTimesheetHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/timesheet`,
+        moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
+        environment: {
+          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+        },
+      }
+    );
+
+    const authHandler = new GoFunction(
+      this,
+      "GoogleSheetsGetEmployeeIdHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/auth`,
+        moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
+        environment: {
+          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+        },
+      }
+    );
 
     const api = new RestApi(this, "RestApi", {
       defaultCorsPreflightOptions: {
@@ -63,7 +120,7 @@ export class ApiService extends Stack {
     const availabilityRoute = api.root.addResource("availability");
     availabilityRoute.addMethod(
       "GET",
-      new LambdaIntegration(props.GoogleSheets.getAvailabilityHandler),
+      new LambdaIntegration(getAvailabilityHandler),
       {
         authorizer,
         authorizationType: AuthorizationType.COGNITO,
@@ -71,7 +128,7 @@ export class ApiService extends Stack {
     );
     availabilityRoute.addMethod(
       "POST",
-      new LambdaIntegration(props.GoogleSheets.updateAvailabilityHandler),
+      new LambdaIntegration(updateAvailabilityHandler),
       {
         authorizer,
         authorizationType: AuthorizationType.COGNITO,
@@ -79,26 +136,13 @@ export class ApiService extends Stack {
     );
 
     const timesheetRoute = api.root.addResource("timesheet");
-    timesheetRoute.addMethod(
-      "GET",
-      new LambdaIntegration(props.GoogleSheets.timesheetHandler),
-      {
-        authorizer,
-        authorizationType: AuthorizationType.COGNITO,
-      }
-    );
+    timesheetRoute.addMethod("GET", new LambdaIntegration(timesheetHandler), {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const baseAuthRoute = api.root.addResource("auth");
     const authRoute = baseAuthRoute.addResource("{email}");
-    authRoute.addMethod(
-      "GET",
-      new LambdaIntegration(props.GoogleSheets.authHandler)
-    );
-  }
-
-  public addDependencies(targets: Stack[]): void {
-    targets.forEach((dependency) => {
-      this.addDependency(dependency);
-    });
+    authRoute.addMethod("GET", new LambdaIntegration(authHandler));
   }
 }
