@@ -24,13 +24,8 @@
   "dependencies": {
     "@aws-cdk/aws-lambda-go": "^1.164.0",
     "@aws-cdk/aws-lambda-go-alpha": "^2.32.1-alpha.0",
-    "@emotion/react": "^11.10.5",
-    "@emotion/styled": "^11.10.5",
-    "@mui/material": "^5.10.17",
     "aws-cdk-lib": "2.32.1",
-    "axios": "^1.2.1",
     "constructs": "^10.1.48",
-    "react-query": "^3.39.2",
     "source-map-support": "^0.5.21"
   }
 }
