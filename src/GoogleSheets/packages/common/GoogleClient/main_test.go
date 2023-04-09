@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-const mOCK_G_SERVICE_CONFIG_JSON = "{\"type\":\"service_account\",\"project_id\":\"\",\"private_key_id\":\"\",\"private_key\":\"\",\"client_email\":\"\",\"client_id\":\"\",\"auth_uri\":\"\",\"token_uri\":\"\",\"auth_provider_x509_cert_url\":\"\",\"client_x509_cert_url\":\"\"}"
+const MOCK_G_SERVICE_CONFIG_JSON = "{\"type\":\"service_account\",\"project_id\":\"\",\"private_key_id\":\"\",\"private_key\":\"\",\"client_email\":\"\",\"client_id\":\"\",\"auth_uri\":\"\",\"token_uri\":\"\",\"auth_provider_x509_cert_url\":\"\",\"client_x509_cert_url\":\"\"}"
 
 func beforeEach() {
-	os.Setenv("G_SERVICE_CONFIG_JSON", mOCK_G_SERVICE_CONFIG_JSON)
+	os.Setenv("G_SERVICE_CONFIG_JSON", MOCK_G_SERVICE_CONFIG_JSON)
 }
 
 func TestSuccessfullyConnectToSheets(t *testing.T) {

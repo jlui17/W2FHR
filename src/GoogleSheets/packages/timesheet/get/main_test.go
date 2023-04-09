@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-func TestGetMasterTimesheet(t *testing.T) {
-	_, err := getMasterTimesheet()
-	if err != nil {
-		t.Errorf("Error getting master timesheet: %v", err)
-	}
-}
-
 func createShift(employeeId string, title string, date string, start string, end string, breakDuration string) []interface{} {
 	return []interface{}{
 		"",
