@@ -34,24 +34,11 @@ export class ApiService extends Stack {
       "G_SERVICE_CONFIG"
     );
 
-    const getAvailabilityHandler = new GoFunction(
+    const availabilityHandler = new GoFunction(
       this,
-      "GoogleSheetsGetAvailabilityHandler",
+      "GoogleSheetsAvailabilityHandler",
       {
-        entry: `${SOURCE_PACKAGES_DIR}/availability/get`,
-        moduleDir: MODULE_DIR,
-        timeout: Duration.seconds(10),
-        environment: {
-          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
-        },
-      }
-    );
-
-    const updateAvailabilityHandler = new GoFunction(
-      this,
-      "GoogleSheetsUpdateAvailabilityHandler",
-      {
-        entry: `${SOURCE_PACKAGES_DIR}/availability/update`,
+        entry: `${SOURCE_PACKAGES_DIR}/availability`,
         moduleDir: MODULE_DIR,
         timeout: Duration.seconds(10),
         environment: {
@@ -118,7 +105,7 @@ export class ApiService extends Stack {
     const availabilityRoute = api.root.addResource("availability");
     availabilityRoute.addMethod(
       "GET",
-      new LambdaIntegration(getAvailabilityHandler),
+      new LambdaIntegration(availabilityHandler),
       {
         authorizer,
         authorizationType: AuthorizationType.COGNITO,
@@ -126,7 +113,7 @@ export class ApiService extends Stack {
     );
     availabilityRoute.addMethod(
       "POST",
-      new LambdaIntegration(updateAvailabilityHandler),
+      new LambdaIntegration(availabilityHandler),
       {
         authorizer,
         authorizationType: AuthorizationType.COGNITO,
