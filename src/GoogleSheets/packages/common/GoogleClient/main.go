@@ -18,6 +18,7 @@ const (
 
 type GoogleSheetsService interface {
 	GetAvailability() ([][]interface{}, error)
+	CanUpdateAvailability() (bool, error)
 }
 
 type SheetsService struct{}
@@ -25,6 +26,11 @@ type SheetsService struct{}
 var (
 	sheetsService *sheets.Service
 )
+
+func New() (*SheetsService, error) {
+	err := ConnectSheetsServiceIfNecessary()
+	return &SheetsService{}, err
+}
 
 func (s *SheetsService) GetAvailability() ([][]interface{}, error) {
 	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
@@ -38,9 +44,20 @@ func (s *SheetsService) GetAvailability() ([][]interface{}, error) {
 	return response.Values, nil
 }
 
-func New() (*SheetsService, error) {
-	err := ConnectSheetsServiceIfNecessary()
-	return &SheetsService{}, err
+func (s *SheetsService) CanUpdateAvailability() (bool, error) {
+	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
+	readRange := AvailabilityConstants.AVAILABILITY_CAN_UPDATE_CELL
+
+	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+	if err != nil {
+		return false, err
+	}
+
+	if response.Values[0][0].(string) == "TRUE" {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func GetSheetsService() *sheets.Service {

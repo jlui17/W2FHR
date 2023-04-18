@@ -41,7 +41,12 @@ func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConst
 }
 
 func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
-	canUpdate, err := GetAvailability.CanUpdateAvailability()
+	sheetsService, err := GoogleClient.New()
+	if err != nil {
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+	}
+
+	canUpdate, err := sheetsService.CanUpdateAvailability()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}

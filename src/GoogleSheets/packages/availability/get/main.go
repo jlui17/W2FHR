@@ -66,7 +66,12 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet [][]interface{}, emplo
 	isAvailableDay3 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
 	isAvailableDay4 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
 
-	canUpdate, err := CanUpdateAvailability()
+	sheetsService, err := GoogleClient.New()
+	if err != nil {
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+	}
+
+	canUpdate, err := sheetsService.CanUpdateAvailability()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
@@ -95,22 +100,4 @@ func FindRowOfEmployeeAvailability(availabilityTimesheet [][]interface{}, employ
 		}
 	}
 	return 0, errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
-}
-
-func CanUpdateAvailability() (bool, error) {
-	sheetsService := GoogleClient.GetSheetsService()
-
-	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
-	readRange := AvailabilityConstants.AVAILABILITY_CAN_UPDATE_CELL
-
-	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
-	if err != nil {
-		return false, err
-	}
-
-	if response.Values[0][0].(string) == "TRUE" {
-		return false, nil
-	}
-
-	return true, nil
 }
