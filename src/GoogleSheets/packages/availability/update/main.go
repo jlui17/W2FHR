@@ -55,7 +55,7 @@ func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *Avai
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	employeeAvailabilityRow, err := GetAvailability.FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
+	employeeAvailabilityRow, err := GetAvailability.FindRowOfEmployeeAvailability(availabilityTimesheet.Values, employeeId)
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}

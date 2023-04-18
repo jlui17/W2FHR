@@ -40,15 +40,20 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 }
 
 func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
-	availabilityTimesheet, err := GetAvailabilityTimesheet()
+	sheetsService, err := GoogleClient.New()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	return findEmployeeAvailabilityFromId(availabilityTimesheet, employeeId)
+	allAvailability, err := sheetsService.GetAvailability()
+	if err != nil {
+		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+	}
+
+	return findEmployeeAvailabilityFromId(allAvailability, employeeId)
 }
 
-func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
+func findEmployeeAvailabilityFromId(availabilityTimesheet [][]interface{}, employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
 	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -56,10 +61,10 @@ func findEmployeeAvailabilityFromId(availabilityTimesheet *sheets.ValueRange, em
 
 	day1ColumnNumber := SharedUtil.GetIndexOfColumn(AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN)
 
-	isAvailableDay1 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
-	isAvailableDay2 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
-	isAvailableDay3 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
-	isAvailableDay4 := availabilityTimesheet.Values[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
+	isAvailableDay1 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
+	isAvailableDay2 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
+	isAvailableDay3 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
+	isAvailableDay4 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
 
 	canUpdate, err := CanUpdateAvailability()
 	if err != nil {
@@ -83,9 +88,9 @@ func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
 	return response, nil
 }
 
-func FindRowOfEmployeeAvailability(availabilityTimesheet *sheets.ValueRange, employeeId string) (int, error) {
-	for i := 0; i < len(availabilityTimesheet.Values); i++ {
-		if availabilityTimesheet.Values[i][0] == employeeId {
+func FindRowOfEmployeeAvailability(availabilityTimesheet [][]interface{}, employeeId string) (int, error) {
+	for i := 0; i < len(availabilityTimesheet); i++ {
+		if availabilityTimesheet[i][0] == employeeId {
 			return i, nil
 		}
 	}

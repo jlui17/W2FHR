@@ -1,6 +1,7 @@
 package GoogleClient
 
 import (
+	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"context"
 	"os"
 
@@ -15,9 +16,32 @@ const (
 	READ_WRITE_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 )
 
+type GoogleSheetsService interface {
+	GetAvailability() ([][]interface{}, error)
+}
+
+type SheetsService struct{}
+
 var (
 	sheetsService *sheets.Service
 )
+
+func (s *SheetsService) GetAvailability() ([][]interface{}, error) {
+	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
+	readRange := AvailabilityConstants.AVAILABILITY_TIMESHEET_GET_RANGE
+
+	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+	if err != nil {
+		return [][]interface{}{}, err
+	}
+
+	return response.Values, nil
+}
+
+func New() (*SheetsService, error) {
+	err := ConnectSheetsServiceIfNecessary()
+	return &SheetsService{}, err
+}
 
 func GetSheetsService() *sheets.Service {
 	return sheetsService
