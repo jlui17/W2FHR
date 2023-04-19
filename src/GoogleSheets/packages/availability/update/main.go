@@ -5,7 +5,6 @@ import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Utilities/AvailabilityUtil"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -65,20 +64,7 @@ func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *Avai
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	return updateAvailabilityOnRow(employeeAvailabilityRow+AvailabilityConstants.GOOGLESHEETS_ROW_OFFSET, newEmployeeAvailability)
-}
-
-func updateAvailabilityOnRow(employeeAvailabilityRow int, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
-	sheetsService := GoogleClient.GetSheetsService()
-
-	updateRange := AvailabilityConstants.GetUpdateAvailabilityRangeFromRow(employeeAvailabilityRow)
-	updateValueRange := createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability)
-	updateResponse, err := sheetsService.Spreadsheets.Values.Update(AvailabilityConstants.AVAILABILITY_SHEET_ID, updateRange, updateValueRange).ValueInputOption("RAW").IncludeValuesInResponse(true).Do()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	return getEmployeeAvailabilityFromUpdateResponse(updateResponse)
+	return sheetsService.UpdateAvailabilityOnRow(employeeAvailabilityRow+AvailabilityConstants.GOOGLESHEETS_ROW_OFFSET, newEmployeeAvailability)
 }
 
 func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) *sheets.ValueRange {
@@ -92,14 +78,4 @@ func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability 
 			newEmployeeAvailability.Day4.IsAvailable})
 	updatedValueRange := sheets.ValueRange{Values: updatedValues}
 	return &updatedValueRange
-}
-
-func getEmployeeAvailabilityFromUpdateResponse(updateResponse *sheets.UpdateValuesResponse) (*AvailabilityConstants.EmployeeAvailability, error) {
-	updateResponseValueRange := updateResponse.UpdatedData
-	isAvailableDay1 := updateResponseValueRange.Values[0][0] == "TRUE"
-	isAvailableDay2 := updateResponseValueRange.Values[0][1] == "TRUE"
-	isAvailableDay3 := updateResponseValueRange.Values[0][2] == "TRUE"
-	isAvailableDay4 := updateResponseValueRange.Values[0][3] == "TRUE"
-
-	return AvailabilityUtil.CreateEmployeeAvailability(isAvailableDay1, isAvailableDay2, isAvailableDay3, isAvailableDay4, true)
 }
