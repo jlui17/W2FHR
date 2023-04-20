@@ -49,10 +49,11 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 }
 
 func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
-	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, schedule)
 	if getUpcomingShifts {
-		unformattedEmployeeShifts = filterForUpcomingShifts(unformattedEmployeeShifts)
+		schedule = filterForUpcomingShifts(schedule)
 	}
+
+	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, schedule)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
 	return &TimesheetConstants.Timesheet{
@@ -75,14 +76,14 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}
 	return employeeShifts
 }
 
-func filterForUpcomingShifts(masterTimesheet [][]string) [][]string {
-	upcomingShifts := [][]string{}
+func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
+	upcomingShifts := [][]interface{}{}
 	today := TimeService.GetToday()
 	log.Printf("Today: %s", today.String())
 
 	dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
 	for i := len(masterTimesheet) - 1; i > -1; i-- {
-		shiftDate := masterTimesheet[i][dateCol]
+		shiftDate := masterTimesheet[i][dateCol].(string)
 		convertedDate := TimeService.ConvertDateToTime(shiftDate)
 
 		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)

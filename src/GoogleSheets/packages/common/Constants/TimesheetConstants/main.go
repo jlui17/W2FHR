@@ -6,7 +6,7 @@ const (
 	TIMESHEET_GET_RANGE         = "A2:J"
 	DATE_FORMAT                 = "Monday, January 2, 2006"
 	EMPLOYEE_ID_COLUMN          = "C"
-	DATE_COLUMN                 = "D"
+	DATE_COLUMN                 = "G"
 	SHIFT_TITLE_COLUMN          = "E"
 	START_TIME_COLUMN           = "H"
 	END_TIME_COLUMN             = "I"
