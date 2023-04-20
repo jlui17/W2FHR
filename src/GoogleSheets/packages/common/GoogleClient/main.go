@@ -2,6 +2,7 @@ package GoogleClient
 
 import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"context"
 	"fmt"
 	"os"
@@ -22,6 +23,7 @@ type GoogleSheetsService interface {
 	CanUpdateAvailability() (bool, error)
 	UpdateAvailabilityOnRow(row string, newAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error)
 	GetDatesForAvailability() ([]string, error)
+	GetSchedule() ([][]interface{}, error)
 }
 
 type SheetsService struct{}
@@ -125,6 +127,18 @@ func formatDates(unformattedDates [][]interface{}) []string {
 	}
 
 	return dates
+}
+
+func (s *SheetsService) GetSchedule() ([][]interface{}, error) {
+	sheetId := TimesheetConstants.TIMESHEET_SHEET_ID
+	readRange := fmt.Sprintf("%s!%s", TimesheetConstants.MASTER_TIMESHEET_SHEET_NAME, TimesheetConstants.TIMESHEET_GET_RANGE)
+
+	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+	if err != nil {
+		return [][]interface{}{}, err
+	}
+
+	return response.Values, nil
 }
 
 func GetSheetsService() *sheets.Service {

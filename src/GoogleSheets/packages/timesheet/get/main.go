@@ -7,16 +7,16 @@ import (
 	"GoogleSheets/packages/common/TimeService"
 	"GoogleSheets/packages/common/Utilities/SharedUtil"
 	"GoogleSheets/packages/common/Utilities/TimesheetUtil"
+	"log"
 
 	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
-	"google.golang.org/api/sheets/v4"
 )
 
 func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGatewayProxyResponse, error) {
-	masterTimesheet, err := getMasterTimesheet()
+	sheetsService, err := GoogleClient.New()
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -24,7 +24,15 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 		}, err
 	}
 
-	employeeShifts, err := getShiftsForEmployee(employeeId, masterTimesheet.Values, getUpcomingShifts)
+	schedule, err := sheetsService.GetSchedule()
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		}, err
+	}
+
+	employeeShifts, err := getShiftsForEmployee(employeeId, schedule, getUpcomingShifts)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -40,27 +48,11 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 	}, err
 }
 
-func getMasterTimesheet() (*sheets.ValueRange, error) {
-	sheetsService := GoogleClient.GetSheetsService()
-
-	sheetId := TimesheetConstants.TIMESHEET_SHEET_ID
-	readRange := fmt.Sprintf("%s!%s", TimesheetConstants.MASTER_TIMESHEET_SHEET_NAME, TimesheetConstants.TIMESHEET_GET_RANGE)
-
-	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
-	if err != nil {
-		return &sheets.ValueRange{}, err
-	}
-
-	return response, nil
-}
-
-func getShiftsForEmployee(employeeId string, masterTimesheet [][]interface{}, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
-	shiftsToFilter := masterTimesheet
+func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
+	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, schedule)
 	if getUpcomingShifts {
-		shiftsToFilter = filterForUpcomingShifts(shiftsToFilter)
+		unformattedEmployeeShifts = filterForUpcomingShifts(unformattedEmployeeShifts)
 	}
-
-	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, shiftsToFilter)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
 
 	return &TimesheetConstants.Timesheet{
@@ -68,11 +60,11 @@ func getShiftsForEmployee(employeeId string, masterTimesheet [][]interface{}, ge
 	}, nil
 }
 
-func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}) *[][]string {
+func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}) [][]string {
 	employeeShifts := [][]string{}
 
+	employeeIdColumn := SharedUtil.GetIndexOfColumn(TimesheetConstants.EMPLOYEE_ID_COLUMN)
 	for _, shift := range masterTimesheet {
-		employeeIdColumn := SharedUtil.GetIndexOfColumn(TimesheetConstants.EMPLOYEE_ID_COLUMN)
 		isThisEmployeesShift := shift[employeeIdColumn].(string) == employeeId
 		if isThisEmployeesShift {
 			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(shift)
@@ -80,20 +72,22 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}
 		}
 	}
 
-	return &employeeShifts
+	return employeeShifts
 }
 
-func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
-	upcomingShifts := make([][]interface{}, 0)
+func filterForUpcomingShifts(masterTimesheet [][]string) [][]string {
+	upcomingShifts := [][]string{}
 	today := TimeService.GetToday()
+	log.Printf("Today: %s", today.String())
 
+	dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
 	for i := len(masterTimesheet) - 1; i > -1; i-- {
-		dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
-		shiftDate := masterTimesheet[i][dateCol].(string)
+		shiftDate := masterTimesheet[i][dateCol]
 		convertedDate := TimeService.ConvertDateToTime(shiftDate)
 
-		isThisShiftAfterToday := convertedDate.After(today) || convertedDate.Equal(today)
-		if !isThisShiftAfterToday {
+		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)
+		log.Printf("Shift Date: %s, Shift is upcoming: %t", convertedDate.String(), shiftIsUpcoming)
+		if !shiftIsUpcoming {
 			break
 		}
 
