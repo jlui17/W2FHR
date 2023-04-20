@@ -65,7 +65,16 @@ func (s *SheetsService) CanUpdateAvailability() (bool, error) {
 
 func (s *SheetsService) UpdateAvailabilityOnRow(row int, newAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error) {
 	updateRange := AvailabilityConstants.GetUpdateAvailabilityRangeFromRow(row)
-	updateValueRange := createUpdatedValueRangeFromNewEmployeeAvailability(newAvailability)
+	updateValueRange := &sheets.ValueRange{
+		Values: [][]interface{}{
+			{
+				newAvailability.Day1.IsAvailable,
+				newAvailability.Day2.IsAvailable,
+				newAvailability.Day3.IsAvailable,
+				newAvailability.Day4.IsAvailable,
+			},
+		},
+	}
 	updateResponse, err := sheetsService.Spreadsheets.Values.Update(AvailabilityConstants.AVAILABILITY_SHEET_ID, updateRange, updateValueRange).ValueInputOption("RAW").IncludeValuesInResponse(true).Do()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
@@ -88,19 +97,6 @@ func (s *SheetsService) UpdateAvailabilityOnRow(row int, newAvailability *Availa
 		Day4:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: isAvailableDay4, Date: dates[3]},
 		CanUpdate: true,
 	}, nil
-}
-
-func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) *sheets.ValueRange {
-	updatedValues := make([][]interface{}, 0)
-	updatedValues = append(
-		updatedValues,
-		[]interface{}{
-			newEmployeeAvailability.Day1.IsAvailable,
-			newEmployeeAvailability.Day2.IsAvailable,
-			newEmployeeAvailability.Day3.IsAvailable,
-			newEmployeeAvailability.Day4.IsAvailable})
-	updatedValueRange := sheets.ValueRange{Values: updatedValues}
-	return &updatedValueRange
 }
 
 func (s *SheetsService) GetDatesForAvailability() ([]string, error) {

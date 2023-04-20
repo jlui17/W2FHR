@@ -11,7 +11,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"
-	"google.golang.org/api/sheets/v4"
 )
 
 func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (events.APIGatewayProxyResponse, error) {
@@ -65,17 +64,4 @@ func updateEmployeeAvailability(employeeId string, newEmployeeAvailability *Avai
 	}
 
 	return sheetsService.UpdateAvailabilityOnRow(employeeAvailabilityRow+AvailabilityConstants.GOOGLESHEETS_ROW_OFFSET, newEmployeeAvailability)
-}
-
-func createUpdatedValueRangeFromNewEmployeeAvailability(newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) *sheets.ValueRange {
-	updatedValues := make([][]interface{}, 0)
-	updatedValues = append(
-		updatedValues,
-		[]interface{}{
-			newEmployeeAvailability.Day1.IsAvailable,
-			newEmployeeAvailability.Day2.IsAvailable,
-			newEmployeeAvailability.Day3.IsAvailable,
-			newEmployeeAvailability.Day4.IsAvailable})
-	updatedValueRange := sheets.ValueRange{Values: updatedValues}
-	return &updatedValueRange
 }
