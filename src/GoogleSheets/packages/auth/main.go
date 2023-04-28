@@ -5,6 +5,7 @@ import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"context"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -19,10 +20,12 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       SharedConstants.INCLUDE_EMAIL_ERROR,
 		}, nil
 	}
+	log.Printf("[INFO] Finding employeeId for email: %s", email)
 
 	GoogleClient.ConnectSheetsServiceIfNecessary()
 	employeeId, err := GetEmployeeId.HandleRequest(email)
 	if err != nil {
+		log.Printf("[ERROR] %s", err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
