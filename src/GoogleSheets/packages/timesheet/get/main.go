@@ -51,10 +51,12 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
 	if getUpcomingShifts {
 		schedule = filterForUpcomingShifts(schedule)
+		log.Printf("[INFO] Found upcoming schedule: %v", schedule)
 	}
 
 	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, schedule)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
+	log.Printf("[INFO] Found shifts for employee: %v", formattedEmployeeShifts)
 
 	return &TimesheetConstants.Timesheet{
 		Shifts: formattedEmployeeShifts,
@@ -87,7 +89,6 @@ func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
 		convertedDate := TimeService.ConvertDateToTime(shiftDate)
 
 		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)
-		log.Printf("Shift Date: %s, Shift is upcoming: %t", convertedDate.String(), shiftIsUpcoming)
 		if !shiftIsUpcoming {
 			break
 		}
