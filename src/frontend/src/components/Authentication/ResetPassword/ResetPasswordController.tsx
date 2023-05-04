@@ -107,6 +107,7 @@ const ResetPasswordController = () => {
           handleChange={handleChange}
           onResendVerificationCode={() => {}}
           showResendVerificationCode={false}
+          canSubmit={verificationCode.length !== 0}
         />
       </div>
     );
@@ -125,6 +126,11 @@ const ResetPasswordController = () => {
         showPassword={showPassword}
         onShowPassword={() => setShowPassword(!showPassword)}
         onCancel={() => navigate(ROUTES.LOGIN)}
+        canSubmit={
+          (step === ResetPasswordStep.ENTER_EMAIL && email.length !== 0) ||
+          (step === ResetPasswordStep.ENTER_NEW_PASSWORD &&
+            newPassword.length !== 0)
+        }
       />
     </div>
   );

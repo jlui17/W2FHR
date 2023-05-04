@@ -12,6 +12,7 @@ interface LoginSignupWidgetProps {
   onResetPassword: () => void;
   showPassword: boolean;
   onShowPassword: () => void;
+  canSubmit: boolean;
 }
 
 export const LoginSignupWidget = ({
@@ -24,6 +25,7 @@ export const LoginSignupWidget = ({
   onResetPassword,
   showPassword,
   onShowPassword,
+  canSubmit,
 }: LoginSignupWidgetProps) => {
   return (
     <div className="flex h-screen w-screen place-items-center">
@@ -56,7 +58,7 @@ export const LoginSignupWidget = ({
           <Button
             className="mr-4 w-full"
             variant="contained"
-            disabled={isLoading}
+            disabled={isLoading || !canSubmit}
             onClick={onLogin}
           >
             Login
@@ -65,7 +67,7 @@ export const LoginSignupWidget = ({
             className="w-full"
             variant="contained"
             onClick={onSignup}
-            disabled={isLoading}
+            disabled={isLoading || !canSubmit}
           >
             Sign up
           </Button>

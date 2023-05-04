@@ -14,6 +14,7 @@ interface ResetPassowrdWidgetProps {
   showPassword: boolean;
   onShowPassword: () => void;
   onCancel: () => void;
+  canSubmit: boolean;
 }
 
 export const ResetPassowrdWidget = ({
@@ -27,6 +28,7 @@ export const ResetPassowrdWidget = ({
   showPassword,
   onShowPassword,
   onCancel,
+  canSubmit,
 }: ResetPassowrdWidgetProps) => {
   return (
     <AuthWidget>
@@ -38,6 +40,7 @@ export const ResetPassowrdWidget = ({
           goToVerifyingStep={goToVerifyingStep}
           isLoading={isLoading}
           onCancel={onCancel}
+          canSubmit={canSubmit}
         />
       )}
       {step === ResetPasswordStep.ENTER_NEW_PASSWORD && (
@@ -48,6 +51,7 @@ export const ResetPassowrdWidget = ({
           showPassword={showPassword}
           onShowPassword={onShowPassword}
           isLoading={isLoading}
+          canSubmit={canSubmit}
         />
       )}
     </AuthWidget>
@@ -60,12 +64,14 @@ const Step1 = ({
   goToVerifyingStep,
   isLoading,
   onCancel,
+  canSubmit,
 }: {
   email: ResetPassowrdWidgetProps["email"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
   goToVerifyingStep: ResetPassowrdWidgetProps["goToVerifyingStep"];
   isLoading: ResetPassowrdWidgetProps["isLoading"];
   onCancel: ResetPassowrdWidgetProps["onCancel"];
+  canSubmit: ResetPassowrdWidgetProps["canSubmit"];
 }) => {
   return (
     <>
@@ -82,7 +88,7 @@ const Step1 = ({
         <Button
           variant="contained"
           onClick={goToVerifyingStep}
-          disabled={isLoading}
+          disabled={isLoading || !canSubmit}
           className="mr-4 w-full"
         >
           Reset Password
@@ -107,6 +113,7 @@ const Step2 = ({
   showPassword,
   onShowPassword,
   isLoading,
+  canSubmit,
 }: {
   newPassword: ResetPassowrdWidgetProps["newPassword"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
@@ -114,6 +121,7 @@ const Step2 = ({
   showPassword: ResetPassowrdWidgetProps["showPassword"];
   onShowPassword: ResetPassowrdWidgetProps["onShowPassword"];
   isLoading: ResetPassowrdWidgetProps["isLoading"];
+  canSubmit: ResetPassowrdWidgetProps["canSubmit"];
 }) => {
   return (
     <>
@@ -128,7 +136,7 @@ const Step2 = ({
       <Button
         variant="contained"
         onClick={onSetNewPassword}
-        disabled={isLoading}
+        disabled={isLoading || !canSubmit}
       >
         Set New Password
       </Button>

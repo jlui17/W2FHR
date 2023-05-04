@@ -159,6 +159,7 @@ const AuthenticationController = () => {
         onResendVerificationCode={onSendVerificationCode}
         handleChange={handleChange}
         showResendVerificationCode={true}
+        canSubmit={verificationCode.length !== 0}
       />
     </div>
   ) : (
@@ -172,6 +173,7 @@ const AuthenticationController = () => {
       onResetPassword={onResetPassword}
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
+      canSubmit={email.length !== 0 && password.length !== 0}
     />
   );
 };

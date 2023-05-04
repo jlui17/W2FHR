@@ -8,6 +8,7 @@ interface VerifySignupWidgetProps {
   onResendVerificationCode: () => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   showResendVerificationCode: boolean;
+  canSubmit: boolean;
 }
 
 export const VerifyWidget = ({
@@ -17,6 +18,7 @@ export const VerifyWidget = ({
   onResendVerificationCode,
   handleChange,
   showResendVerificationCode,
+  canSubmit,
 }: VerifySignupWidgetProps) => {
   return (
     <AuthWidget>
@@ -45,7 +47,11 @@ export const VerifyWidget = ({
           </Button>
         ) : null}
       </div>
-      <Button variant="contained" onClick={onVerify} disabled={isLoading}>
+      <Button
+        variant="contained"
+        onClick={onVerify}
+        disabled={isLoading || !canSubmit}
+      >
         Verify
       </Button>
     </AuthWidget>
