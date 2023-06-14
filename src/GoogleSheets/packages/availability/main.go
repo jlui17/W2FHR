@@ -34,6 +34,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	log.Printf("[INFO] Availability %s for %s", event.HTTPMethod, employeeId)
+
 	switch event.HTTPMethod {
 	case "GET":
 		return GetAvailability.HandleRequest(employeeId)
