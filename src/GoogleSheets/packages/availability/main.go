@@ -6,10 +6,11 @@ import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Utilities/TokenUtil"
+	"GoogleSheets/packages/common/Utilities/EmployeeInfo"
 	"context"
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -26,7 +27,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	GoogleClient.ConnectSheetsServiceIfNecessary()
-	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
+	employeeInfo, err := EmployeeInfo.New(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
@@ -34,11 +35,15 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	log.Printf("[INFO] Availability %s for %s", event.HTTPMethod, employeeId)
+	log.Printf("[INFO] %s Availability Request for email: %s, employee id: %s",
+		strings.ToUpper(event.HTTPMethod),
+		employeeInfo.GetEmployeeId(),
+		employeeInfo.GetEmail(),
+	)
 
 	switch event.HTTPMethod {
 	case "GET":
-		return GetAvailability.HandleRequest(employeeId)
+		return GetAvailability.HandleRequest(employeeInfo.GetEmployeeId())
 	case "POST":
 		newAvailabilityFromRequestBody := event.Body
 		newEmployeeAvailability := AvailabilityConstants.EmployeeAvailability{}
@@ -46,7 +51,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
 		log.Printf("Successfully parsed request body: %v", newEmployeeAvailability)
 
-		return UpdateAvailability.HandleRequest(employeeId, &newEmployeeAvailability)
+		return UpdateAvailability.HandleRequest(employeeInfo.GetEmployeeId(), &newEmployeeAvailability)
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: 501,

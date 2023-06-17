@@ -1,4 +1,4 @@
-package TokenUtil
+package EmployeeInfo
 
 import (
 	"testing"
@@ -37,14 +37,19 @@ func TestParseIdToken(t *testing.T) {
 	}
 }
 
-func TestGetEmployeeIdFromIdToken(t *testing.T) {
+func TestCreateEmployeeInfoFromBearerToken(t *testing.T) {
 	bearerToken := "bearer " + expectedIdToken
-	employeeId, err := GetEmployeeIdFromBearerToken(bearerToken)
+
+	employeeInfo, err := New(bearerToken)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if employeeId != "w2fnm170018" {
-		t.Errorf("Expected employeeId to be w2fnm170018, got %s", employeeId)
+	if employeeInfo.GetEmployeeId() != "w2fnm170018" {
+		t.Errorf("Expected employeeId to be w2fnm170018, got %s", employeeInfo.GetEmployeeId())
+	}
+
+	if employeeInfo.GetEmail() != "justinlui.wun2free@gmail.com" {
+		t.Errorf("Expected employeeId to be justinlui.wun2free@gmail.com, got %s", employeeInfo.GetEmail())
 	}
 }

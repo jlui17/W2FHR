@@ -12,10 +12,10 @@ func createShift(employeeId string, title string, date string, start string, end
 		"",
 		"",
 		employeeId,
-		date,
+		"",
 		title,
 		"",
-		"",
+		date,
 		start,
 		end,
 		breakDuration,
@@ -26,7 +26,7 @@ func TestGetAllShiftsForEmployee(t *testing.T) {
 	shift1 := createShift("1", "Shift 1", "Sunday, December 11, 2022", "10:00", "18:00", "1:00")
 	shift2 := createShift("1", "Shift 2", "Monday, December 12, 2022", "10:00", "18:00", "1:00")
 	shift3 := createShift("2", "Shift 3", "Sunday, December 11, 2022", "10:00", "18:00", "1:00")
-	masterTimesheet := [][]interface{}{shift1, shift2, shift3}
+	timesheet := [][]interface{}{shift1, shift2, shift3}
 
 	expectedShift1 := TimesheetConstants.EmployeeShift{
 		ShiftTitle: "Shift 1", Date: "Sunday, December 11, 2022", StartTime: "10:00", EndTime: "18:00", BreakDuration: "1:00",
@@ -36,7 +36,7 @@ func TestGetAllShiftsForEmployee(t *testing.T) {
 	}
 	expectedShifts := TimesheetConstants.Timesheet{Shifts: []TimesheetConstants.EmployeeShift{expectedShift1, expectedShift2}}
 
-	employeeShifts, err := getShiftsForEmployee("1", masterTimesheet, false)
+	employeeShifts, err := getShiftsForEmployee("1", timesheet, false)
 	if err != nil {
 		t.Errorf("Error getting shifts for employee: %v", err)
 	}

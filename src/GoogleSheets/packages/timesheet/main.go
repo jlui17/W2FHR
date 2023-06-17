@@ -3,9 +3,10 @@ package main
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Utilities/TokenUtil"
+	"GoogleSheets/packages/common/Utilities/EmployeeInfo"
 	GetTimesheet "GoogleSheets/packages/timesheet/get"
 	"context"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -22,7 +23,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	GoogleClient.ConnectSheetsServiceIfNecessary()
-	employeeId, err := TokenUtil.GetEmployeeIdFromBearerToken(idToken)
+	employeeInfo, err := EmployeeInfo.New(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
@@ -31,7 +32,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	getUpcomingShifts, getUpcomingShiftsExists := event.QueryStringParameters["upcoming"]
-	return GetTimesheet.HandleRequest(employeeId, getUpcomingShiftsExists && getUpcomingShifts == "true")
+	shouldGetUpcoming := getUpcomingShiftsExists && getUpcomingShifts == "true"
+	log.Printf("[INFO] GET Timesheet request (upcoming = %t) for email: %s, employee id: %s",
+		shouldGetUpcoming,
+		employeeInfo.GetEmail(),
+		employeeInfo.GetEmployeeId(),
+	)
+	return GetTimesheet.HandleRequest(employeeInfo.GetEmployeeId(), shouldGetUpcoming)
 }
 
 func main() {
