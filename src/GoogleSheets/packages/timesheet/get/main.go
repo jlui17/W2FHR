@@ -6,7 +6,7 @@ import (
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/TimeService"
 	"GoogleSheets/packages/common/Utilities/SharedUtil"
-	"GoogleSheets/packages/common/Utilities/TimesheetUtil"
+	"GoogleSheets/packages/timesheet/TimesheetProcessor"
 	"log"
 
 	"encoding/json"
@@ -34,14 +34,7 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 		}, err
 	}
 
-	employeeShifts, err := getShiftsForEmployee(employeeId, schedule, getUpcomingShifts)
-	if err != nil {
-		log.Printf("[ERROR] Failed to filter timesheet for %s: %s", employeeId, err.Error())
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-		}, err
-	}
+	employeeShifts := getShiftsForEmployee(employeeId, schedule, getUpcomingShifts)
 	res, _ := json.Marshal(employeeShifts)
 
 	return events.APIGatewayProxyResponse{
@@ -51,34 +44,20 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 	}, err
 }
 
-func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomingShifts bool) (*TimesheetConstants.Timesheet, error) {
+func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomingShifts bool) *TimesheetConstants.Timesheet {
 	if getUpcomingShifts {
 		schedule = filterForUpcomingShifts(schedule)
 		log.Printf("[INFO] Found upcoming schedule: %v", schedule)
 	}
 
-	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, schedule)
-	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
-	log.Printf("[INFO] Found shifts for employee (%s): %v", employeeId, formattedEmployeeShifts)
-
-	return &TimesheetConstants.Timesheet{
-		Shifts: formattedEmployeeShifts,
-	}, nil
-}
-
-func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}) [][]string {
-	employeeShifts := [][]string{}
-
-	employeeIdColumn := SharedUtil.GetIndexOfColumn(TimesheetConstants.EMPLOYEE_ID_COLUMN)
-	for _, shift := range masterTimesheet {
-		isThisEmployeesShift := shift[employeeIdColumn].(string) == employeeId
-		if isThisEmployeesShift {
-			convertedEmployeeShift := TimesheetUtil.ConvertShiftInterfaceSliceToStringSlice(shift)
-			employeeShifts = append(employeeShifts, convertedEmployeeShift)
-		}
+	timesheetProcessor := TimesheetProcessor.New(employeeId)
+	for _, row := range schedule {
+		timesheetProcessor.ProcessRow(row)
 	}
+	timesheetForEmployee := timesheetProcessor.GetTimesheet()
+	log.Printf("[INFO] Found shifts for employee (%s): %v", employeeId, timesheetForEmployee)
 
-	return employeeShifts
+	return &timesheetForEmployee
 }
 
 func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {

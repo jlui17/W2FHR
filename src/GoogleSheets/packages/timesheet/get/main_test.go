@@ -36,10 +36,7 @@ func TestGetAllShiftsForEmployee(t *testing.T) {
 	}
 	expectedShifts := TimesheetConstants.Timesheet{Shifts: []TimesheetConstants.EmployeeShift{expectedShift1, expectedShift2}}
 
-	employeeShifts, err := getShiftsForEmployee("1", timesheet, false)
-	if err != nil {
-		t.Errorf("Error getting shifts for employee: %v", err)
-	}
+	employeeShifts := getShiftsForEmployee("1", timesheet, false)
 
 	if len(employeeShifts.Shifts) != len(expectedShifts.Shifts) {
 		t.Errorf("Expected %d shifts, got %d", len(expectedShifts.Shifts), len(employeeShifts.Shifts))
@@ -69,10 +66,7 @@ func TestGetUpcomingShiftsForEmployee(t *testing.T) {
 	}
 	expectedShifts := TimesheetConstants.Timesheet{Shifts: []TimesheetConstants.EmployeeShift{expectedShift1, expectedShift2}}
 
-	employeeShifts, err := getShiftsForEmployee("1", masterTimesheet, true)
-	if err != nil {
-		t.Errorf("Error getting shifts for employee: %v", err)
-	}
+	employeeShifts := getShiftsForEmployee("1", masterTimesheet, true)
 
 	if len(employeeShifts.Shifts) != len(expectedShifts.Shifts) {
 		t.Errorf("Expected %d shifts, got %d", len(expectedShifts.Shifts), len(employeeShifts.Shifts))
