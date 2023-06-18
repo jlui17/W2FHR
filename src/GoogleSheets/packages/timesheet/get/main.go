@@ -18,6 +18,7 @@ import (
 func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGatewayProxyResponse, error) {
 	sheetsService, err := GoogleClient.New()
 	if err != nil {
+		log.Printf("[ERROR] Failed to connect to Google API: %s", err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -26,6 +27,7 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 
 	schedule, err := sheetsService.GetSchedule()
 	if err != nil {
+		log.Printf("[ERROR] Failed to retrieve schedule from google sheets: %s", err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -34,6 +36,7 @@ func HandleRequest(employeeId string, getUpcomingShifts bool) (events.APIGateway
 
 	employeeShifts, err := getShiftsForEmployee(employeeId, schedule, getUpcomingShifts)
 	if err != nil {
+		log.Printf("[ERROR] Failed to filter timesheet for %s: %s", employeeId, err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -56,7 +59,7 @@ func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomi
 
 	unformattedEmployeeShifts := filterShiftsByEmployeeId(employeeId, schedule)
 	formattedEmployeeShifts := TimesheetUtil.FormatEmployeeShifts(unformattedEmployeeShifts)
-	log.Printf("[INFO] Found shifts for employee: %v", formattedEmployeeShifts)
+	log.Printf("[INFO] Found shifts for employee (%s): %v", employeeId, formattedEmployeeShifts)
 
 	return &TimesheetConstants.Timesheet{
 		Shifts: formattedEmployeeShifts,
@@ -81,7 +84,7 @@ func filterShiftsByEmployeeId(employeeId string, masterTimesheet [][]interface{}
 func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
 	upcomingShifts := [][]interface{}{}
 	today := TimeService.GetToday()
-	log.Printf("Today: %s", today.String())
+	log.Printf("[INFO] Today: %s", today.String())
 
 	dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
 	for i := len(masterTimesheet) - 1; i > -1; i-- {

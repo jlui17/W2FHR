@@ -16,7 +16,7 @@ import (
 func HandleRequest(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (events.APIGatewayProxyResponse, error) {
 	updatedEmployeeAvailability, err := updateEmployeeAvailability(employeeId, newEmployeeAvailability)
 	if err != nil {
-		log.Printf("[ERROR] Availability updating: %s", err.Error())
+		log.Printf("[ERROR] Failed to update availability for %s: %s", employeeId, err.Error())
 		statusCode := 500
 		if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
 			statusCode = 404

@@ -19,6 +19,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	employeeAvailability, err := getEmployeeAvailability(employeeId)
 
 	if err != nil {
+		log.Printf("[ERROR] Failed to get availability for %s: %s", employeeId, err.Error())
 		statusCode := 500
 		if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
 			statusCode = 404
@@ -32,7 +33,7 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 	}
 
 	res, _ := json.Marshal(employeeAvailability)
-	log.Printf("[INFO] Availability for %s: %s", employeeId, fmt.Sprint(string(res)))
+	log.Printf("[INFO] Found availability for %s: %s", employeeId, fmt.Sprint(string(res)))
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
