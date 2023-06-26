@@ -37,8 +37,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	log.Printf("[INFO] %s Availability Request for email: %s, employee id: %s",
 		strings.ToUpper(event.HTTPMethod),
-		employeeInfo.GetEmployeeId(),
 		employeeInfo.GetEmail(),
+		employeeInfo.GetEmployeeId(),
 	)
 
 	switch event.HTTPMethod {
@@ -49,7 +49,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		newEmployeeAvailability := AvailabilityConstants.EmployeeAvailability{}
 		log.Printf("New Availability: %s", newAvailabilityFromRequestBody)
 		json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
-		log.Printf("Successfully parsed request body: %v", newEmployeeAvailability)
 
 		return UpdateAvailability.HandleRequest(employeeInfo.GetEmployeeId(), &newEmployeeAvailability)
 	default:
