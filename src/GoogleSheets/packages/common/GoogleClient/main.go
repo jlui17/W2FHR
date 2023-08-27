@@ -131,7 +131,7 @@ func formatDates(unformattedDates [][]interface{}) []string {
 
 func (s *SheetsService) GetSchedule() ([][]interface{}, error) {
 	sheetId := TimesheetConstants.TIMESHEET_SHEET_ID
-	readRange := fmt.Sprintf("%s!%s", TimesheetConstants.MASTER_TIMESHEET_SHEET_NAME, TimesheetConstants.TIMESHEET_GET_RANGE)
+	readRange := fmt.Sprintf("%s!%s", TimesheetConstants.SCHEDULE_SHEET_NAME, TimesheetConstants.SCHEDULE_GET_RANGE)
 
 	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
 	if err != nil {
