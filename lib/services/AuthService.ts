@@ -1,9 +1,14 @@
 import { aws_cognito, Stack } from "aws-cdk-lib";
-import { UserPool, VerificationEmailStyle } from "aws-cdk-lib/aws-cognito";
+import {
+  UserPool,
+  UserPoolClient,
+  VerificationEmailStyle,
+} from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
 
 export class AuthService extends Stack {
   public readonly userPool: UserPool;
+  public readonly userPoolClient: UserPoolClient;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -35,7 +40,7 @@ export class AuthService extends Stack {
       },
     });
 
-    this.userPool.addClient("employees-client", {
+    this.userPoolClient = this.userPool.addClient("employees-client", {
       userPoolClientName: "employees-client",
       generateSecret: false,
       authFlows: {
