@@ -8,13 +8,14 @@ import {
   MethodLoggingLevel,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
-import { UserPool } from "aws-cdk-lib/aws-cognito";
+import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
 interface ApiServiceProps {
   AuthService: {
     userPool: UserPool;
+    userPoolClient: UserPoolClient;
   };
 }
 
