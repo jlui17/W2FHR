@@ -12,7 +12,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		StatusCode: 200,
 		Body:       "Hello World",
 	}, nil
-
 }
 
 func main() {

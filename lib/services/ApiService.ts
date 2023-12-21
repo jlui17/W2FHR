@@ -74,6 +74,19 @@ export class ApiService extends Stack {
       }
     );
 
+    const testHandler = new GoFunction(
+      this,
+      "HelloTestHandler",
+      {
+        entry: `${SOURCE_PACKAGES_DIR}/hello_test`,
+        moduleDir: MODULE_DIR,
+        timeout: Duration.seconds(10),
+        environment: {
+          G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+        },
+      }
+    );
+
     const api = new RestApi(this, "RestApi", {
       defaultCorsPreflightOptions: {
         allowHeaders: [
@@ -130,5 +143,7 @@ export class ApiService extends Stack {
     const baseAuthRoute = api.root.addResource("auth");
     const authRoute = baseAuthRoute.addResource("{email}");
     authRoute.addMethod("GET", new LambdaIntegration(authHandler));
+    const testRoute = api.root.addResource("test");
+    testRoute.addMethod("GET", new LambdaIntegration(testHandler));
   }
 }
