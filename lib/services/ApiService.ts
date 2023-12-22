@@ -76,9 +76,9 @@ export class ApiService extends Stack {
 
     const testHandler = new GoFunction(
       this,
-      "HelloTestHandler",
+      "NewAuthHandler",
       {
-        entry: `${SOURCE_PACKAGES_DIR}/hello_test`,
+        entry: `${SOURCE_PACKAGES_DIR}/new_auth`,
         moduleDir: MODULE_DIR,
         timeout: Duration.seconds(10),
         environment: {
