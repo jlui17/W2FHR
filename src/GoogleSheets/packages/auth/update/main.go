@@ -1,13 +1,12 @@
-package main
+package UpdateEmployeeID
 
 import (
-	"GoogleSheets/packages/common/Constants/NewAuthConstants"
+	"GoogleSheets/packages/common/Constants/AuthConstants"
 	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
@@ -15,7 +14,7 @@ import (
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	var signReq NewAuthConstants.SignUpRequest
+	var signReq AuthConstants.SignUpRequest
 	err := json.Unmarshal([]byte(event.Body), &signReq)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -39,7 +38,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	response := NewAuthConstants.SignUpResponse{
+	response := AuthConstants.SignUpResponse{
 		NeedsConfirmation: !(*signUpOutput.UserConfirmed),
 	}
 
@@ -50,8 +49,4 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		Body:       string(reponseBody),
 	}, nil
 
-}
-
-func main() {
-	lambda.Start(HandleRequest)
 }
