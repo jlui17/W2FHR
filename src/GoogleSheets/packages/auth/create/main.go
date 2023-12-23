@@ -44,8 +44,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	fmt.Println("Employee ID:", employeeId)
-	clientId := os.Getenv("COGNITO_CLIENT_ID")
-	if clientId == "" {
+	cognitoClientID := os.Getenv("COGNITO_CLIENT_ID")
+	if cognitoClientID == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Body:       "COGNITO_CLIENT_ID not set",
@@ -55,7 +55,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	sess := session.Must(session.NewSession())
 	client := cognitoidentityprovider.New(sess)
 	signUpInput := (&cognitoidentityprovider.SignUpInput{
-		ClientId: aws.String(clientId),
+		ClientId: aws.String(cognitoClientID),
 		Username: aws.String(signReq.Email),
 		Password: aws.String(signReq.Password),
 	})
