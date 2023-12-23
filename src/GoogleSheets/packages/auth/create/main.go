@@ -44,7 +44,14 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	fmt.Println("Employee ID:", employeeId)
-	clientId := os.Getenv("CLIENT_ID")
+	clientId := os.Getenv("COGNITO_CLIENT_ID")
+	if clientId == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "COGNITO_CLIENT_ID not set",
+		}, nil
+	}
+
 	sess := session.Must(session.NewSession())
 	client := cognitoidentityprovider.New(sess)
 	signUpInput := (&cognitoidentityprovider.SignUpInput{
@@ -65,6 +72,12 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	reponseBody, err := json.Marshal(response)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Error marshalling response",
+		}, nil
+	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
