@@ -11,7 +11,6 @@ import {
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
-
 interface ApiServiceProps {
   AuthService: {
     userPool: UserPool;
@@ -70,6 +69,7 @@ export class ApiService extends Stack {
         timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+          COGNITO_CLIENT_ID: "4kkjr0at3bjoeli3uuprqrthru",
         },
       }
     );
