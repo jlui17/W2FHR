@@ -69,7 +69,7 @@ export class ApiService extends Stack {
         timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
-          COGNITO_CLIENT_ID: "4kkjr0at3bjoeli3uuprqrthru",
+          COGNITO_CLIENT_ID:  props.AuthService.userPoolClient.userPoolClientId,
         },
       }
     );
