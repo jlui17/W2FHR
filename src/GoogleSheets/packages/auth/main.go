@@ -1,6 +1,7 @@
 package main
 
 import (
+	CreateEmployeeID "GoogleSheets/packages/auth/create"
 	GetEmployeeId "GoogleSheets/packages/auth/get"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
@@ -12,32 +13,43 @@ import (
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	email, emailExists := event.PathParameters["email"]
-	if !emailExists {
+	switch event.HTTPMethod {
+	case "GET":
+		email, emailExists := event.PathParameters["email"]
+		if !emailExists {
+			return events.APIGatewayProxyResponse{
+				StatusCode: 401,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       SharedConstants.INCLUDE_EMAIL_ERROR,
+			}, nil
+		}
+		log.Printf("[INFO] Finding employeeId for email: %s", email)
+
+		GoogleClient.ConnectSheetsServiceIfNecessary()
+		employeeId, err := GetEmployeeId.HandleRequest(email)
+		if err != nil {
+			log.Printf("[ERROR] %s", err.Error())
+			return events.APIGatewayProxyResponse{
+				StatusCode: 500,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       err.Error(),
+			}, nil
+		}
+
 		return events.APIGatewayProxyResponse{
-			StatusCode: 401,
+			StatusCode: 200,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       SharedConstants.INCLUDE_EMAIL_ERROR,
+			Body:       employeeId,
+		}, nil
+	case "POST":
+
+		return CreateEmployeeID.HandleRequest(ctx, event)
+	default:
+		return events.APIGatewayProxyResponse{
+			StatusCode: 501,
 		}, nil
 	}
-	log.Printf("[INFO] Finding employeeId for email: %s", email)
 
-	GoogleClient.ConnectSheetsServiceIfNecessary()
-	employeeId, err := GetEmployeeId.HandleRequest(email)
-	if err != nil {
-		log.Printf("[ERROR] %s", err.Error())
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       err.Error(),
-		}, nil
-	}
-
-	return events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-		Body:       employeeId,
-	}, nil
 }
 
 func main() {

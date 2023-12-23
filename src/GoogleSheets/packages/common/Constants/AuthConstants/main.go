@@ -14,6 +14,15 @@ type STAFF_LIST_INFO struct {
 	EmployeeIds []interface{}
 }
 
+type SignUpRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type SignUpResponse struct {
+	NeedsConfirmation bool `json:"needsConfirmation"`
+}
+
 var (
 	DEFAULT_STAFF_LIST_INFO = &STAFF_LIST_INFO{
 		Emails:      []interface{}{},
