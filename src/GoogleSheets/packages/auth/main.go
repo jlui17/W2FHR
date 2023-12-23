@@ -1,8 +1,8 @@
 package main
 
 import (
+	CreateEmployeeID "GoogleSheets/packages/auth/create"
 	GetEmployeeId "GoogleSheets/packages/auth/get"
-	UpdateEmployeeID "GoogleSheets/packages/auth/update"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"context"
@@ -43,7 +43,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	case "POST":
 
-		return UpdateEmployeeID.HandleRequest(ctx, event)
+		return CreateEmployeeID.HandleRequest(ctx, event)
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: 501,
