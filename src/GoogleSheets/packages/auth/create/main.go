@@ -3,6 +3,7 @@ package CreateEmployeeID
 import (
 	GetEmployeeId "GoogleSheets/packages/auth/get"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"context"
 	"encoding/json"
@@ -82,6 +83,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
 		Body:       string(reponseBody),
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 	}, nil
 
 }
