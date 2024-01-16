@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
-
 import {
   API_URLS,
   ERROR_MESSAGES,
@@ -82,33 +81,6 @@ const AuthenticationController = () => {
       setIsLoading(false);
     }
   };
-
-
-  
-
-
-  // const onSignup = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const needToConfirm = await signUpAndGetNeedToConfirm(email, password);
-  //     if (needToConfirm) {
-  //       setIsConfirmingAccount(true);
-  //     }
-  //   } catch (err) {
-  //     const errorAlert: AlertInfo = {
-  //       type: AlertType.ERROR,
-  //       message: ERROR_MESSAGES.UNKNOWN_ERROR,
-  //     };
-
-  //     if (err instanceof Error) {
-  //       errorAlert.message = err.message;
-  //     }
-
-  //     console.error(`Signup Error: ${errorAlert.message}`);
-  //     setAlert(errorAlert);
-  //   }
-  //   setIsLoading(false);
-  // };
 
   const onConfirmAccount = async () => {
     setIsLoading(true);
