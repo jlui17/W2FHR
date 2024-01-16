@@ -14,9 +14,11 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import {
+  API_URLS,
   ERROR_MESSAGES,
   RESPONSE_ERROR_MESSAGE_MAP,
 } from "../../common/constants";
+import { useMutation } from "react-query";
 
 const COGNITO_CONFIG = {
   region: "us-west-2",
@@ -25,6 +27,8 @@ const COGNITO_CONFIG = {
 const COGNITO_CLIENT = new CognitoIdentityProviderClient({
   region: "us-west-2",
 });
+
+
 
 export const signUpAndGetNeedToConfirm = async (
   email: string,
@@ -45,6 +49,9 @@ export const signUpAndGetNeedToConfirm = async (
   } catch (err) {
     return Promise.reject(err);
   }
+  
+
+
 };
 
 const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
@@ -68,7 +75,53 @@ const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
   }
 };
 
-const doSignUp = async (
+interface SignUpParams {
+  email: string;
+  password: string;
+  idToken: string;
+  onSuccess: (data: any) => void;
+  onError: (err: unknown) => void;
+}
+export const useSignUp = ({
+  email,
+  password,
+  idToken,
+  onSuccess,
+  onError,
+}: SignUpParams) => {
+  const signUp = async (): Promise<any> => {
+    const response = await fetch(API_URLS.AUTH, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify({ email, password }),
+    });
+
+    switch(response.status) {
+      case 201: 
+        const data = await response.json();        
+        return Promise.resolve(data);
+      case 400:
+        return Promise.reject(new Error('Invalid request'));
+      
+      case 500:
+        return Promise.reject(new Error('Internal server error'));
+      
+      default:
+        return Promise.reject(new Error('Unknown error occurred'));
+    }
+  };
+  return useMutation(signUp, {
+    onSuccess: onSuccess,
+    onError: onError,
+  });
+};
+
+
+const doSignUp = async (  
   email: string,
   password: string,
   employeeId: string
@@ -178,6 +231,7 @@ export const confirmPasswordReset = async (
 
     await COGNITO_CLIENT.send(confirmPasswordResetCommand);
     return Promise.resolve();
+    
   } catch (err) {
     return Promise.reject(err);
   }

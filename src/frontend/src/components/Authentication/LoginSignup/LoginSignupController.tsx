@@ -4,7 +4,9 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
+
 import {
+  API_URLS,
   ERROR_MESSAGES,
   INFO_MESSAGES,
   ROUTES,
@@ -16,6 +18,7 @@ import {
   loginAndGetAuthSession,
   resendSignupVerificationCode,
   signUpAndGetNeedToConfirm,
+  useSignUp,
 } from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
 
@@ -26,9 +29,10 @@ const AuthenticationController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { saveAuthSession, isLoggedIn } = useContext(AuthenticationContext);
+  const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(AuthenticationContext);
   const navigate = useNavigate();
   const { setAlert } = useAlert();
+
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -47,28 +51,64 @@ const AuthenticationController = () => {
     }
   };
 
+  const { mutateAsync: doSignUp, isError, error } = useSignUp({
+    email,
+    password,
+    idToken: getAuthSession()?.IdToken || "",
+    onSuccess: (data) => {
+      console.log(data);
+      if (data.needsConfirmation) {
+        setIsLoading(false)
+        setIsConfirmingAccount(true);
+      }
+    },
+    onError: (err: any) => {
+      setIsLoading(false);
+      if (err instanceof UserNotConfirmedException) {
+        setIsConfirmingAccount(true);
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
+        setAlert({ type: AlertType.ERROR, message: errorMessage });
+      }
+    }
+  });
+  
   const onSignup = async () => {
     setIsLoading(true);
     try {
-      const needToConfirm = await signUpAndGetNeedToConfirm(email, password);
-      if (needToConfirm) {
-        setIsConfirmingAccount(true);
-      }
-    } catch (err) {
-      const errorAlert: AlertInfo = {
-        type: AlertType.ERROR,
-        message: ERROR_MESSAGES.UNKNOWN_ERROR,
-      };
-
-      if (err instanceof Error) {
-        errorAlert.message = err.message;
-      }
-
-      console.error(`Signup Error: ${errorAlert.message}`);
-      setAlert(errorAlert);
+      await doSignUp(); 
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
+
+
+  
+
+
+  // const onSignup = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const needToConfirm = await signUpAndGetNeedToConfirm(email, password);
+  //     if (needToConfirm) {
+  //       setIsConfirmingAccount(true);
+  //     }
+  //   } catch (err) {
+  //     const errorAlert: AlertInfo = {
+  //       type: AlertType.ERROR,
+  //       message: ERROR_MESSAGES.UNKNOWN_ERROR,
+  //     };
+
+  //     if (err instanceof Error) {
+  //       errorAlert.message = err.message;
+  //     }
+
+  //     console.error(`Signup Error: ${errorAlert.message}`);
+  //     setAlert(errorAlert);
+  //   }
+  //   setIsLoading(false);
+  // };
 
   const onConfirmAccount = async () => {
     setIsLoading(true);
