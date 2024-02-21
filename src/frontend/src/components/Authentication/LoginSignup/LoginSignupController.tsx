@@ -16,7 +16,6 @@ import {
   confirmAccount,
   loginAndGetAuthSession,
   resendSignupVerificationCode,
-  signUpAndGetNeedToConfirm,
   useSignUp,
 } from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
@@ -56,9 +55,10 @@ const AuthenticationController = () => {
     idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
       console.log(data);
-      if (data.needsConfirmation) {
+      if (data.needsConfirmation) {     
         setIsLoading(false)
-        setIsConfirmingAccount(true);
+        setIsConfirmingAccount(true);        
+
       }
     },
     onError: (err: any) => {

@@ -30,29 +30,26 @@ const COGNITO_CLIENT = new CognitoIdentityProviderClient({
 
 
 
-export const signUpAndGetNeedToConfirm = async (
-  email: string,
-  password: string
-): Promise<boolean> => {
-  try {
-    const employeeId = await getEmployeeIdFromEmail(email);
+// export const signUpAndGetNeedToConfirm = async (
+//   email: string,
+//   password: string
+// ): Promise<boolean> => {
+//   try {
+//     const employeeId = await getEmployeeIdFromEmail(email);
+//     const signUpResponse = await doSignUp(email, password, employeeId);
+//     if (
+//       signUpResponse.UserSub === undefined ||
+//       signUpResponse.UserConfirmed === undefined
+//     ) {
+//       return Promise.reject(new Error(ERROR_MESSAGES.SIGNUP_ERROR));
+//     }
 
-    const signUpResponse = await doSignUp(email, password, employeeId);
-    if (
-      signUpResponse.UserSub === undefined ||
-      signUpResponse.UserConfirmed === undefined
-    ) {
-      return Promise.reject(new Error(ERROR_MESSAGES.SIGNUP_ERROR));
-    }
+//     return Promise.resolve(!signUpResponse.UserConfirmed);
+//   } catch (err) {
+//     return Promise.reject(err);
+//   }
 
-    return Promise.resolve(!signUpResponse.UserConfirmed);
-  } catch (err) {
-    return Promise.reject(err);
-  }
-  
-
-
-};
+// };
 
 const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
   const response = await fetch(getAuthApiUrlForEmail(email));
@@ -121,25 +118,25 @@ export const useSignUp = ({
 };
 
 
-const doSignUp = async (  
-  email: string,
-  password: string,
-  employeeId: string
-): Promise<SignUpCommandOutput> => {
-  const signUpCommand = new SignUpCommand({
-    ClientId: COGNITO_CONFIG.clientId,
-    Username: email,
-    Password: password,
-    UserAttributes: [
-      {
-        Name: "custom:employeeId",
-        Value: employeeId,
-      },
-    ],
-  });
+// const doSignUp = async (  
+//   email: string,
+//   password: string,
+//   employeeId: string
+// ): Promise<SignUpCommandOutput> => {
+//   const signUpCommand = new SignUpCommand({
+//     ClientId: COGNITO_CONFIG.clientId,
+//     Username: email,
+//     Password: password,
+//     UserAttributes: [
+//       {
+//         Name: "custom:employeeId",
+//         Value: employeeId,
+//       },
+//     ],
+//   });
 
-  return COGNITO_CLIENT.send(signUpCommand);
-};
+//   return COGNITO_CLIENT.send(signUpCommand);
+// };
 
 export const confirmAccount = async (
   email: string,
