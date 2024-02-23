@@ -37,16 +37,47 @@ func New() (*SheetsService, error) {
 	return &SheetsService{}, err
 }
 
-func (s *SheetsService) GetAvailability() ([][]interface{}, error) {
-	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
-	readRange := AvailabilityConstants.AVAILABILITY_TIMESHEET_GET_RANGE
+type GetAvailabilityResponse struct {
+	EmployeeIds    []interface{}
+	Availabilities [][]interface{}
+	Dates          []interface{}
+	CanUpdate      bool
+}
 
-	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+func (s *SheetsService) GetAvailability() (*GetAvailabilityResponse, error) {
+	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
+
+	r1, err := sheetsService.Spreadsheets.Values.BatchGet(sheetId).
+		Ranges(
+			"Availability!E2:H",
+			"View!B4:E4",
+			"View!G4",
+		).
+		MajorDimension("ROWS").
+		Do()
 	if err != nil {
-		return [][]interface{}{}, err
+		return &GetAvailabilityResponse{}, err
 	}
 
-	return response.Values, nil
+	r2, err := sheetsService.Spreadsheets.Values.
+		Get(sheetId, "Availability!A2:A").
+		MajorDimension("COLUMNS").
+		Do()
+	if err != nil {
+		return &GetAvailabilityResponse{}, err
+	}
+
+	dates := r1.ValueRanges[1].Values[0]
+	if len(dates) == 3 {
+		dates = append(dates, "")
+	}
+
+	return &GetAvailabilityResponse{
+		EmployeeIds:    r2.Values[0],
+		Availabilities: r1.ValueRanges[0].Values,
+		Dates:          dates,
+		CanUpdate:      r1.ValueRanges[2].Values[0][0].(string) == "TRUE",
+	}, nil
 }
 
 func (s *SheetsService) CanUpdateAvailability() (bool, error) {

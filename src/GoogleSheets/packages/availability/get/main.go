@@ -4,7 +4,6 @@ import (
 	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/Utilities/SharedUtil"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,47 +46,37 @@ func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.Employee
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	allAvailability, err := sheetsService.GetAvailability()
+	res, err := sheetsService.GetAvailability()
 	if err != nil {
 		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
 	}
 
-	return findEmployeeAvailabilityFromId(allAvailability, employeeId)
-}
+	employeeIds := res.EmployeeIds
+	availabilities := res.Availabilities
+	dates := res.Dates
+	canUpdate := res.CanUpdate
 
-func findEmployeeAvailabilityFromId(availabilityTimesheet [][]interface{}, employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
-	rowOfEmployeeAvailability, err := FindRowOfEmployeeAvailability(availabilityTimesheet, employeeId)
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+	r := -1
+	for i, row := range employeeIds {
+		if row == employeeId {
+			r = i
+			break
+		}
+	}
+	if r == -1 {
+		return &AvailabilityConstants.EmployeeAvailability{}, errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
 	}
 
-	day1ColumnNumber := SharedUtil.GetIndexOfColumn(AvailabilityConstants.AVAILABILITY_SHEET_DAY1_COLUMN)
-
-	isAvailableDay1 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber] == "TRUE"
-	isAvailableDay2 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+1] == "TRUE"
-	isAvailableDay3 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+2] == "TRUE"
-	isAvailableDay4 := availabilityTimesheet[rowOfEmployeeAvailability][day1ColumnNumber+3] == "TRUE"
-
-	sheetsService, err := GoogleClient.New()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	canUpdate, err := sheetsService.CanUpdateAvailability()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
-
-	dates, err := sheetsService.GetDatesForAvailability()
-	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
-	}
+	day1 := availabilities[r][0] == "TRUE"
+	day2 := availabilities[r][1] == "TRUE"
+	day3 := availabilities[r][2] == "TRUE"
+	day4 := availabilities[r][3] == "TRUE"
 
 	return &AvailabilityConstants.EmployeeAvailability{
-		Day1:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: isAvailableDay1, Date: dates[0]},
-		Day2:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: isAvailableDay2, Date: dates[1]},
-		Day3:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: isAvailableDay3, Date: dates[2]},
-		Day4:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: isAvailableDay4, Date: dates[3]},
+		Day1:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: day1, Date: dates[0].(string)},
+		Day2:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: day2, Date: dates[1].(string)},
+		Day3:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: day3, Date: dates[2].(string)},
+		Day4:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: day4, Date: dates[3].(string)},
 		CanUpdate: canUpdate,
 	}, nil
 }
