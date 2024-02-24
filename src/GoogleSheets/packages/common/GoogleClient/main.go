@@ -1,11 +1,8 @@
 package GoogleClient
 
 import (
-	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
-	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
@@ -19,19 +16,14 @@ const (
 	availabilitySheetId       = "13LQSitRMmmyZPwvvDa5Pbf9yMWzKL2y0TaitaETqCmI"
 	availabilitySheetName     = "Availability"
 	availabilityViewName      = "View"
-	day1Col                   = "E"
-	day4Col                   = "H"
+	availabilityDay1Col       = "E"
+	availabilityDay4Col       = "H"
 	availabilityCanUpdateCell = availabilityViewName + "!G4"
 	availabilityViewingDates  = availabilityViewName + "!B4:E4"
+	availabilityEmployeeIds   = availabilitySheetName + "!A2:A"
+	availabilityCells         = availabilitySheetName + "!E2:H"
+	availabilityUpdateOffset  = 2
 )
-
-type GoogleSheetsService interface {
-	GetAvailability() ([][]interface{}, error)
-	CanUpdateAvailability() (bool, error)
-	UpdateAvailabilityOnRow(row string, newAvailability *AvailabilityConstants.EmployeeAvailability) (*AvailabilityConstants.EmployeeAvailability, error)
-	GetSchedule() ([][]interface{}, error)
-	UpdateAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) (bool, error)
-}
 
 type SheetsService struct{}
 
@@ -45,7 +37,7 @@ func New() (*SheetsService, error) {
 }
 
 type GetAvailabilityResponse struct {
-	EmployeeIds    []interface{}
+	EmployeeIds    [][]interface{}
 	Availabilities [][]interface{}
 	Dates          []interface{}
 	CanUpdate      bool
@@ -55,18 +47,12 @@ func (s *SheetsService) GetAvailability() (*GetAvailabilityResponse, error) {
 	r1, err := sheetsService.Spreadsheets.Values.
 		BatchGet(availabilitySheetId).
 		Ranges(
-			fmt.Sprintf("%s!E2:H", availabilitySheetName),
-			"View!B4:E4",
+			availabilityCells,
+			availabilityViewingDates,
+			availabilityCanUpdateCell,
+			availabilityEmployeeIds,
 		).
 		MajorDimension("ROWS").
-		Do()
-	if err != nil {
-		return &GetAvailabilityResponse{}, err
-	}
-
-	r2, err := sheetsService.Spreadsheets.Values.
-		Get(availabilitySheetId, fmt.Sprintf("%s!A2:A", availabilitySheetName)).
-		MajorDimension("COLUMNS").
 		Do()
 	if err != nil {
 		return &GetAvailabilityResponse{}, err
@@ -77,75 +63,20 @@ func (s *SheetsService) GetAvailability() (*GetAvailabilityResponse, error) {
 		dates = append(dates, "")
 	}
 
-	canUpdate, err := s.canUpdateAvailability()
-	if err != nil {
-		return &GetAvailabilityResponse{}, err
-	}
-
 	return &GetAvailabilityResponse{
-		EmployeeIds:    r2.Values[0],
+		EmployeeIds:    r1.ValueRanges[3].Values,
 		Availabilities: r1.ValueRanges[0].Values,
 		Dates:          dates,
-		CanUpdate:      canUpdate,
+		CanUpdate:      r1.ValueRanges[2].Values[0][0] == "FALSE",
 	}, nil
 }
 
-func (s *SheetsService) canUpdateAvailability() (bool, error) {
-	response, err := sheetsService.Spreadsheets.Values.
-		Get(availabilitySheetId, availabilityCanUpdateCell).
-		Do()
-	if err != nil {
-		return false, err
-	}
-
-	return response.Values[0][0] == "FALSE", nil
-}
-
-func (s *SheetsService) UpdateAvailability(employeeId string, newEmployeeAvailability *AvailabilityConstants.EmployeeAvailability) error {
-	availability, err := s.GetAvailability()
-	if err != nil {
-		return err
-	}
-
-	if !availability.CanUpdate {
-		return errors.New(AvailabilityConstants.UPDATE_AVAILABILITY_DISABLED_ERROR)
-	}
-
-	r := -1
-	for i, id := range availability.EmployeeIds {
-		if id == employeeId {
-			r = i
-			break
-		}
-	}
-	if r == -1 {
-		return errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
-	}
-
-	err = s.updateAvailabilityOnRow(r, newEmployeeAvailability)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *SheetsService) updateAvailabilityOnRow(row int, newAvailability *AvailabilityConstants.EmployeeAvailability) error {
-	r := row + 2
-	updateRange := fmt.Sprintf("%s!%s%d:%s%d", availabilitySheetName, day1Col, r, day4Col, r)
-	updateValueRange := &sheets.ValueRange{
-		Values: [][]interface{}{
-			{
-				newAvailability.Day1.IsAvailable,
-				newAvailability.Day2.IsAvailable,
-				newAvailability.Day3.IsAvailable,
-				newAvailability.Day4.IsAvailable,
-			},
-		},
-	}
+func (s *SheetsService) UpdateAvailability(row int, newAvailability *sheets.ValueRange) error {
+	r := row + availabilityUpdateOffset
+	updateRange := fmt.Sprintf("%s!%s%d:%s%d", availabilitySheetName, availabilityDay1Col, r, availabilityDay4Col, r)
 
 	_, err := sheetsService.Spreadsheets.Values.
-		Update(availabilitySheetId, updateRange, updateValueRange).
+		Update(availabilitySheetId, updateRange, newAvailability).
 		ValueInputOption("RAW").
 		Do()
 	if err != nil {

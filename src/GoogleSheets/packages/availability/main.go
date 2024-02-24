@@ -1,11 +1,8 @@
 package main
 
 import (
-	GetAvailability "GoogleSheets/packages/availability/get"
-	UpdateAvailability "GoogleSheets/packages/availability/update"
-	"GoogleSheets/packages/common/Constants/AvailabilityConstants"
+	Availability "GoogleSheets/packages/availability/handlers"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/EmployeeInfo"
 	"context"
 	"encoding/json"
@@ -17,7 +14,6 @@ import (
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
 	idToken, exists := event.Headers["Authorization"]
 	if !exists {
 		return events.APIGatewayProxyResponse{
@@ -26,7 +22,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	GoogleClient.ConnectSheetsServiceIfNecessary()
 	employeeInfo, err := EmployeeInfo.New(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -43,14 +38,60 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	switch event.HTTPMethod {
 	case "GET":
-		return GetAvailability.HandleRequest(employeeInfo.GetEmployeeId())
+		availability, err := Availability.Get(employeeInfo.GetEmployeeId())
+		if err != nil {
+			log.Printf("[ERROR] Failed to get availability for %s: %s", employeeInfo.GetEmployeeId(), err.Error())
+			statusCode := 500
+			if err.Error() == SharedConstants.EMPLOYEE_NOT_FOUND_ERROR {
+				statusCode = 404
+			}
+			return events.APIGatewayProxyResponse{
+				StatusCode: statusCode,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       err.Error(),
+			}, nil
+		}
+
+		res, _ := json.Marshal(availability)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       string(res),
+		}, nil
+
 	case "POST":
 		newAvailabilityFromRequestBody := event.Body
-		newEmployeeAvailability := AvailabilityConstants.EmployeeAvailability{}
-		log.Printf("New Availability: %s", newAvailabilityFromRequestBody)
+		newEmployeeAvailability := Availability.EmployeeAvailability{}
+		log.Printf("[INFO] Trying to update availability for %s: %s", employeeInfo.GetEmployeeId(), newAvailabilityFromRequestBody)
 		json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
 
-		return UpdateAvailability.HandleRequest(employeeInfo.GetEmployeeId(), &newEmployeeAvailability)
+		err := Availability.Update(employeeInfo.GetEmployeeId(), &newEmployeeAvailability)
+		if err != nil {
+			log.Printf("[ERROR] Failed to update availability for %s: %s", employeeInfo.GetEmployeeId(), err.Error())
+			var statusCode int
+
+			switch err.Error() {
+			case Availability.UPDATE_AVAILABILITY_DISABLED_ERROR:
+				statusCode = 403
+			case SharedConstants.EMPLOYEE_NOT_FOUND_ERROR:
+				statusCode = 404
+			default:
+				statusCode = 500
+			}
+
+			return events.APIGatewayProxyResponse{
+				StatusCode: statusCode,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       err.Error(),
+			}, nil
+		}
+
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       newAvailabilityFromRequestBody,
+		}, nil
+
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: 501,
