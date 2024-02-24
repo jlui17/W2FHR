@@ -10,8 +10,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"
-
-	"google.golang.org/api/sheets/v4"
 )
 
 func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
@@ -43,12 +41,12 @@ func HandleRequest(employeeId string) (events.APIGatewayProxyResponse, error) {
 func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.EmployeeAvailability, error) {
 	sheetsService, err := GoogleClient.New()
 	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+		return &AvailabilityConstants.EmployeeAvailability{}, err
 	}
 
 	res, err := sheetsService.GetAvailability()
 	if err != nil {
-		return &AvailabilityConstants.DEFAULT_EMPLOYEE_AVAILABILITY, err
+		return &AvailabilityConstants.EmployeeAvailability{}, err
 	}
 
 	employeeIds := res.EmployeeIds
@@ -79,20 +77,6 @@ func getEmployeeAvailability(employeeId string) (*AvailabilityConstants.Employee
 		Day4:      AvailabilityConstants.EmployeeAvailabilityDay{IsAvailable: day4, Date: dates[3].(string)},
 		CanUpdate: canUpdate,
 	}, nil
-}
-
-func GetAvailabilityTimesheet() (*sheets.ValueRange, error) {
-	sheetsService := GoogleClient.GetSheetsService()
-
-	sheetId := AvailabilityConstants.AVAILABILITY_SHEET_ID
-	readRange := AvailabilityConstants.AVAILABILITY_TIMESHEET_GET_RANGE
-
-	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
-	if err != nil {
-		return &sheets.ValueRange{}, err
-	}
-
-	return response, nil
 }
 
 func FindRowOfEmployeeAvailability(availabilityTimesheet [][]interface{}, employeeId string) (int, error) {
