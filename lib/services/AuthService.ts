@@ -10,11 +10,17 @@ export class AuthService extends Stack {
   public readonly userPool: UserPool;
   public readonly userPoolClient: UserPoolClient;
 
-  constructor(scope: Construct, id: string) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: {
+      userPoolName: string;
+    }
+  ) {
     super(scope, id);
 
-    this.userPool = new UserPool(this, "employees", {
-      userPoolName: "employees",
+    this.userPool = new UserPool(this, props.userPoolName, {
+      userPoolName: props.userPoolName,
       selfSignUpEnabled: true,
       signInCaseSensitive: false,
       signInAliases: {
@@ -40,16 +46,19 @@ export class AuthService extends Stack {
       },
     });
 
-    this.userPoolClient = this.userPool.addClient("employees-client", {
-      userPoolClientName: "employees-client",
-      generateSecret: false,
-      authFlows: {
-        userPassword: true,
-      },
-    });
-    this.userPool.addDomain("employees-domain", {
+    this.userPoolClient = this.userPool.addClient(
+      props.userPoolName + "-client",
+      {
+        userPoolClientName: props.userPoolName + "-client",
+        generateSecret: false,
+        authFlows: {
+          userPassword: true,
+        },
+      }
+    );
+    this.userPool.addDomain(props.userPoolName + "-domain", {
       cognitoDomain: {
-        domainPrefix: "employees-wun2free",
+        domainPrefix: props.userPoolName + "-wun2free",
       },
     });
   }

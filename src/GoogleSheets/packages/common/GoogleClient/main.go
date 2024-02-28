@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	availabilitySheetId       = "13LQSitRMmmyZPwvvDa5Pbf9yMWzKL2y0TaitaETqCmI"
+	availabilitySheetId       = "1m-t041RzaQRj2XqGo0KIpAnzUg6w71e0_9UFudIJnxU"
 	availabilitySheetName     = "Availability"
 	availabilityViewName      = "View"
 	availabilityDay1Col       = "E"

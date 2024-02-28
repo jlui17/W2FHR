@@ -6,7 +6,9 @@ import { AuthService } from "../lib/services/AuthService";
 import { FrontendService } from "../lib/services/FrontendService";
 
 const app = new cdk.App();
-const authService = new AuthService(app, "AuthService");
+const authService = new AuthService(app, "AuthService", {
+  userPoolName: "employees",
+});
 
 const apiService = new ApiService(app, "ApiService", {
   AuthService: {
