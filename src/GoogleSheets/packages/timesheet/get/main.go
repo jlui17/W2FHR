@@ -5,8 +5,6 @@ import (
 	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/TimeService"
-	"GoogleSheets/packages/common/Utilities/SharedUtil"
-	"GoogleSheets/packages/timesheet/TimesheetProcessor"
 	"log"
 
 	"encoding/json"
@@ -30,7 +28,8 @@ func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResp
 	switch upcoming {
 	case true:
 		log.Printf("[INFO] Getting upcoming shifts for employee: %s", employeeId)
-		upcomingSchedule, err := sheetsService.GetUpcomingSchedule()
+		schedule, err := sheetsService.GetUpcomingSchedule()
+		schedule = filterForUpcomingShifts(schedule)
 		if err != nil {
 			log.Printf("[ERROR] Failed to retrieve upcoming schedule from google sheets: %s", err.Error())
 			return events.APIGatewayProxyResponse{
@@ -39,7 +38,7 @@ func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResp
 			}, nil
 		}
 
-		employeeShifts = getUpcomingShifts(employeeId, upcomingSchedule)
+		employeeShifts = getShifts(employeeId, schedule, true)
 	case false:
 		log.Printf("[INFO] Getting all shifts for employee: %s", employeeId)
 		schedule, err := sheetsService.GetSchedule()
@@ -51,9 +50,10 @@ func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResp
 			}, err
 		}
 
-		employeeShifts = getShiftsForEmployee(employeeId, schedule, upcoming)
+		employeeShifts = getShifts(employeeId, schedule, false)
 	}
 
+	log.Printf("[INFO] Found shifts for %s: %v", employeeId, employeeShifts)
 	res, _ := json.Marshal(employeeShifts)
 
 	return events.APIGatewayProxyResponse{
@@ -63,7 +63,35 @@ func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResp
 	}, err
 }
 
-func getUpcomingShifts(employeeId string, schedule *GoogleClient.GetScheduleResponse) *TimesheetConstants.Timesheet {
+func filterForUpcomingShifts(schedule *GoogleClient.GetScheduleResponse) *GoogleClient.GetScheduleResponse {
+	employeeIds := [][]interface{}{}
+	shiftNames := [][]interface{}{}
+	shifts := [][]interface{}{}
+
+	today := TimeService.GetToday()
+	log.Printf("[INFO] Today: %s", today.String())
+	for i, row := range schedule.Shifts {
+		shiftDate := row[0].(string)
+		convertedDate := TimeService.ConvertDateToTime(shiftDate)
+
+		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)
+		if !shiftIsUpcoming {
+			break
+		}
+
+		employeeIds = append(employeeIds, schedule.EmployeeIds[i])
+		shiftNames = append(shiftNames, schedule.ShiftNames[i])
+		shifts = append(shifts, schedule.Shifts[i])
+	}
+
+	return &GoogleClient.GetScheduleResponse{
+		EmployeeIds: employeeIds,
+		ShiftNames:  shiftNames,
+		Shifts:      shifts,
+	}
+}
+
+func getShifts(employeeId string, schedule *GoogleClient.GetScheduleResponse, reverse bool) *TimesheetConstants.Timesheet {
 	employeeShifts := []TimesheetConstants.EmployeeShift{}
 
 	for i := 0; i < len(schedule.EmployeeIds); i++ {
@@ -79,51 +107,13 @@ func getUpcomingShifts(employeeId string, schedule *GoogleClient.GetScheduleResp
 	}
 
 	// upcoming shifts sorted in desc date, need to return in asc date order
-	for i, j := 0, len(employeeShifts)-1; i < j; i, j = i+1, j-1 {
-		employeeShifts[i], employeeShifts[j] = employeeShifts[j], employeeShifts[i]
+	if reverse {
+		for i, j := 0, len(employeeShifts)-1; i < j; i, j = i+1, j-1 {
+			employeeShifts[i], employeeShifts[j] = employeeShifts[j], employeeShifts[i]
+		}
 	}
 
 	return &TimesheetConstants.Timesheet{
 		Shifts: employeeShifts,
 	}
-}
-
-func getShiftsForEmployee(employeeId string, schedule [][]interface{}, getUpcomingShifts bool) *TimesheetConstants.Timesheet {
-	if getUpcomingShifts {
-		schedule = filterForUpcomingShifts(schedule)
-		log.Printf("[INFO] Found upcoming schedule: %v", schedule)
-	}
-
-	timesheetProcessor := TimesheetProcessor.New(employeeId)
-	for _, row := range schedule {
-		timesheetProcessor.ProcessRow(row)
-	}
-	timesheetForEmployee := timesheetProcessor.GetTimesheet()
-	log.Printf("[INFO] Found shifts for employee (%s): %v", employeeId, timesheetForEmployee)
-
-	return &timesheetForEmployee
-}
-
-func filterForUpcomingShifts(masterTimesheet [][]interface{}) [][]interface{} {
-	upcomingShifts := [][]interface{}{}
-	today := TimeService.GetToday()
-	log.Printf("[INFO] Today: %s", today.String())
-
-	dateCol := SharedUtil.GetIndexOfColumn(TimesheetConstants.DATE_COLUMN)
-	for i := len(masterTimesheet) - 1; i > -1; i-- {
-		shiftDate := masterTimesheet[i][dateCol].(string)
-		convertedDate := TimeService.ConvertDateToTime(shiftDate)
-
-		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)
-		if !shiftIsUpcoming {
-			break
-		}
-
-		upcomingShifts = append(upcomingShifts, masterTimesheet[i])
-	}
-
-	for i, j := 0, len(upcomingShifts)-1; i < j; i, j = i+1, j-1 { // reverse
-		upcomingShifts[i], upcomingShifts[j] = upcomingShifts[j], upcomingShifts[i]
-	}
-	return upcomingShifts
 }

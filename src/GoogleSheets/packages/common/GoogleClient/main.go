@@ -1,7 +1,6 @@
 package GoogleClient
 
 import (
-	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"context"
 	"fmt"
 	"os"
@@ -24,17 +23,40 @@ const (
 	availabilityCells         = availabilitySheetName + "!E2:H"
 	availabilityUpdateOffset  = 2
 
-	scheduleSheetId             = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
-	scheduleUpcomingSheetName   = "Main Schedule SORT BY DESC DATE"
-	scheduleUpcomingEmployeeIds = scheduleUpcomingSheetName + "!C2:C200"
-	scheduleUpcomingShiftNames  = scheduleUpcomingSheetName + "!E2:E200"
-	scheduleUpcomingData        = scheduleUpcomingSheetName + "!G2:J200"
+	scheduleSheetId           = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
+	scheduleRangeTemplate     = "%s!%s2:%s200"
+	scheduleUpcomingSheetName = "Main Schedule SORT BY DESC DATE"
+	scheduleSheetName         = "Main Schedule"
+	scheduleEmployeeIdCol     = "C"
+	scheduleTitleCol          = "E"
+	scheduleDataColStart      = "G"
+	scheduleDataColEnd        = "J"
 )
 
 type SheetsService struct{}
 
 var (
 	sheetsService *sheets.Service
+
+	scheduleUpcomingEmployeeIds = fmt.Sprintf(scheduleRangeTemplate, scheduleUpcomingSheetName,
+		scheduleEmployeeIdCol,
+		scheduleEmployeeIdCol)
+	scheduleUpcomingShiftNames = fmt.Sprintf(scheduleRangeTemplate, scheduleUpcomingSheetName,
+		scheduleTitleCol,
+		scheduleTitleCol)
+	scheduleUpcomingData = fmt.Sprintf(scheduleRangeTemplate, scheduleUpcomingSheetName,
+		scheduleDataColStart,
+		scheduleDataColEnd)
+
+	scheduleEmployeeIds = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
+		scheduleEmployeeIdCol,
+		scheduleEmployeeIdCol)
+	scheduleShiftNames = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
+		scheduleTitleCol,
+		scheduleTitleCol)
+	scheduleData = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
+		scheduleDataColStart,
+		scheduleDataColEnd)
 )
 
 func New() (*SheetsService, error) {
@@ -119,16 +141,25 @@ func (s *SheetsService) GetUpcomingSchedule() (*GetScheduleResponse, error) {
 	}, nil
 }
 
-func (s *SheetsService) GetSchedule() ([][]interface{}, error) {
-	sheetId := TimesheetConstants.TIMESHEET_SHEET_ID
-	readRange := fmt.Sprintf("%s!%s", TimesheetConstants.SCHEDULE_SHEET_NAME, TimesheetConstants.SCHEDULE_GET_RANGE)
-
-	response, err := sheetsService.Spreadsheets.Values.Get(sheetId, readRange).Do()
+func (s *SheetsService) GetSchedule() (*GetScheduleResponse, error) {
+	response, err := sheetsService.Spreadsheets.Values.
+		BatchGet(scheduleSheetId).
+		Ranges(
+			scheduleEmployeeIds,
+			scheduleShiftNames,
+			scheduleData,
+		).
+		MajorDimension("ROWS").
+		Do()
 	if err != nil {
-		return [][]interface{}{}, err
+		return &GetScheduleResponse{}, err
 	}
 
-	return response.Values, nil
+	return &GetScheduleResponse{
+		EmployeeIds: response.ValueRanges[0].Values,
+		ShiftNames:  response.ValueRanges[1].Values,
+		Shifts:      response.ValueRanges[2].Values,
+	}, nil
 }
 
 func GetSheetsService() *sheets.Service {
