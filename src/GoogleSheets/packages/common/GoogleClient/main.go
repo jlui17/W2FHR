@@ -23,6 +23,12 @@ const (
 	availabilityEmployeeIds   = availabilitySheetName + "!A2:A"
 	availabilityCells         = availabilitySheetName + "!E2:H"
 	availabilityUpdateOffset  = 2
+
+	scheduleSheetId             = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
+	scheduleUpcomingSheetName   = "Main Schedule SORT BY DESC DATE"
+	scheduleUpcomingEmployeeIds = scheduleUpcomingSheetName + "!C2:C200"
+	scheduleUpcomingShiftNames  = scheduleUpcomingSheetName + "!E2:E200"
+	scheduleUpcomingData        = scheduleUpcomingSheetName + "!G2:J200"
 )
 
 type SheetsService struct{}
@@ -84,6 +90,33 @@ func (s *SheetsService) UpdateAvailability(row int, newAvailability *sheets.Valu
 	}
 
 	return nil
+}
+
+type GetScheduleResponse struct {
+	EmployeeIds [][]interface{}
+	ShiftNames  [][]interface{}
+	Shifts      [][]interface{}
+}
+
+func (s *SheetsService) GetUpcomingSchedule() (*GetScheduleResponse, error) {
+	response, err := sheetsService.Spreadsheets.Values.
+		BatchGet(scheduleSheetId).
+		Ranges(
+			scheduleUpcomingEmployeeIds,
+			scheduleUpcomingShiftNames,
+			scheduleUpcomingData,
+		).
+		MajorDimension("ROWS").
+		Do()
+	if err != nil {
+		return &GetScheduleResponse{}, err
+	}
+
+	return &GetScheduleResponse{
+		EmployeeIds: response.ValueRanges[0].Values,
+		ShiftNames:  response.ValueRanges[1].Values,
+		Shifts:      response.ValueRanges[2].Values,
+	}, nil
 }
 
 func (s *SheetsService) GetSchedule() ([][]interface{}, error) {
