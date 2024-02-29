@@ -1,12 +1,14 @@
 package TimeService
 
 import (
-	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"log"
 	"time"
 )
 
-const vancouverTimeZone string = "America/Los_Angeles"
+const (
+	vancouverTimeZone = "America/Los_Angeles"
+	dateFormat        = "Monday, January 2, 2006"
+)
 
 func GetToday() time.Time {
 	vancouverTime, err := time.LoadLocation(vancouverTimeZone)
@@ -16,17 +18,15 @@ func GetToday() time.Time {
 	}
 
 	y, m, d := time.Now().In(vancouverTime).Date()
-	today := time.Date(y, m, d, 0, 0, 0, 0, vancouverTime)
-	return today
+	return time.Date(y, m, d, 0, 0, 0, 0, vancouverTime)
 }
 
-func ConvertDateToTime(date string) *time.Time {
+func ConvertDateToTime(date string) (time.Time, error) {
 	vancouverTime, err := time.LoadLocation(vancouverTimeZone)
 	if err != nil {
 		log.Printf("[ERROR] Couldn't load location for time zone: %s", err.Error())
 		panic(err)
 	}
 
-	t, _ := time.ParseInLocation(TimesheetConstants.DATE_FORMAT, date, vancouverTime)
-	return &t
+	return time.ParseInLocation(dateFormat, date, vancouverTime)
 }

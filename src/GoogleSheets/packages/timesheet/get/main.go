@@ -2,7 +2,6 @@ package GetTimesheet
 
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/Constants/TimesheetConstants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/TimeService"
 	"log"
@@ -12,6 +11,18 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 )
+
+type Timesheet struct {
+	Shifts []EmployeeShift `json:"shifts"`
+}
+
+type EmployeeShift struct {
+	Date          string `json:"date"`
+	ShiftTitle    string `json:"shiftTitle"`
+	StartTime     string `json:"startTime"`
+	EndTime       string `json:"endTime"`
+	BreakDuration string `json:"breakDuration"`
+}
 
 func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResponse, error) {
 	sheetsService, err := GoogleClient.New()
@@ -23,15 +34,23 @@ func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResp
 		}, nil
 	}
 
-	var employeeShifts *TimesheetConstants.Timesheet
+	var employeeShifts *Timesheet
 
 	switch upcoming {
 	case true:
 		log.Printf("[INFO] Getting upcoming shifts for employee: %s", employeeId)
 		schedule, err := sheetsService.GetUpcomingSchedule()
-		schedule = filterForUpcomingShifts(schedule)
 		if err != nil {
 			log.Printf("[ERROR] Failed to retrieve upcoming schedule from google sheets: %s", err.Error())
+			return events.APIGatewayProxyResponse{
+				StatusCode: 500,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			}, nil
+		}
+
+		schedule, err = filterForUpcomingShifts(schedule)
+		if err != nil {
+			log.Printf("[ERROR] Failed to filter for upcoming shifts: %s", err.Error())
 			return events.APIGatewayProxyResponse{
 				StatusCode: 500,
 				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -63,7 +82,7 @@ func HandleRequest(employeeId string, upcoming bool) (events.APIGatewayProxyResp
 	}, err
 }
 
-func filterForUpcomingShifts(schedule *GoogleClient.GetScheduleResponse) *GoogleClient.GetScheduleResponse {
+func filterForUpcomingShifts(schedule *GoogleClient.GetScheduleResponse) (*GoogleClient.GetScheduleResponse, error) {
 	employeeIds := [][]interface{}{}
 	shiftNames := [][]interface{}{}
 	shifts := [][]interface{}{}
@@ -72,7 +91,11 @@ func filterForUpcomingShifts(schedule *GoogleClient.GetScheduleResponse) *Google
 	log.Printf("[INFO] Today: %s", today.String())
 	for i, row := range schedule.Shifts {
 		shiftDate := row[0].(string)
-		convertedDate := TimeService.ConvertDateToTime(shiftDate)
+		convertedDate, err := TimeService.ConvertDateToTime(shiftDate)
+		if err != nil {
+			log.Printf("[ERROR] Failed to convert date: %s\nError: ", shiftDate, err.Error())
+			return &GoogleClient.GetScheduleResponse{}, err
+		}
 
 		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)
 		if !shiftIsUpcoming {
@@ -88,15 +111,15 @@ func filterForUpcomingShifts(schedule *GoogleClient.GetScheduleResponse) *Google
 		EmployeeIds: employeeIds,
 		ShiftNames:  shiftNames,
 		Shifts:      shifts,
-	}
+	}, nil
 }
 
-func getShifts(employeeId string, schedule *GoogleClient.GetScheduleResponse, reverse bool) *TimesheetConstants.Timesheet {
-	employeeShifts := []TimesheetConstants.EmployeeShift{}
+func getShifts(employeeId string, schedule *GoogleClient.GetScheduleResponse, reverse bool) *Timesheet {
+	employeeShifts := []EmployeeShift{}
 
 	for i := 0; i < len(schedule.EmployeeIds); i++ {
 		if schedule.EmployeeIds[i][0] == employeeId {
-			employeeShifts = append(employeeShifts, TimesheetConstants.EmployeeShift{
+			employeeShifts = append(employeeShifts, EmployeeShift{
 				ShiftTitle:    schedule.ShiftNames[i][0].(string),
 				Date:          schedule.Shifts[i][0].(string),
 				StartTime:     schedule.Shifts[i][1].(string),
@@ -113,7 +136,7 @@ func getShifts(employeeId string, schedule *GoogleClient.GetScheduleResponse, re
 		}
 	}
 
-	return &TimesheetConstants.Timesheet{
+	return &Timesheet{
 		Shifts: employeeShifts,
 	}
 }
