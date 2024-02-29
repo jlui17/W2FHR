@@ -93,7 +93,7 @@ func filterForUpcomingShifts(schedule *GoogleClient.GetScheduleResponse) (*Googl
 		shiftDate := row[0].(string)
 		convertedDate, err := TimeService.ConvertDateToTime(shiftDate)
 		if err != nil {
-			log.Printf("[ERROR] Failed to convert date: %s\nError: ", shiftDate, err.Error())
+			log.Printf("[ERROR] Failed to convert date: %s\nError: %s", shiftDate, err.Error())
 			return &GoogleClient.GetScheduleResponse{}, err
 		}
 
