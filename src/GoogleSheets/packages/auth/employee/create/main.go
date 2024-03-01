@@ -1,7 +1,7 @@
 package CreateEmployeeID
 
 import (
-	GetEmployeeId "GoogleSheets/packages/auth/get"
+	GetEmployeeId "GoogleSheets/packages/auth/employee/get"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"

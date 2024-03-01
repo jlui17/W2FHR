@@ -3,6 +3,7 @@ export const API_URLS = {
   TIMESHEET: `${BASE_URL}/timesheet`,
   AVAILABILITY: `${BASE_URL}/availability`,
   AUTH: `${BASE_URL}/auth`,
+  EMPLOYEE: `${BASE_URL}/auth/employee`,
 };
 
 const PLEASE_CONTACT_JUSTIN =

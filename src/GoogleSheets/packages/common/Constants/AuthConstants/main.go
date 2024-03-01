@@ -1,7 +1,8 @@
 package AuthConstants
 
 const (
-	STAFF_LIST_SHEET_ID                = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
+	STAFF_LIST_SHEET_ID = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
+	// STAFF_LIST_SHEET_ID                = "1UWg4SPcPf6wSLNIW-u_KRt1HCHj4yhvqdQyfryNj51I"
 	EMPLOYEE_ID_COL                    = "A"
 	EMAIL_GET_RANGE                    = "G2:G"
 	EMPLOYEE_ID_GET_RANGE              = "A2:A"
@@ -29,3 +30,12 @@ var (
 		EmployeeIds: []interface{}{},
 	}
 )
+
+type SendCodeRequest struct {
+	Username string `json:"username"`
+}
+
+type ConfirmCodeRequest struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}

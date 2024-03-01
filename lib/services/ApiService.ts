@@ -129,9 +129,13 @@ export class ApiService extends Stack {
     });
 
     const baseAuthRoute = api.root.addResource("auth");
-    const authRoute = baseAuthRoute.addResource("{email}");
-    authRoute.addMethod("GET", new LambdaIntegration(authHandler));
-    baseAuthRoute.addMethod("POST", new LambdaIntegration(authHandler));
+    const employeeRoute = baseAuthRoute.addResource("employee");
+    employeeRoute.addMethod("GET", new LambdaIntegration(authHandler))
+    employeeRoute.addMethod("POST", new LambdaIntegration(authHandler))   
+    const verifyRoute = baseAuthRoute.addResource("verify");
+    verifyRoute.addMethod("GET", new LambdaIntegration(authHandler));
+    verifyRoute.addMethod("POST", new LambdaIntegration(authHandler))
+    
 
   }
 }
