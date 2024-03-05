@@ -1,8 +1,8 @@
 package AuthConstants
 
 const (
-	STAFF_LIST_SHEET_ID = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
-	// STAFF_LIST_SHEET_ID                = "1UWg4SPcPf6wSLNIW-u_KRt1HCHj4yhvqdQyfryNj51I"
+	// (NEW STAFF LIST) STAFF_LIST_SHEET_ID = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
+	STAFF_LIST_SHEET_ID                = "1UWg4SPcPf6wSLNIW-u_KRt1HCHj4yhvqdQyfryNj51I"
 	EMPLOYEE_ID_COL                    = "A"
 	EMAIL_GET_RANGE                    = "G2:G"
 	EMPLOYEE_ID_GET_RANGE              = "A2:A"
@@ -38,4 +38,15 @@ type SendCodeRequest struct {
 type ConfirmCodeRequest struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type ResetPassword struct {
+	Email    string `json:"email"`
+	Code     string `json:"code"`
+	Password string `json:"password"`
 }

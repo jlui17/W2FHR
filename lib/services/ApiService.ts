@@ -135,7 +135,10 @@ export class ApiService extends Stack {
     const verifyRoute = baseAuthRoute.addResource("verify");
     verifyRoute.addMethod("GET", new LambdaIntegration(authHandler));
     verifyRoute.addMethod("POST", new LambdaIntegration(authHandler))
-    
-
+    const loginRoute = baseAuthRoute.addResource("login");
+    loginRoute.addMethod("POST", new LambdaIntegration(authHandler))    
+    const passwordRoute = baseAuthRoute.addResource("password");
+    passwordRoute.addMethod("GET", new LambdaIntegration(authHandler));
+    passwordRoute.addMethod("POST", new LambdaIntegration(authHandler))
   }
 }
