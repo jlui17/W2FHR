@@ -2,10 +2,10 @@ package main
 
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/Utilities/EmployeeInfo"
-	GetTimesheet "GoogleSheets/packages/timesheet/get"
+	"GoogleSheets/packages/schedule/Schedule"
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -13,7 +13,6 @@ import (
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
 	idToken, exists := event.Headers["Authorization"]
 	if !exists {
 		return events.APIGatewayProxyResponse{
@@ -22,7 +21,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	GoogleClient.ConnectSheetsServiceIfNecessary()
 	employeeInfo, err := EmployeeInfo.New(idToken)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -38,7 +36,23 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		employeeInfo.GetEmail(),
 		employeeInfo.GetEmployeeId(),
 	)
-	return GetTimesheet.HandleRequest(employeeInfo.GetEmployeeId(), shouldGetUpcoming)
+
+	schedule, err := Schedule.Get(employeeInfo.GetEmployeeId(), shouldGetUpcoming)
+	if err != nil {
+		log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	log.Printf("[INFO] Found shifts for %s: %v", employeeInfo.GetEmployeeId(), schedule)
+	res, _ := json.Marshal(schedule)
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		Body:       string(res),
+	}, nil
 }
 
 func main() {

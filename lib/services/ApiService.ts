@@ -51,7 +51,7 @@ export class ApiService extends Stack {
       this,
       "GoogleSheetsTimesheetHandler",
       {
-        entry: `${SOURCE_PACKAGES_DIR}/timesheet`,
+        entry: `${SOURCE_PACKAGES_DIR}/schedule`,
         moduleDir: MODULE_DIR,
         timeout: Duration.seconds(10),
         environment: {
@@ -69,11 +69,10 @@ export class ApiService extends Stack {
         timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
-          COGNITO_CLIENT_ID:  props.AuthService.userPoolClient.userPoolClientId,
+          COGNITO_CLIENT_ID: props.AuthService.userPoolClient.userPoolClientId,
         },
       }
     );
-
 
     const api = new RestApi(this, "RestApi", {
       defaultCorsPreflightOptions: {
@@ -132,6 +131,5 @@ export class ApiService extends Stack {
     const authRoute = baseAuthRoute.addResource("{email}");
     authRoute.addMethod("GET", new LambdaIntegration(authHandler));
     baseAuthRoute.addMethod("POST", new LambdaIntegration(authHandler));
-
   }
 }
