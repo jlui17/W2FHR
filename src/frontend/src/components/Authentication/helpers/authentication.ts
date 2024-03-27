@@ -87,7 +87,7 @@ export const useSignUp = ({
   onError,
 }: SignUpParams) => {
   const signUp = async (): Promise<any> => {
-    const response = await fetch(API_URLS.AUTH, {
+    const response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${idToken}`,
