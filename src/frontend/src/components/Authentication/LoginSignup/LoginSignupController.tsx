@@ -13,7 +13,7 @@ import {
 } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
-  confirmAccount,
+  useConfirmAccount,
   loginAndGetAuthSession,
   resendSignupVerificationCode,
   useSignUp,
@@ -49,7 +49,7 @@ const AuthenticationController = () => {
     }
   };
 
-  const { mutateAsync: doSignUp, isError, error } = useSignUp({
+  const { mutateAsync: doSignUp} = useSignUp({
     email,
     password,
     idToken: getAuthSession()?.IdToken || "",
@@ -82,29 +82,49 @@ const AuthenticationController = () => {
     }
   };
 
-  const onConfirmAccount = async () => {
-    setIsLoading(true);
-    try {
-      await confirmAccount(email, verificationCode);
+  const { mutateAsync: confirmAccount} = useConfirmAccount({
+    email,
+    verificationCode,
+    idToken: getAuthSession()?.IdToken || "",
+    onSuccess: (data) => {
+      console.log(data)
+      console.log("success")
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
       });
+      
       setVerificationCode("");
-    } catch (err) {
-      const errorAlert: AlertInfo = {
-        type: AlertType.ERROR,
-        message: ERROR_MESSAGES.UNKNOWN_ERROR,
-      };
-      if (err instanceof Error) {
-        errorAlert.message = err.message;
+      setIsLoading(false);
+      navigate(ROUTES.DASHBOARD)
+    },
+    onError: (err: unknown) => {
+
+
+      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        errorMessage = "You have inputted the wrong code"; 
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
+      setAlert({
+        type: AlertType.ERROR,
+        message: errorMessage,
+      });
 
       console.error(err);
-      setAlert(errorAlert);
+      setIsLoading(false); 
+    },
+  });
+
+  const onConfirmAccount = async () => {
+    setIsLoading(true); 
+    try {
+      await confirmAccount(); 
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
     }
-    setIsConfirmingAccount(false);
-    setIsLoading(false);
   };
 
   const onSendVerificationCode = async () => {

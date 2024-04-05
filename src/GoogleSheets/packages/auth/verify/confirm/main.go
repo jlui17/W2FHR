@@ -2,6 +2,7 @@ package VerifyEmployeeCode
 
 import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -40,8 +41,15 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	response := AuthConstants.VerifyResponse{
+		Response: "confirmed",
+	}
+
+	reponseBody, err := json.Marshal(response)
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       "Verification successful",
+		Body:       string(reponseBody),
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 	}, nil
 }

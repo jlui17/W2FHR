@@ -97,6 +97,7 @@ export const useSignUp = ({
       body: JSON.stringify({ email, password }),
     });
 
+    console.log("SIGN UP WENT THRU")
     switch(response.status) {
       case 201: 
         const data = await response.json();        
@@ -129,8 +130,8 @@ export const useSignUp = ({
 //     Password: password,
 //     UserAttributes: [
 //       {
-//         Name: "custom:employeeId",
-//         Value: employeeId,
+//         Name: "custom:eeemployeeId",
+//         Value: employId,
 //       },
 //     ],
 //   });
@@ -138,19 +139,63 @@ export const useSignUp = ({
 //   return COGNITO_CLIENT.send(signUpCommand);
 // };
 
-export const confirmAccount = async (
-  email: string,
-  verificationCode: string
-): Promise<ConfirmSignUpCommandOutput> => {
-  const confirmSignUpCommand = new ConfirmSignUpCommand({
-    ClientId: COGNITO_CONFIG.clientId,
-    Username: email,
-    ConfirmationCode: verificationCode,
+// export const confirmAccount = async (
+//   email: string,
+//   verificationCode: string
+// ): Promise<ConfirmSignUpCommandOutput> => {
+//   const confirmSignUpCommand = new ConfirmSignUpCommand({
+//     ClientId: COGNITO_CONFIG.clientId,
+//     Username: email,
+//     ConfirmationCode: verificationCode,
+//   });
+
+//   return COGNITO_CLIENT.send(confirmSignUpCommand);
+// };
+
+interface ConfirmAccountParams {
+  email: string;
+  verificationCode: string;
+  idToken: string;
+  onSuccess: (data: any) => void;
+  onError: (err: unknown) => void;
+}
+
+export const useConfirmAccount = ({
+  email,
+  verificationCode,
+  idToken,
+  onSuccess,
+  onError,
+}: ConfirmAccountParams) => {
+  const confirmAccount = async (): Promise<any> => {
+    const response = await fetch(API_URLS.VERIFY, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ email, code: verificationCode }),
+    });
+
+    switch(response.status) {
+      case 200:
+        console.log("good verify")
+        return Promise.resolve(200);
+      case 400:
+        return Promise.reject(new Error('Invalid request'));
+      case 500:
+        return Promise.reject(new Error('Internal server error'));
+      
+      default:
+        return Promise.reject(new Error('Unknown error occurred'));
+    }
+  };
+
+  return useMutation(confirmAccount, {
+    onSuccess: onSuccess,
+    onError: onError,
   });
-
-  return COGNITO_CLIENT.send(confirmSignUpCommand);
 };
-
 export const resendSignupVerificationCode = async (
   email: string
 ): Promise<void> => {

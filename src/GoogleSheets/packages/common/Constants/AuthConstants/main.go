@@ -24,6 +24,10 @@ type SignUpResponse struct {
 	NeedsConfirmation bool `json:"needsConfirmation"`
 }
 
+type VerifyResponse struct {
+	Response string `json:"response"`
+}
+
 var (
 	DEFAULT_STAFF_LIST_INFO = &STAFF_LIST_INFO{
 		Emails:      []interface{}{},

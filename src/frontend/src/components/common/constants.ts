@@ -4,6 +4,8 @@ export const API_URLS = {
   AVAILABILITY: `${BASE_URL}/availability`,
   AUTH: `${BASE_URL}/auth`,
   EMPLOYEE: `${BASE_URL}/auth/employee`,
+  VERIFY: `${BASE_URL}/auth/verify`,
+
 };
 
 const PLEASE_CONTACT_JUSTIN =
