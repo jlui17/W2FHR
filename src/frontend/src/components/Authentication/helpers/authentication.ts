@@ -163,21 +163,33 @@ export const useConfirmAccount = ({
     onError: onError,
   });
 };
-export const resendSignupVerificationCode = async (
-  email: string
-): Promise<void> => {
-  const resendConfirmationCodeCommand = new ResendConfirmationCodeCommand({
-    ClientId: COGNITO_CONFIG.clientId,
-    Username: email,
-  });
 
+interface ConfirmAccountParams {
+  email: string;
+  idToken: string;
+}
+
+
+export const resendSignupVerificationCode = async (email: string, idToken: string): Promise<void> => {
+  const url = new URL(API_URLS.VERIFY); 
+  url.searchParams.append('email', email);
   try {
-    await COGNITO_CLIENT.send(resendConfirmationCodeCommand);
-  } catch (err) {
-    return Promise.reject(err);
-  }
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
 
-  return Promise.resolve();
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to resend verification code');
+    }
+  } catch (err) {
+    throw new Error('LimitExceededException');
+  }
 };
 
 // export const loginAndGetAuthSession = async (
@@ -236,13 +248,19 @@ export const useLogin = ({
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      console.log("Failed")
-      throw new Error('Login failed');
+    switch(response.status) {
+      case 200:
+        const data = await response.json();        
+        return Promise.resolve(data);
+      case 401:
+        return Promise.reject(new Error('UserNotConfirmedException'));
+      case 500:
+        return Promise.reject(new Error('Internal server error'));
+      
+      default:
+        return Promise.reject(new Error('Unknown error occurred'));
     }
 
-    const data = await response.json();
-    return data;
   };
 
   return useMutation(login, {

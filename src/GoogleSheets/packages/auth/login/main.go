@@ -6,7 +6,6 @@ import (
 
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -38,10 +37,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	authResp, err := cognitoClient.InitiateAuth(authInput)
+
 	if err != nil {
+
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
-			Body:       fmt.Sprintf("Authentication failed: %v", err),
+			Body:       err.Error(),
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		}, nil
 	}
 	authResultJSON, err := json.Marshal(authResp.AuthenticationResult)

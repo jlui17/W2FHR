@@ -6,6 +6,7 @@ export const API_URLS = {
   EMPLOYEE: `${BASE_URL}/auth/employee`,
   VERIFY: `${BASE_URL}/auth/verify`,
   LOGIN: `${BASE_URL}/auth/login`,
+  PASSWORD: `${BASE_URL}/auth/password`,
 
 };
 

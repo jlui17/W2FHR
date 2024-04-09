@@ -1,6 +1,7 @@
 package VerifyEmployee
 
 import (
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"context"
 	"fmt"
 	"os"
@@ -47,5 +48,6 @@ func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyRes
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Body:       "Confirmation code resent successfully",
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 	}, nil
 }

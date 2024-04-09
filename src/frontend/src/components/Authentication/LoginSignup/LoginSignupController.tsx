@@ -128,17 +128,20 @@ const AuthenticationController = () => {
   const onSendVerificationCode = async () => {
     setIsLoading(true);
     try {
-      await resendSignupVerificationCode(email);
+      await resendSignupVerificationCode(email, getAuthSession()?.IdToken || "");
       setAlert({
         type: AlertType.INFO,
         message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
       });
-    } catch (err) {
+    } catch (err: any) {
+      console.log(err)
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
         message: ERROR_MESSAGES.UNKNOWN_ERROR,
       };
-      if (err instanceof Error) {
+      if(err.message == 'LimitExceededException') {
+        errorAlert.message = "Too many requests, Please wait. (Check your email for the code)"
+      }else if (err instanceof Error) {
         errorAlert.message = err.message;
       }
 
@@ -167,12 +170,17 @@ const AuthenticationController = () => {
         message: "Login successful",
       });
       
-      setIsLoading(false);
       navigate(ROUTES.DASHBOARD);
     },
-    onError: (err) => {
+    onError: (err: any) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (err instanceof Error) {
+      console.log(err)
+      if(err.message === 'UserNotConfirmedException'){
+          setVerificationCode("")
+          setIsConfirmingAccount(true);
+          onSendVerificationCode();
+          errorMessage = "You need to confirm your account"
+      }else if (err instanceof Error) {
         errorMessage = err.message;
       }
       setAlert({
