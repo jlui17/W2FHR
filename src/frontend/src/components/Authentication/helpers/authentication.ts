@@ -241,7 +241,6 @@ export const useLogin = ({
       throw new Error('Login failed');
     }
 
-    console.log(response.json())
     const data = await response.json();
     return data;
   };

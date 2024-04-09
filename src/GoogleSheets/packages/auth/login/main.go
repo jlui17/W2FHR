@@ -54,7 +54,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       fmt.Sprintf("Login successful: %v", string(authResultJSON)),
+		Body:       string(authResultJSON),
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 	}, nil
 }
