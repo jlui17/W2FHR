@@ -2,6 +2,7 @@ package LoginEmployee
 
 import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 
 	"context"
 	"encoding/json"
@@ -23,7 +24,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       "Invalid request body",
 		}, nil
 	}
-	
+
 	sess := session.Must(session.NewSession())
 	cognitoClient := cognitoidentityprovider.New(sess)
 
@@ -43,9 +44,17 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       fmt.Sprintf("Authentication failed: %v", err),
 		}, nil
 	}
+	authResultJSON, err := json.Marshal(authResp.AuthenticationResult)
 
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Error marshalling response",
+		}, nil
+	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       fmt.Sprintf("Login successful: %v", authResp.AuthenticationResult),
+		Body:       fmt.Sprintf("Login successful: %v", string(authResultJSON)),
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 	}, nil
 }

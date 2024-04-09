@@ -180,36 +180,79 @@ export const resendSignupVerificationCode = async (
   return Promise.resolve();
 };
 
-export const loginAndGetAuthSession = async (
-  email: string,
-  password: string
-): Promise<AuthenticationResultType> => {
-  try {
-    const loginResponse = await doLogin(email, password);
-    if (loginResponse.AuthenticationResult == undefined) {
-      return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+// export const loginAndGetAuthSession = async (
+//   email: string,
+//   password: string
+// ): Promise<AuthenticationResultType> => {
+//   try {
+//     const loginResponse = await doLogin(email, password);
+//     if (loginResponse.AuthenticationResult == undefined) {
+//       return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+//     }
+
+//     return Promise.resolve(loginResponse.AuthenticationResult);
+//   } catch (err) {
+//     return Promise.reject(err);
+//   }
+// };
+
+// const doLogin = async (
+//   email: string,
+//   password: string
+// ): Promise<InitiateAuthCommandOutput> => {
+//   const loginCommand = new InitiateAuthCommand({
+//     AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
+//     ClientId: COGNITO_CONFIG.clientId,
+//     AuthParameters: {
+//       USERNAME: email,
+//       PASSWORD: password,
+//     },
+//   });
+//   return COGNITO_CLIENT.send(loginCommand);
+// };
+
+interface LoginParams {
+  email: string;
+  password: string;
+  idToken: string;
+  onSuccess: (data: any) => void;
+  onError: (err: unknown) => void;
+}
+
+export const useLogin = ({
+  email,
+  password,
+  onSuccess,
+  onError,
+  idToken,
+}: LoginParams) => {
+  const login = async (): Promise<any> => {
+    const response = await fetch(API_URLS.LOGIN, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      console.log("Failed")
+      throw new Error('Login failed');
     }
 
-    return Promise.resolve(loginResponse.AuthenticationResult);
-  } catch (err) {
-    return Promise.reject(err);
-  }
+    console.log(response.json())
+    const data = await response.json();
+    return data;
+  };
+
+  return useMutation(login, {
+    onSuccess,
+    onError,
+  });
 };
 
-const doLogin = async (
-  email: string,
-  password: string
-): Promise<InitiateAuthCommandOutput> => {
-  const loginCommand = new InitiateAuthCommand({
-    AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-    ClientId: COGNITO_CONFIG.clientId,
-    AuthParameters: {
-      USERNAME: email,
-      PASSWORD: password,
-    },
-  });
-  return COGNITO_CLIENT.send(loginCommand);
-};
+
 
 export const initiatePasswordReset = async (email: string): Promise<void> => {
   try {

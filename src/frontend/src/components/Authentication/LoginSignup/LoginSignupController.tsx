@@ -14,7 +14,7 @@ import {
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
   useConfirmAccount,
-  loginAndGetAuthSession,
+  useLogin,
   resendSignupVerificationCode,
   useSignUp,
 } from "../helpers/authentication";
@@ -99,8 +99,6 @@ const AuthenticationController = () => {
       navigate(ROUTES.DASHBOARD)
     },
     onError: (err: unknown) => {
-
-
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
       if (err instanceof TypeError && err.message === "Failed to fetch") {
         errorMessage = "You have inputted the wrong code"; 
@@ -150,32 +148,50 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
+  const { mutateAsync: login } = useLogin({
+    email,
+    password,
+    idToken: getAuthSession()?.IdToken || "",
+
+    onSuccess: (data) => {
+      saveAuthSession({
+        AccessToken: data.AccessToken,
+        ExpiresIn: data.ExpiresIn,
+        IdToken: data.IdToken,
+        RefreshToken: data.RefreshToken,
+        TokenType: data.TokenType,
+      })
+
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: "Login successful",
+      });
+      
+      setIsLoading(false);
+      navigate(ROUTES.DASHBOARD);
+    },
+    onError: (err) => {
+      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setAlert({
+        type: AlertType.ERROR,
+        message: errorMessage,
+      });
+      console.error(err);
+      setIsLoading(false);
+    },
+  });
+
   const onLogin = async () => {
     setIsLoading(true);
     try {
-      const authSession = await loginAndGetAuthSession(email, password);
-      saveAuthSession(authSession);
-    } catch (err) {
-      console.error(err);
-      if (err instanceof UserNotConfirmedException) {
-        setVerificationCode("");
-        setIsConfirmingAccount(true);
-        await onSendVerificationCode();
-      } else {
-        const errorAlert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: ERROR_MESSAGES.UNKNOWN_ERROR,
-        };
-
-        if (err instanceof Error) {
-          errorAlert.message = err.message;
-        }
-
-        setAlert(errorAlert);
-      }
+      await login();
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
     }
-    setPassword("");
-    setIsLoading(false);
   };
 
   const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
