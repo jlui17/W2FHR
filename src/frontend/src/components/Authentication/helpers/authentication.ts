@@ -119,39 +119,6 @@ export const useSignUp = ({
 };
 
 
-// const doSignUp = async (  
-//   email: string,
-//   password: string,
-//   employeeId: string
-// ): Promise<SignUpCommandOutput> => {
-//   const signUpCommand = new SignUpCommand({
-//     ClientId: COGNITO_CONFIG.clientId,
-//     Username: email,
-//     Password: password,
-//     UserAttributes: [
-//       {
-//         Name: "custom:eeemployeeId",
-//         Value: employId,
-//       },
-//     ],
-//   });
-
-//   return COGNITO_CLIENT.send(signUpCommand);
-// };
-
-// export const confirmAccount = async (
-//   email: string,
-//   verificationCode: string
-// ): Promise<ConfirmSignUpCommandOutput> => {
-//   const confirmSignUpCommand = new ConfirmSignUpCommand({
-//     ClientId: COGNITO_CONFIG.clientId,
-//     Username: email,
-//     ConfirmationCode: verificationCode,
-//   });
-
-//   return COGNITO_CLIENT.send(confirmSignUpCommand);
-// };
-
 interface ConfirmAccountParams {
   email: string;
   verificationCode: string;
