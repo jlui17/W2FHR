@@ -253,7 +253,15 @@ export const useLogin = ({
         const data = await response.json();        
         return Promise.resolve(data);
       case 401:
-        return Promise.reject(new Error('UserNotConfirmedException'));
+        case 401:
+          const errorText = await response.text();
+          if (errorText.includes("UserNotConfirmed")) {
+            return Promise.reject(new Error("UserNotConfirmed"));
+
+          } else if (errorText.includes("UserNotFound")) {
+            return Promise.reject("UserNotFoundException")
+          }
+          return Promise.reject("Unknown Error");
       case 500:
         return Promise.reject(new Error('Internal server error'));
       

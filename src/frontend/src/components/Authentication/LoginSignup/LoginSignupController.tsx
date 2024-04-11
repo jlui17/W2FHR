@@ -174,13 +174,16 @@ const AuthenticationController = () => {
     },
     onError: (err: any) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      console.log(err)
-      if(err.message === 'UserNotConfirmedException'){
+      if(err === 'UserNotConfirmedException'){
           setVerificationCode("")
           setIsConfirmingAccount(true);
           onSendVerificationCode();
           errorMessage = "You need to confirm your account"
-      }else if (err instanceof Error) {
+      }
+      else if (err === 'UserNotFoundException'){
+        errorMessage = "You have not registered yet"
+      }
+      else if (err instanceof Error) {
         errorMessage = err.message;
       }
       setAlert({

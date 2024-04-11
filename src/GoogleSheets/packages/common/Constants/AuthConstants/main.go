@@ -1,8 +1,7 @@
 package AuthConstants
 
 const (
-	// (NEW STAFF LIST) STAFF_LIST_SHEET_ID = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
-	STAFF_LIST_SHEET_ID                = "1UWg4SPcPf6wSLNIW-u_KRt1HCHj4yhvqdQyfryNj51I"
+	STAFF_LIST_SHEET_ID                = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
 	EMPLOYEE_ID_COL                    = "A"
 	EMAIL_GET_RANGE                    = "G2:G"
 	EMPLOYEE_ID_GET_RANGE              = "A2:A"
