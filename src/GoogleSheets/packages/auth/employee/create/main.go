@@ -4,7 +4,6 @@ import (
 	GetEmployeeId "GoogleSheets/packages/auth/employee/get"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/GoogleClient"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -27,15 +26,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	err = GoogleClient.ConnectSheetsServiceIfNecessary()
-	if err != nil {
-		fmt.Printf("Error connecting to Google Sheets: %v\n", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Internal server error",
-		}, nil
-	}
-
 	employeeId, err := GetEmployeeId.HandleRequest(signReq.Email)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -44,7 +34,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	fmt.Println("Employee ID:", employeeId)
+	fmt.Printf("[INFO] - email: %s, employee ID: %s", signReq, employeeId)
 	cognitoClientID := os.Getenv("COGNITO_CLIENT_ID")
 	if cognitoClientID == "" {
 		return events.APIGatewayProxyResponse{
@@ -55,10 +45,17 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	sess := session.Must(session.NewSession())
 	client := cognitoidentityprovider.New(sess)
+	attributes := []*cognitoidentityprovider.AttributeType{
+		{
+			Name:  aws.String("custom:employeeId"),
+			Value: aws.String(employeeId),
+		},
+	}
 	signUpInput := (&cognitoidentityprovider.SignUpInput{
-		ClientId: aws.String(cognitoClientID),
-		Username: aws.String(signReq.Email),
-		Password: aws.String(signReq.Password),
+		ClientId:       aws.String(cognitoClientID),
+		Username:       aws.String(signReq.Email),
+		Password:       aws.String(signReq.Password),
+		UserAttributes: attributes,
 	})
 	signUpOutput, err := client.SignUp(signUpInput)
 	if err != nil {

@@ -17,7 +17,7 @@ var (
 )
 
 func New() (*sheets.Service, error) {
-	err := ConnectSheetsServiceIfNecessary()
+	err := connectSheetsServiceIfNecessary()
 	return sheetsService, err
 }
 
@@ -27,11 +27,7 @@ type GetScheduleResponse struct {
 	Shifts      [][]interface{}
 }
 
-func GetSheetsService() *sheets.Service {
-	return sheetsService
-}
-
-func ConnectSheetsServiceIfNecessary() error {
+func connectSheetsServiceIfNecessary() error {
 	if sheetsService != nil {
 		return nil
 	}

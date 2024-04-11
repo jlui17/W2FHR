@@ -10,7 +10,6 @@ import (
 	ConfirmEmployee "GoogleSheets/packages/auth/verify/confirm"
 	VerifyEmployee "GoogleSheets/packages/auth/verify/send"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/GoogleClient"
 	"context"
 	"log"
 	"net/http"
@@ -35,7 +34,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			}
 			log.Printf("[INFO] Finding employeeId for email: %s", email)
 
-			GoogleClient.ConnectSheetsServiceIfNecessary()
 			employeeId, err := GetEmployeeId.HandleRequest(email)
 			if err != nil {
 				log.Printf("[ERROR] %s", err.Error())

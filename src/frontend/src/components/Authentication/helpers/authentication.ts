@@ -1,24 +1,15 @@
 import {
-  AuthenticationResultType,
-  AuthFlowType,
   CognitoIdentityProviderClient,
   ConfirmForgotPasswordCommand,
-  ConfirmSignUpCommand,
-  ConfirmSignUpCommandOutput,
   ForgotPasswordCommand,
-  InitiateAuthCommand,
-  InitiateAuthCommandOutput,
-  ResendConfirmationCodeCommand,
-  SignUpCommand,
-  SignUpCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
+import { useMutation } from "react-query";
 import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
 import {
   API_URLS,
   ERROR_MESSAGES,
   RESPONSE_ERROR_MESSAGE_MAP,
 } from "../../common/constants";
-import { useMutation } from "react-query";
 
 const COGNITO_CONFIG = {
   region: "us-west-2",
@@ -27,8 +18,6 @@ const COGNITO_CONFIG = {
 const COGNITO_CLIENT = new CognitoIdentityProviderClient({
   region: "us-west-2",
 });
-
-
 
 // export const signUpAndGetNeedToConfirm = async (
 //   email: string,
@@ -89,27 +78,27 @@ export const useSignUp = ({
   const signUp = async (): Promise<any> => {
     const response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
       },
-      method: 'POST',
-      mode: 'cors',
+      method: "POST",
+      mode: "cors",
       body: JSON.stringify({ email, password }),
     });
 
-    console.log("SIGN UP WENT THRU")
-    switch(response.status) {
-      case 201: 
-        const data = await response.json();        
+    console.log("SIGN UP WENT THRU");
+    switch (response.status) {
+      case 201:
+        const data = await response.json();
         return Promise.resolve(data);
       case 400:
-        return Promise.reject(new Error('Invalid request'));
-      
+        return Promise.reject(new Error("Invalid request"));
+
       case 500:
-        return Promise.reject(new Error('Internal server error'));
-      
+        return Promise.reject(new Error("Internal server error"));
+
       default:
-        return Promise.reject(new Error('Unknown error occurred'));
+        return Promise.reject(new Error("Unknown error occurred"));
     }
   };
   return useMutation(signUp, {
@@ -117,7 +106,6 @@ export const useSignUp = ({
     onError: onError,
   });
 };
-
 
 interface ConfirmAccountParams {
   email: string;
@@ -136,25 +124,25 @@ export const useConfirmAccount = ({
 }: ConfirmAccountParams) => {
   const confirmAccount = async (): Promise<any> => {
     const response = await fetch(API_URLS.VERIFY, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
       },
       body: JSON.stringify({ email, code: verificationCode }),
     });
 
-    switch(response.status) {
+    switch (response.status) {
       case 200:
-        console.log("good verify")
+        console.log("good verify");
         return Promise.resolve(200);
       case 400:
-        return Promise.reject(new Error('Invalid request'));
+        return Promise.reject(new Error("Invalid request"));
       case 500:
-        return Promise.reject(new Error('Internal server error'));
-      
+        return Promise.reject(new Error("Internal server error"));
+
       default:
-        return Promise.reject(new Error('Unknown error occurred'));
+        return Promise.reject(new Error("Unknown error occurred"));
     }
   };
 
@@ -169,26 +157,27 @@ interface ConfirmAccountParams {
   idToken: string;
 }
 
-
-export const resendSignupVerificationCode = async (email: string, idToken: string): Promise<void> => {
-  const url = new URL(API_URLS.VERIFY); 
-  url.searchParams.append('email', email);
+export const resendSignupVerificationCode = async (
+  email: string,
+  idToken: string
+): Promise<void> => {
+  const url = new URL(API_URLS.VERIFY);
+  url.searchParams.append("email", email);
   try {
     const response = await fetch(url.toString(), {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
-
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
       },
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(errorText || 'Failed to resend verification code');
+      throw new Error(errorText || "Failed to resend verification code");
     }
   } catch (err) {
-    throw new Error('LimitExceededException');
+    throw new Error("LimitExceededException");
   }
 };
 
@@ -240,35 +229,32 @@ export const useLogin = ({
 }: LoginParams) => {
   const login = async (): Promise<any> => {
     const response = await fetch(API_URLS.LOGIN, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
       },
       body: JSON.stringify({ email, password }),
     });
 
-    switch(response.status) {
+    switch (response.status) {
       case 200:
-        const data = await response.json();        
+        const data = await response.json();
         return Promise.resolve(data);
       case 401:
-        case 401:
-          const errorText = await response.text();
-          if (errorText.includes("UserNotConfirmed")) {
-            return Promise.reject(new Error("UserNotConfirmed"));
-
-          } else if (errorText.includes("UserNotFound")) {
-            return Promise.reject("UserNotFoundException")
-          }
-          return Promise.reject("Unknown Error");
+        const errorText = await response.text();
+        if (errorText.includes("UserNotConfirmed")) {
+          return Promise.reject(new Error("UserNotConfirmed"));
+        } else if (errorText.includes("UserNotFound")) {
+          return Promise.reject("UserNotFoundException");
+        }
+        return Promise.reject("Unknown Error");
       case 500:
-        return Promise.reject(new Error('Internal server error'));
-      
-      default:
-        return Promise.reject(new Error('Unknown error occurred'));
-    }
+        return Promise.reject(new Error("Internal server error"));
 
+      default:
+        return Promise.reject(new Error("Unknown error occurred"));
+    }
   };
 
   return useMutation(login, {
@@ -276,8 +262,6 @@ export const useLogin = ({
     onError,
   });
 };
-
-
 
 export const initiatePasswordReset = async (email: string): Promise<void> => {
   try {
@@ -308,7 +292,6 @@ export const confirmPasswordReset = async (
 
     await COGNITO_CLIENT.send(confirmPasswordResetCommand);
     return Promise.resolve();
-    
   } catch (err) {
     return Promise.reject(err);
   }

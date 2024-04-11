@@ -15,16 +15,20 @@ import (
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	idToken, exists := event.Headers["Authorization"]
 	if !exists {
+		log.Println("[ERROR] Schedule - ID Token doesn't exist in header.")
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       SharedConstants.INCLUDE_AUTH_HEADER_ERROR,
 		}, nil
 	}
 
 	employeeInfo, err := EmployeeInfo.New(idToken)
 	if err != nil {
+		log.Printf("[ERROR] Schedule - failed to get employee info from ID token: %v, err: %s", idToken, err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       err.Error(),
 		}, nil
 	}
