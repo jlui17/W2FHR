@@ -2,8 +2,6 @@ package Availability
 
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"io"
-	"log"
 	"reflect"
 	"testing"
 )
@@ -30,7 +28,6 @@ func (m *mockSheet) Update(row int, new *EmployeeAvailability) error {
 }
 
 func TestGet(t *testing.T) {
-	log.SetOutput(io.Discard)
 	s := &mockSheet{}
 	type Input struct {
 		id    string

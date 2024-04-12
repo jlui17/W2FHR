@@ -1,7 +1,6 @@
 package Availability
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -27,7 +26,7 @@ func doUpdate(employeeId string, new *EmployeeAvailability, sheet availabilitySh
 	}
 
 	if !all.CanUpdate {
-		return fmt.Errorf(UPDATE_AVAILABILITY_DISABLED_ERROR)
+		return ErrNoUpdating
 	}
 
 	row, err := findRowOfEmployee(all.EmployeeIds, employeeId)

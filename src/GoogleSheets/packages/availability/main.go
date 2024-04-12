@@ -70,10 +70,10 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			log.Printf("[ERROR] Failed to update availability for %s: %s", employeeInfo.GetEmployeeId(), err.Error())
 			var statusCode int
 
-			switch err.Error() {
-			case Availability.UPDATE_AVAILABILITY_DISABLED_ERROR:
+			switch err {
+			case Availability.ErrNoUpdating:
 				statusCode = 403
-			case SharedConstants.ErrEmployeeNotFound.Error():
+			case SharedConstants.ErrEmployeeNotFound:
 				statusCode = 404
 			default:
 				statusCode = 500

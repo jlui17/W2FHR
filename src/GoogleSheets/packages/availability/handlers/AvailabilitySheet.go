@@ -3,6 +3,7 @@ package Availability
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
+	"errors"
 	"fmt"
 
 	"google.golang.org/api/sheets/v4"
@@ -19,9 +20,9 @@ const (
 	availabilityEmployeeIds   = availabilitySheetName + "!A2:A"
 	availabilityCells         = availabilitySheetName + "!E2:H"
 	availabilityUpdateOffset  = 2
-
-	UPDATE_AVAILABILITY_DISABLED_ERROR = "UPDATE_AVAILABILITY_DISABLED_ERROR"
 )
+
+var ErrNoUpdating = errors.New("UPDATE_AVAILABILITY_DISABLED_ERROR")
 
 type EmployeeAvailabilityDay struct {
 	IsAvailable bool   `json:"isAvailable"`
