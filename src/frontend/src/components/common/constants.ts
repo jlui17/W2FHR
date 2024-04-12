@@ -7,7 +7,6 @@ export const API_URLS = {
   VERIFY: `${BASE_URL}/auth/verify`,
   LOGIN: `${BASE_URL}/auth/login`,
   PASSWORD: `${BASE_URL}/auth/password`,
-
 };
 
 const PLEASE_CONTACT_JUSTIN =
@@ -29,6 +28,7 @@ export const ERROR_MESSAGES = {
   AUTH: {
     NOT_SIGNED_IN: "You are not signed in.",
   },
+  EMPLOYEE_NOT_CONFIRMED: "UserNotConfirmedException",
 };
 
 export const RESPONSE_ERROR_MESSAGE_MAP: {

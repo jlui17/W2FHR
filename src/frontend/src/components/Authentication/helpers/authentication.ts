@@ -243,8 +243,9 @@ export const useLogin = ({
         return Promise.resolve(data);
       case 401:
         const errorText = await response.text();
-        if (errorText.includes("UserNotConfirmed")) {
-          return Promise.reject(new Error("UserNotConfirmed"));
+        console.log("ERROR: ", errorText);
+        if (errorText.includes(ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED)) {
+          return Promise.reject(ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED);
         } else if (errorText.includes("UserNotFound")) {
           return Promise.reject("UserNotFoundException");
         }

@@ -5,7 +5,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
 import {
-  API_URLS,
   ERROR_MESSAGES,
   INFO_MESSAGES,
   ROUTES,
@@ -13,9 +12,9 @@ import {
 } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
+  resendSignupVerificationCode,
   useConfirmAccount,
   useLogin,
-  resendSignupVerificationCode,
   useSignUp,
 } from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
@@ -27,10 +26,11 @@ const AuthenticationController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(AuthenticationContext);
+  const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(
+    AuthenticationContext
+  );
   const navigate = useNavigate();
   const { setAlert } = useAlert();
-
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -49,16 +49,15 @@ const AuthenticationController = () => {
     }
   };
 
-  const { mutateAsync: doSignUp} = useSignUp({
+  const { mutateAsync: doSignUp } = useSignUp({
     email,
     password,
     idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
       console.log(data);
-      if (data.needsConfirmation) {     
-        setIsLoading(false)
-        setIsConfirmingAccount(true);        
-
+      if (data.needsConfirmation) {
+        setIsLoading(false);
+        setIsConfirmingAccount(true);
       }
     },
     onError: (err: any) => {
@@ -66,42 +65,43 @@ const AuthenticationController = () => {
       if (err instanceof UserNotConfirmedException) {
         setIsConfirmingAccount(true);
       } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to sign up";
         setAlert({ type: AlertType.ERROR, message: errorMessage });
       }
-    }
+    },
   });
-  
+
   const onSignup = async () => {
     setIsLoading(true);
     try {
-      await doSignUp(); 
+      await doSignUp();
     } catch (e) {
       console.error(e);
       setIsLoading(false);
     }
   };
 
-  const { mutateAsync: confirmAccount} = useConfirmAccount({
+  const { mutateAsync: confirmAccount } = useConfirmAccount({
     email,
     verificationCode,
     idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
-      console.log(data)
-      console.log("success")
+      console.log(data);
+      console.log("success");
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
       });
-      
+
       setVerificationCode("");
       setIsLoading(false);
-      navigate(ROUTES.DASHBOARD)
+      navigate(ROUTES.DASHBOARD);
     },
     onError: (err: unknown) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
       if (err instanceof TypeError && err.message === "Failed to fetch") {
-        errorMessage = "You have inputted the wrong code"; 
+        errorMessage = "You have inputted the wrong code";
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
@@ -111,14 +111,14 @@ const AuthenticationController = () => {
       });
 
       console.error(err);
-      setIsLoading(false); 
+      setIsLoading(false);
     },
   });
 
   const onConfirmAccount = async () => {
-    setIsLoading(true); 
+    setIsLoading(true);
     try {
-      await confirmAccount(); 
+      await confirmAccount();
     } catch (e) {
       console.error(e);
       setIsLoading(false);
@@ -128,20 +128,24 @@ const AuthenticationController = () => {
   const onSendVerificationCode = async () => {
     setIsLoading(true);
     try {
-      await resendSignupVerificationCode(email, getAuthSession()?.IdToken || "");
+      await resendSignupVerificationCode(
+        email,
+        getAuthSession()?.IdToken || ""
+      );
       setAlert({
         type: AlertType.INFO,
         message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
       });
     } catch (err: any) {
-      console.log(err)
+      console.log(err);
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
         message: ERROR_MESSAGES.UNKNOWN_ERROR,
       };
-      if(err.message == 'LimitExceededException') {
-        errorAlert.message = "Too many requests, Please wait. (Check your email for the code)"
-      }else if (err instanceof Error) {
+      if (err.message == "LimitExceededException") {
+        errorAlert.message =
+          "Too many requests, Please wait. (Check your email for the code)";
+      } else if (err instanceof Error) {
         errorAlert.message = err.message;
       }
 
@@ -163,27 +167,25 @@ const AuthenticationController = () => {
         IdToken: data.IdToken,
         RefreshToken: data.RefreshToken,
         TokenType: data.TokenType,
-      })
+      });
 
       setAlert({
         type: AlertType.SUCCESS,
         message: "Login successful",
       });
-      
+
       navigate(ROUTES.DASHBOARD);
     },
     onError: (err: any) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if(err === 'UserNotConfirmedException'){
-          setVerificationCode("")
-          setIsConfirmingAccount(true);
-          onSendVerificationCode();
-          errorMessage = "You need to confirm your account"
-      }
-      else if (err === 'UserNotFoundException'){
-        errorMessage = "You have not registered yet"
-      }
-      else if (err instanceof Error) {
+      if (err === ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED) {
+        setVerificationCode("");
+        setIsConfirmingAccount(true);
+        onSendVerificationCode();
+        return;
+      } else if (err === "UserNotFoundException") {
+        errorMessage = "You have not registered yet";
+      } else if (err instanceof Error) {
         errorMessage = err.message;
       }
       setAlert({
