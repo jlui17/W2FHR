@@ -116,7 +116,7 @@ export const useSignUp = ({
       return Promise.reject(new InvalidPasswordException(pErrs));
     }
 
-    const response = await fetch(API_URLS.EMPLOYEE, {
+    const response: Response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
@@ -127,16 +127,15 @@ export const useSignUp = ({
     });
 
     console.log("SIGN UP WENT THRU");
+    const data = await response.json();
     switch (response.status) {
       case 201:
-        const data = await response.json();
         return Promise.resolve(data);
       case 400:
-        return Promise.reject(new Error("Invalid request"));
-
+      case 401:
+        return Promise.reject(new Error(data));
       case 500:
         return Promise.reject(new Error("Internal server error"));
-
       default:
         return Promise.reject(new Error("Unknown error occurred"));
     }

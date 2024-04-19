@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -20,16 +21,25 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	var signReq AuthConstants.SignUpRequest
 	err := json.Unmarshal([]byte(event.Body), &signReq)
 	if err != nil {
+		log.Print("[ERROR] Auth wrong signReq structure")
 		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
+			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Invalid request body",
 		}, nil
 	}
 
 	employeeId, err := GetEmployeeId.HandleRequest(signReq.Email)
 	if err != nil {
+		log.Printf("[ERROR] Auth failed to get employeeId, err: %s", err)
+		code := 500
+		if err == SharedConstants.ErrEmployeeNotFound {
+			code = 401
+		}
+
 		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
+			StatusCode: code,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       fmt.Sprintf("Error getting employeeId: %v", err.Error()),
 		}, nil
 	}
@@ -37,8 +47,10 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	fmt.Printf("[INFO] - email: %s, employee ID: %s", signReq, employeeId)
 	cognitoClientID := os.Getenv("COGNITO_CLIENT_ID")
 	if cognitoClientID == "" {
+		log.Print("[ERROR] Auth - cognito client id not available")
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "COGNITO_CLIENT_ID not set",
 		}, nil
 	}
@@ -59,8 +71,10 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	})
 	signUpOutput, err := client.SignUp(signUpInput)
 	if err != nil {
+		log.Printf("[ERROR] Auth - error signing up, err: %s", err)
 		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
+			StatusCode: 401,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       fmt.Sprintf("Error signing up: %v", err.Error()),
 		}, nil
 	}
@@ -69,18 +83,12 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		NeedsConfirmation: !(*signUpOutput.UserConfirmed),
 	}
 
-	reponseBody, err := json.Marshal(response)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Error marshalling response",
-		}, nil
-	}
-
+	log.Printf("[INFO] Auth - successfully signed up %s", signReq.Email)
+	reponseBody, _ := json.Marshal(response)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
-		Body:       string(reponseBody),
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		Body:       string(reponseBody),
 	}, nil
 
 }

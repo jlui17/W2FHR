@@ -65,5 +65,5 @@ func getEmployeeId(email string, staffListInfo AuthConstants.STAFF_LIST_INFO) (s
 	}
 
 	log.Printf("[INFO] No employeeId found for %s", email)
-	return "", errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
+	return "", SharedConstants.ErrEmployeeNotFound
 }
