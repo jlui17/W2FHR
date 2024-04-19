@@ -12,6 +12,7 @@ import {
 } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
+  InvalidPasswordException,
   resendSignupVerificationCode,
   useConfirmAccount,
   useLogin,

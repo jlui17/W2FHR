@@ -61,6 +61,40 @@ const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
   }
 };
 
+export class InvalidPasswordException extends Error {
+  constructor(missing: string[]) {
+    let message: string = "Your password is missing the following: ";
+    for (const m of missing) {
+      message += m + ", ";
+    }
+    super(message.slice(0, -1));
+  }
+}
+const hasLowercase: RegExp = /[a-z]/;
+const hasUppercase: RegExp = /[A-Z]/;
+const hasNumber: RegExp = /\d/;
+// Check for at least one special character from the specified list
+const hasSpecialChar: RegExp =
+  /[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]/;
+function validatePassword(p: string): string[] {
+  const res: string[] = [];
+  if (!hasLowercase.test(p)) {
+    res.push("1 LOWERCASE letter");
+  }
+  if (!hasUppercase.test(p)) {
+    res.push("1 UPPERCASE letter");
+  }
+  if (!hasNumber.test(p)) {
+    res.push("1 NUMBER");
+  }
+  if (!hasSpecialChar.test(p)) {
+    res.push(
+      "1 of the following SPECIAL CHARACTERS: ^ $ * . [ ] { } ( ) ? - \" ! @ # % & /  , > < ' : ; | _ ~ ` + = ?"
+    );
+  }
+  return res;
+}
+
 interface SignUpParams {
   email: string;
   password: string;
@@ -76,6 +110,12 @@ export const useSignUp = ({
   onError,
 }: SignUpParams) => {
   const signUp = async (): Promise<any> => {
+    password = password.trim();
+    const pErrs: string[] = validatePassword(password);
+    if (pErrs.length != 0) {
+      return Promise.reject(new InvalidPasswordException(pErrs));
+    }
+
     const response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
         "Content-Type": "application/json",
