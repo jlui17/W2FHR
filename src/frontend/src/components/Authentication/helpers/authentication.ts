@@ -127,13 +127,14 @@ export const useSignUp = ({
     });
 
     console.log("SIGN UP WENT THRU");
-    const data = await response.json();
     switch (response.status) {
       case 201:
+        const data = await response.json();
         return Promise.resolve(data);
       case 400:
       case 401:
-        return Promise.reject(new Error(data));
+        const err = await response.text();
+        return Promise.reject(new Error(err));
       case 500:
         return Promise.reject(new Error("Internal server error"));
       default:

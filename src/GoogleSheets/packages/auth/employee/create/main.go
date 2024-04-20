@@ -12,6 +12,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 )
@@ -72,10 +73,29 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	signUpOutput, err := client.SignUp(signUpInput)
 	if err != nil {
 		log.Printf("[ERROR] Auth - error signing up, err: %s", err)
+		status := 500
+		errMsg := fmt.Sprintf("Error signing up: %v", err.Error())
+
+		if awsErr, ok := err.(awserr.Error); ok {
+			switch awsErr.Code() {
+			case cognitoidentityprovider.ErrCodeInvalidPasswordException:
+				errMsg = "[ERROR] Auth - password validation not up to date on frontend"
+			case cognitoidentityprovider.ErrCodeTooManyRequestsException:
+				status = 400
+				errMsg = "You have tried to sign up too many times, please wait a while and try again later."
+			case cognitoidentityprovider.ErrCodeUsernameExistsException:
+				status = 400
+				errMsg = "You already have an account. Please log in instead."
+			}
+		}
+
+		if status == 500 {
+			log.Printf("[ERROR] Auth: %v", errMsg)
+		}
 		return events.APIGatewayProxyResponse{
-			StatusCode: 401,
+			StatusCode: status,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       fmt.Sprintf("Error signing up: %v", err.Error()),
+			Body:       errMsg,
 		}, nil
 	}
 
