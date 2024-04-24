@@ -1,6 +1,7 @@
 package ResetPassword
 
 import (
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"context"
 	"fmt"
 	"os"
@@ -15,6 +16,7 @@ func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyRes
 	if email == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Email parameter is required",
 		}, nil
 	}
@@ -24,6 +26,7 @@ func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyRes
 		fmt.Println("configuration error,", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Internal server error",
 		}, nil
 	}
@@ -40,12 +43,14 @@ func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyRes
 		fmt.Println("error calling ForgotPassword,", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       fmt.Sprintf("Error sending password reset: %v", err),
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       "Password reset sent successfully",
 	}, nil
 }

@@ -142,8 +142,12 @@ func (t *timesheet) getUpcomingSchedule() (*allSchedules, error) {
 
 func (t *timesheet) getShifts(employeeId string, schedule *allSchedules, reverse bool) *Timesheet {
 	employeeShifts := []EmployeeShift{}
-
+	log.Println(schedule.EmployeeIds)
 	for i := 0; i < len(schedule.EmployeeIds); i++ {
+		if len(schedule.EmployeeIds[i]) != 1 {
+			continue
+		}
+
 		if schedule.EmployeeIds[i][0] == employeeId {
 			employeeShifts = append(employeeShifts, EmployeeShift{
 				ShiftTitle:    schedule.ShiftNames[i][0].(string),

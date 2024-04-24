@@ -4,6 +4,7 @@ import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -14,8 +15,10 @@ import (
 
 func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyResponse, error) {
 	if email == "" {
+		log.Printf("[ERROR] Auth - email missing")
 		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
+			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Email parameter is required",
 		}, nil
 	}
@@ -25,6 +28,7 @@ func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyRes
 		fmt.Println("configuration error,", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Internal server error",
 		}, nil
 	}
@@ -41,13 +45,14 @@ func HandleRequest(ctx context.Context, email string) (events.APIGatewayProxyRes
 		fmt.Println("error calling ResendConfirmationCode,", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       fmt.Sprintf("Error resending confirmation code: %v", err),
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       "Confirmation code resent successfully",
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		Body:       "Confirmation code resent successfully",
 	}, nil
 }

@@ -46,6 +46,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       err.Error(),
 		}, nil
 	}

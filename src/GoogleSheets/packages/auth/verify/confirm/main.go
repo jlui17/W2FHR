@@ -20,6 +20,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Invalid request body",
 		}, nil
 	}
@@ -37,6 +38,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       fmt.Sprintf("Error confirming code: %v", err),
 		}, nil
 	}
@@ -49,7 +51,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       string(reponseBody),
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		Body:       string(reponseBody),
 	}, nil
 }

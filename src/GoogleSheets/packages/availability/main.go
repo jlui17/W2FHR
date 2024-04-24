@@ -99,6 +99,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: 501,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		}, nil
 	}
 }

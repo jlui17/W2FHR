@@ -20,6 +20,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Invalid request body",
 		}, nil
 	}
@@ -42,8 +43,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,
-			Body:       err.Error(),
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       err.Error(),
 		}, nil
 	}
 	authResultJSON, err := json.Marshal(authResp.AuthenticationResult)
@@ -51,12 +52,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Error marshalling response",
 		}, nil
 	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       string(authResultJSON),
 		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		Body:       string(authResultJSON),
 	}, nil
 }

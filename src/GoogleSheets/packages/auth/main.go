@@ -36,7 +36,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 			employeeId, err := GetEmployeeId.HandleRequest(email)
 			if err != nil {
-				log.Printf("[ERROR] %s", err.Error())
+				log.Printf("[ERROR] Auth - error getting employee id for %s: %s", email, err.Error())
 				return events.APIGatewayProxyResponse{
 					StatusCode: 500,
 					Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -61,7 +61,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 			response, err := VerifyEmployee.HandleRequest(ctx, email)
 			if err != nil {
-				log.Printf("[ERROR] %s", err.Error())
+				log.Printf("[ERROR] Auth - error verifying %s: %s", email, err.Error())
 				return events.APIGatewayProxyResponse{
 					StatusCode: 500,
 					Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -82,7 +82,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 			response, err := ResetPassword.HandleRequest(ctx, email)
 			if err != nil {
-				log.Printf("[ERROR] %s", err.Error())
+				log.Printf("[ERROR] Auth - error sending password reset code to %s, %s", email, err.Error())
 				return events.APIGatewayProxyResponse{
 					StatusCode: 500,
 					Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
@@ -94,6 +94,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		default:
 			return events.APIGatewayProxyResponse{
 				StatusCode: 501,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			}, nil
 		}
 
@@ -110,11 +111,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		default:
 			return events.APIGatewayProxyResponse{
 				StatusCode: 501,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			}, nil
 		}
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: 501,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		}, nil
 	}
 

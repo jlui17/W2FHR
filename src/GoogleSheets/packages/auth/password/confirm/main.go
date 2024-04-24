@@ -2,7 +2,9 @@ package ConfirmResetPassword
 
 import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
+	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"encoding/json"
+	"log"
 
 	"context"
 	"fmt"
@@ -18,8 +20,14 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	var resetReq AuthConstants.ResetPassword
 	err := json.Unmarshal([]byte(event.Body), &resetReq)
 	if err != nil {
+		log.Printf(
+			"[ERROR] Auth - reset password json mismatch\nexpected: %v\nactual: %s",
+			AuthConstants.ResetPassword{Email: ".", Password: ".", Code: "."},
+			event.Body,
+		)
 		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
+			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Invalid request body",
 		}, nil
 	}
@@ -29,6 +37,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		fmt.Println("configuration error,", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       "Internal server error",
 		}, nil
 	}
@@ -47,12 +56,14 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		fmt.Println("error calling ConfirmForgotPassword,", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       fmt.Sprintf("Error confirming password reset: %v", err),
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
+		Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		Body:       "Password reset confirmed successfully",
 	}, nil
 }

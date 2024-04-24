@@ -18,7 +18,6 @@ import (
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
 	var signReq AuthConstants.SignUpRequest
 	err := json.Unmarshal([]byte(event.Body), &signReq)
 	if err != nil {
