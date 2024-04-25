@@ -13,10 +13,18 @@ import (
 func HandleRequest(email string) (string, error) {
 	staffListInfo, err := getStaffListInfo()
 	if err != nil {
+		log.Printf("[Error] Auth - error while getting staff list: %s", err)
 		return "", err
 	}
 
 	if len(staffListInfo.Emails) != len(staffListInfo.EmployeeIds) {
+		log.Printf(
+			"[ERROR] Auth - # of emails (%d) != # of ids (%d)\nEmails: %v\nIDs: %v",
+			len(staffListInfo.Emails),
+			len(staffListInfo.EmployeeIds),
+			staffListInfo.Emails,
+			staffListInfo.EmployeeIds,
+		)
 		return "", errors.New(AuthConstants.STAFF_LIST_INFO_INCONSISTENT_ERROR)
 	}
 
