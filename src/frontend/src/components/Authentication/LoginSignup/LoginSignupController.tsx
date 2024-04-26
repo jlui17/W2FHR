@@ -184,8 +184,6 @@ const AuthenticationController = () => {
         setIsConfirmingAccount(true);
         onSendVerificationCode();
         return;
-      } else if (err === "UserNotFoundException") {
-        errorMessage = "You have not registered yet";
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }

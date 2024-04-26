@@ -287,8 +287,11 @@ export const useLogin = ({
         if (errorText.includes(ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED)) {
           return Promise.reject(ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED);
         } else if (errorText.includes("UserNotFound")) {
-          return Promise.reject("UserNotFoundException");
+          return Promise.reject(new Error("You have not registered yet."));
+        } else if (errorText.includes("NotAuthorized")) {
+          return Promise.reject(new Error("Incorrect email or password."));
         }
+
         return Promise.reject("Unknown Error");
       case 500:
         return Promise.reject(new Error("Internal server error"));
