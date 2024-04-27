@@ -10,26 +10,27 @@ import (
 )
 
 const (
-	scheduleSheetId           = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
-	scheduleRangeTemplate     = "%s!%s2:%s200"
-	scheduleUpcomingSheetName = "Main Schedule SORT BY DESC DATE"
-	scheduleSheetName         = "Main Schedule"
-	scheduleEmployeeIdCol     = "C"
-	scheduleTitleCol          = "E"
-	scheduleDataColStart      = "G"
-	scheduleDataColEnd        = "J"
+	scheduleSheetId               = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
+	upcomingScheduleRangeTemplate = "%s!%s2:%s200"
+	scheduleRangeTemplate         = "%s!%s2:%s"
+	scheduleUpcomingSheetName     = "Main Schedule SORT BY DESC DATE"
+	scheduleSheetName             = "Main Schedule"
+	scheduleEmployeeIdCol         = "C"
+	scheduleTitleCol              = "E"
+	scheduleDataColStart          = "G"
+	scheduleDataColEnd            = "J"
 )
 
 var (
 	sheetsService *sheets.Service
 
-	scheduleUpcomingEmployeeIds = fmt.Sprintf(scheduleRangeTemplate, scheduleUpcomingSheetName,
+	upcomingScheduleEmployeeIds = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
 		scheduleEmployeeIdCol,
 		scheduleEmployeeIdCol)
-	scheduleUpcomingShiftNames = fmt.Sprintf(scheduleRangeTemplate, scheduleUpcomingSheetName,
+	upcomingScheduleShiftNames = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
 		scheduleTitleCol,
 		scheduleTitleCol)
-	scheduleUpcomingData = fmt.Sprintf(scheduleRangeTemplate, scheduleUpcomingSheetName,
+	upcomingScheduleData = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
 		scheduleDataColStart,
 		scheduleDataColEnd)
 
@@ -123,9 +124,9 @@ func (t *timesheet) getUpcomingSchedule() (*allSchedules, error) {
 	response, err := t.service.Spreadsheets.Values.
 		BatchGet(scheduleSheetId).
 		Ranges(
-			scheduleUpcomingEmployeeIds,
-			scheduleUpcomingShiftNames,
-			scheduleUpcomingData,
+			upcomingScheduleEmployeeIds,
+			upcomingScheduleShiftNames,
+			upcomingScheduleData,
 		).
 		MajorDimension("ROWS").
 		Do()
@@ -142,6 +143,13 @@ func (t *timesheet) getUpcomingSchedule() (*allSchedules, error) {
 
 func (t *timesheet) getShifts(employeeId string, schedule *allSchedules, reverse bool) *Timesheet {
 	employeeShifts := []EmployeeShift{}
+<<<<<<< Updated upstream
+=======
+	for i := 0; i < len(schedule.EmployeeIds); i++ {
+		if len(schedule.EmployeeIds[i]) != 1 {
+			continue
+		}
+>>>>>>> Stashed changes
 
 	for i := 0; i < len(schedule.EmployeeIds); i++ {
 		if schedule.EmployeeIds[i][0] == employeeId {
