@@ -20,9 +20,9 @@ const (
 	availabilityEmployeeIds   = availabilitySheetName + "!A2:A"
 	availabilityCells         = availabilitySheetName + "!E2:H"
 	availabilityUpdateOffset  = 2
-
-	UPDATE_AVAILABILITY_DISABLED_ERROR = "UPDATE_AVAILABILITY_DISABLED_ERROR"
 )
+
+var ErrNoUpdating = errors.New("UPDATE_AVAILABILITY_DISABLED_ERROR")
 
 type EmployeeAvailabilityDay struct {
 	IsAvailable bool   `json:"isAvailable"`
@@ -44,45 +44,25 @@ type AllAvailability struct {
 	CanUpdate      bool
 }
 
-type availabilitySheet struct {
+type availabilitySheet interface {
+	Get() (*AllAvailability, error)
+	Update(int, *EmployeeAvailability) error
+}
+
+type sheet struct {
 	service *sheets.Service
 }
 
-func getAvailabilitySheet() (*availabilitySheet, error) {
+func getAvailabilitySheet() (availabilitySheet, error) {
 	service, err := GoogleClient.New()
 	if err != nil {
-		return &availabilitySheet{}, err
+		return &sheet{}, err
 	}
 
-	return &availabilitySheet{service: service}, nil
+	return &sheet{service: service}, nil
 }
 
-func (a *availabilitySheet) Get(employeeId string) (*EmployeeAvailability, error) {
-	all, err := a.getAll()
-	if err != nil {
-		return &EmployeeAvailability{}, err
-	}
-
-	r, err := findRowOfEmployee(all.EmployeeIds, employeeId)
-	if err != nil {
-		return &EmployeeAvailability{}, err
-	}
-
-	day1 := all.Availabilities[r][0] == "TRUE"
-	day2 := all.Availabilities[r][1] == "TRUE"
-	day3 := all.Availabilities[r][2] == "TRUE"
-	day4 := all.Availabilities[r][3] == "TRUE"
-
-	return &EmployeeAvailability{
-		Day1:      EmployeeAvailabilityDay{IsAvailable: day1, Date: all.Dates[0].(string)},
-		Day2:      EmployeeAvailabilityDay{IsAvailable: day2, Date: all.Dates[1].(string)},
-		Day3:      EmployeeAvailabilityDay{IsAvailable: day3, Date: all.Dates[2].(string)},
-		Day4:      EmployeeAvailabilityDay{IsAvailable: day4, Date: all.Dates[3].(string)},
-		CanUpdate: all.CanUpdate,
-	}, nil
-}
-
-func (a *availabilitySheet) getAll() (*AllAvailability, error) {
+func (a *sheet) Get() (*AllAvailability, error) {
 	r1, err := a.service.Spreadsheets.Values.
 		BatchGet(availabilitySheetId).
 		Ranges(
@@ -110,21 +90,7 @@ func (a *availabilitySheet) getAll() (*AllAvailability, error) {
 	}, nil
 }
 
-func (a *availabilitySheet) Update(employeeId string, newAvailability *EmployeeAvailability) error {
-	all, err := a.getAll()
-	if err != nil {
-		return err
-	}
-
-	if !all.CanUpdate {
-		return fmt.Errorf(UPDATE_AVAILABILITY_DISABLED_ERROR)
-	}
-
-	row, err := findRowOfEmployee(all.EmployeeIds, employeeId)
-	if err != nil {
-		return err
-	}
-
+func (a *sheet) Update(row int, newAvailability *EmployeeAvailability) error {
 	updateValueRange := &sheets.ValueRange{
 		Values: [][]interface{}{
 			{
@@ -139,7 +105,7 @@ func (a *availabilitySheet) Update(employeeId string, newAvailability *EmployeeA
 	r := row + availabilityUpdateOffset
 	updateRange := fmt.Sprintf("%s!%s%d:%s%d", availabilitySheetName, availabilityDay1Col, r, availabilityDay4Col, r)
 
-	_, err = a.service.Spreadsheets.Values.
+	_, err := a.service.Spreadsheets.Values.
 		Update(availabilitySheetId, updateRange, updateValueRange).
 		ValueInputOption("RAW").
 		Do()
@@ -156,5 +122,5 @@ func findRowOfEmployee(employeeIds [][]interface{}, employeeId string) (int, err
 			return i, nil
 		}
 	}
-	return 0, errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
+	return 0, SharedConstants.ErrEmployeeNotFound
 }

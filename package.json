@@ -5,7 +5,7 @@
     "w2_fhr": "bin/w2_fhr.js"
   },
   "scripts": {
-    "build": "tsc; cd src/frontend; yarn build; cd ../..",
+    "build": "tsc; cd src/frontend; yarn build; cd ../GoogleSheets; go test ./...; cd ../..",
     "watch": "tsc -w",
     "test": "yarn test:Googlesheets",
     "test:Googlesheets": "cd src/Googlesheets; go test ./...",
