@@ -4,7 +4,7 @@ import {
   ForgotPasswordCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { useMutation } from "react-query";
-import { getAuthApiUrlForEmail } from "../../common/ApiUrlUtil";
+import { getAuthApiUrlForEmail, getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
 import {
   API_URLS,
   ERROR_MESSAGES,
@@ -307,36 +307,115 @@ export const useLogin = ({
   });
 };
 
-export const initiatePasswordReset = async (email: string): Promise<void> => {
-  try {
-    const forgotPasswordCommand = new ForgotPasswordCommand({
-      ClientId: COGNITO_CONFIG.clientId,
-      Username: email,
-    });
 
-    await COGNITO_CLIENT.send(forgotPasswordCommand);
-    return Promise.resolve();
-  } catch (err) {
-    return Promise.reject(err);
+
+interface PasswordParams {
+  email: string;
+  onSuccess: (data: any) => void;
+  onError: (err: unknown) => void;
+}
+
+export const initiatePasswordReset = ({
+  email,
+  onSuccess,
+  onError,
+}: PasswordParams) => {
+  const reset = async (): Promise<any> => {
+    const response = await fetch(getAuthApiUrlForResetPassword(email), {
+      method: 'GET', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    switch (response.status) {
+      case 200:
+        return Promise.resolve(200);
+      default:
+        return Promise.reject(new Error("Unknown error occurred"));
+    }
   }
+
+  return useMutation(reset, {
+    onSuccess,
+    onError,
+  });
 };
 
-export const confirmPasswordReset = async (
-  email: string,
-  newPassword: string,
-  verificationCode: string
-) => {
-  try {
-    const confirmPasswordResetCommand = new ConfirmForgotPasswordCommand({
-      ClientId: COGNITO_CONFIG.clientId,
-      Username: email,
-      ConfirmationCode: verificationCode,
-      Password: newPassword,
-    });
 
-    await COGNITO_CLIENT.send(confirmPasswordResetCommand);
-    return Promise.resolve();
-  } catch (err) {
-    return Promise.reject(err);
-  }
+// export const initiatePasswordReset = async (email: string): Promise<void> => {
+//   try {
+//     const forgotPasswordCommand = new ForgotPasswordCommand({
+//       ClientId: COGNITO_CONFIG.clientId,
+//       Username: email,
+//     });
+
+//     await COGNITO_CLIENT.send(forgotPasswordCommand);
+//     return Promise.resolve();
+//   } catch (err) {
+//     return Promise.reject(err);
+//   }
+// };
+
+
+
+interface ConfirmPasswordResetParams {
+  email: string;
+  verificationCode: string;
+  newPassword: string;
+  idToken: string;
+  onSuccess: (data: any) => void; 
+  onError: (err: unknown) => void;
+}
+
+export const confirmPasswordReset = ({
+  email,
+  verificationCode,
+  newPassword,
+  idToken,
+  onSuccess,
+  onError,
+}: ConfirmPasswordResetParams) => {
+    const confirm = async (): Promise<any> => {
+      console.log(verificationCode)
+      const response = await fetch(API_URLS.PASSWORD, { 
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ email, code: verificationCode, password: newPassword }),
+      });
+      switch (response.status) {
+        case 200:
+          return Promise.resolve(200);
+        default:
+          return Promise.reject(new Error("Unknown error occurred"));
+      }
+    }
+
+    return useMutation(confirm, {
+      onSuccess,
+      onError,
+    });
 };
+
+// export const confirmPasswordReset = async (
+//   email: string,
+//   newPassword: string,
+//   verificationCode: string
+// ) => {
+//   try {
+//     const confirmPasswordResetCommand = new ConfirmForgotPasswordCommand({
+//       ClientId: COGNITO_CONFIG.clientId,
+//       Username: email,
+//       ConfirmationCode: verificationCode,
+//       Password: newPassword,
+//     });
+
+//     await COGNITO_CLIENT.send(confirmPasswordResetCommand);
+//     return Promise.resolve();
+//   } catch (err) {
+//     return Promise.reject(err);
+//   }
+// };

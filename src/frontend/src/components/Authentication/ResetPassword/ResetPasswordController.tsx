@@ -2,6 +2,10 @@ import { CodeMismatchException } from "@aws-sdk/client-cognito-identity-provider
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertType, useAlert } from "../../common/Alerts";
+import { useMutation } from 'react-query';
+import { useContext } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import {
   ERROR_MESSAGES,
   ROUTES,
@@ -29,7 +33,10 @@ const ResetPasswordController = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { setAlert } = useAlert();
-
+  const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(
+    AuthenticationContext
+  );
+  
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     switch (name) {
@@ -47,56 +54,66 @@ const ResetPasswordController = () => {
     }
   };
 
-  const goToVerifyingStep = async () => {
-    setIsLoading(true);
-    try {
-      await initiatePasswordReset(email);
-      setStep(ResetPasswordStep.VERIFY_CODE);
-    } catch (err) {
-      if (err instanceof Error) {
+  const { mutateAsync: initiateReset } = initiatePasswordReset({
+      email,
+      onSuccess: (data) => {
+        setStep(ResetPasswordStep.VERIFY_CODE);
+        setAlert({
+          type: AlertType.SUCCESS,
+          message: "Verification code sent. Check your email.",
+        });
+      },
+      onError: (err) => {
+        if (err instanceof Error) {
+          setAlert({
+            type: AlertType.ERROR,
+            message: err.message,
+          });
+        }
+      },
+    })
+
+    
+  const { mutateAsync: confirmReset } = confirmPasswordReset ({
+      email,
+      verificationCode,
+      newPassword,
+      idToken: getAuthSession()?.IdToken || "",
+      onSuccess: (data) => {
+        setAlert({
+          type: AlertType.SUCCESS,
+          message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
+        });
+        setTimeout(() => {
+          navigate(ROUTES.LOGIN);
+        }, 1000);
+      },
+      onError: (err: any) => {
+        let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+        if (err instanceof TypeError && err.message === "Failed to fetch") {
+          errorMessage = "You have inputted the wrong code";
+        } else if (err instanceof Error) {
+          errorMessage = err.message;
+        }
         setAlert({
           type: AlertType.ERROR,
-          message: err.message,
+          message: errorMessage,
         });
-      }
-    }
-    setIsLoading(false);
+        if (err instanceof CodeMismatchException) {
+          setNewPassword("");
+          setStep(ResetPasswordStep.VERIFY_CODE);
+        }
+      },
+    })
+
+
+  const goToVerifyingStep = async () => {
+    await initiateReset();
   };
 
   const onSetNewPassword = async () => {
-    setIsLoading(true);
-    try {
-      await confirmPasswordReset(email, newPassword, verificationCode);
-      setAlert({
-        type: AlertType.SUCCESS,
-        message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
-      });
-      setTimeout(() => {
-        navigate(ROUTES.LOGIN);
-      }, 1000);
-      return;
-    } catch (err) {
-      console.error(`Error while resetting password:\n${err}`);
-      if (err instanceof Error) {
-        setAlert({
-          type: AlertType.ERROR,
-          message: err.message,
-        });
-      } else {
-        setAlert({
-          type: AlertType.ERROR,
-          message: ERROR_MESSAGES.UNKNOWN_ERROR,
-        });
-      }
-
-      if (err instanceof CodeMismatchException) {
-        setNewPassword("");
-        setStep(ResetPasswordStep.VERIFY_CODE);
-      }
-    }
-    setIsLoading(false);
+    await confirmReset();
   };
-
   if (step === ResetPasswordStep.VERIFY_CODE) {
     return (
       <div className="flex h-screen w-screen place-items-center">
@@ -137,5 +154,10 @@ const ResetPasswordController = () => {
 };
 
 export const ResetPassword = () => {
-  return <ResetPasswordController />;
+  const client = new QueryClient();
+  return (
+    <QueryClientProvider client={client}>
+      <ResetPasswordController />
+    </QueryClientProvider>
+  );
 };
