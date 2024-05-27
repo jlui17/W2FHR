@@ -294,10 +294,10 @@ export const useLogin = ({
 
         return Promise.reject("Unknown Error");
       case 500:
-        return Promise.reject(new Error("Internal server error"));
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
 
       default:
-        return Promise.reject(new Error("Unknown error occurred"));
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
   };
 
@@ -330,8 +330,21 @@ export const initiatePasswordReset = ({
     switch (response.status) {
       case 200:
         return Promise.resolve(200);
+      case 401:
+        const errorText = await response.text();
+        console.log("ERROR: ", errorText);
+        if (errorText.includes("InvalidParameterException")) {
+          return Promise.reject(new Error("The provided email is unverified or doesn't exist."));
+        } else if (errorText.includes("TooManyRequestsException")) {
+          return Promise.reject(new Error("You have made too many requests. Please wait a while and try again later."));
+        }
+  
+        return Promise.reject("Unknown Error");
+      case 500:
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+  
       default:
-        return Promise.reject(new Error("Unknown error occurred"));
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
   }
 
@@ -389,8 +402,21 @@ export const confirmPasswordReset = ({
       switch (response.status) {
         case 200:
           return Promise.resolve(200);
+        case 401:
+          const errorText = await response.text();
+          console.log("ERROR: ", errorText);
+          if (errorText.includes("InvalidParameterException")) {
+            return Promise.reject(new Error("The provided confirmation code is incorrect or expired."));
+          } else if (errorText.includes("TooManyRequestsException")) {
+            return Promise.reject(new Error("You have made too many requests. Please wait a while and try again later."));
+          }
+    
+          return Promise.reject(ERROR_MESSAGES.UNKNOWN_ERROR);
+        case 500:
+          return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+    
         default:
-          return Promise.reject(new Error("Unknown error occurred"));
+          return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
       }
     }
 
