@@ -4,6 +4,7 @@ import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"encoding/json"
+	"errors"
 	"log"
 
 	"context"
@@ -14,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -58,15 +59,14 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		status := 500
 		errMsg := fmt.Sprintf("Error confirming password reset: %v", err.Error())
 
-		if awsErr, ok := err.(awserr.Error); ok {
-			switch awsErr.Code() {
-			case "InvalidParameterException":
-				status = 400
-				errMsg = "(InvalidParameterException) The provided confirmation code is incorrect or expired."
-			case "TooManyRequestsException":
-				status = 400
-				errMsg = "(TooManyRequestsException) You have made too many requests. Please wait a while and try again later."
-			}
+		var invalid *types.InvalidParameterException
+		var tmr *types.TooManyRequestsException
+		if errors.As(err, &invalid) {
+			status = 400
+			errMsg = "(InvalidParameterException) The provided confirmation code is incorrect or expired."
+		} else if errors.As(err, &tmr) {
+			status = 400
+			errMsg = "(TooManyRequestsException) You have made too many requests. Please wait a while and try again later."
 		}
 
 		if status == 500 {
