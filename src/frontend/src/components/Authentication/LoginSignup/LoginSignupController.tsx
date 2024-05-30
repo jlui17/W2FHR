@@ -63,13 +63,9 @@ const AuthenticationController = () => {
     },
     onError: (err: any) => {
       setIsLoading(false);
-      if (err instanceof UserNotConfirmedException) {
-        setIsConfirmingAccount(true);
-      } else {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to sign up";
-        setAlert({ type: AlertType.ERROR, message: errorMessage });
-      }
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to sign up";
+      setAlert({ type: AlertType.ERROR, message: errorMessage });
     },
   });
 

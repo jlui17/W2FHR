@@ -1,11 +1,9 @@
 import { CodeMismatchException } from "@aws-sdk/client-cognito-identity-provider";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { QueryClient, QueryClientProvider, useMutation } from "react-query";
 import { useNavigate } from "react-router-dom";
-import { AlertType, useAlert } from "../../common/Alerts";
-import { useMutation } from 'react-query';
-import { useContext } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
+import { AlertType, useAlert } from "../../common/Alerts";
 import {
   ERROR_MESSAGES,
   ROUTES,
@@ -15,6 +13,7 @@ import { VerifyWidget } from "../common/VerifyWidget";
 import {
   confirmPasswordReset,
   initiatePasswordReset,
+  InvalidConfirmationCodeException,
 } from "../helpers/authentication";
 import { ResetPassowrdWidget } from "./ResetPasswordWidget";
 
@@ -36,7 +35,7 @@ const ResetPasswordController = () => {
   const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(
     AuthenticationContext
   );
-  
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     switch (name) {
@@ -55,57 +54,55 @@ const ResetPasswordController = () => {
   };
 
   const { mutateAsync: initiateReset } = initiatePasswordReset({
-      email,
-      onSuccess: (data) => {
-        setStep(ResetPasswordStep.VERIFY_CODE);
-        setAlert({
-          type: AlertType.SUCCESS,
-          message: "Verification code sent. Check your email.",
-        });
-      },
-      onError: (err) => {
-        if (err instanceof Error) {
-          setAlert({
-            type: AlertType.ERROR,
-            message: err.message,
-          });
-        }
-      },
-    })
-
-    
-  const { mutateAsync: confirmReset } = confirmPasswordReset ({
-      email,
-      verificationCode,
-      newPassword,
-      idToken: getAuthSession()?.IdToken || "",
-      onSuccess: (data) => {
-        setAlert({
-          type: AlertType.SUCCESS,
-          message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
-        });
-        setTimeout(() => {
-          navigate(ROUTES.LOGIN);
-        }, 1000);
-      },
-      onError: (err: any) => {
-        let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-        if (err instanceof TypeError && err.message === "Failed to fetch") {
-          errorMessage = "You have inputted the wrong code";
-        } else if (err instanceof Error) {
-          errorMessage = err.message;
-        }
+    email,
+    onSuccess: (data) => {
+      setStep(ResetPasswordStep.VERIFY_CODE);
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: "Verification code sent. Check your email.",
+      });
+    },
+    onError: (err) => {
+      if (err instanceof Error) {
         setAlert({
           type: AlertType.ERROR,
-          message: errorMessage,
+          message: err.message,
         });
-        if (err instanceof CodeMismatchException) {
-          setNewPassword("");
-          setStep(ResetPasswordStep.VERIFY_CODE);
-        }
-      },
-    })
+      }
+    },
+  });
 
+  const { mutateAsync: confirmReset } = confirmPasswordReset({
+    email,
+    verificationCode,
+    newPassword,
+    idToken: getAuthSession()?.IdToken || "",
+    onSuccess: (data) => {
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
+      });
+      setTimeout(() => {
+        navigate(ROUTES.LOGIN);
+      }, 1000);
+    },
+    onError: (err: any) => {
+      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setAlert({
+        type: AlertType.ERROR,
+        message: errorMessage,
+      });
+
+      if (err instanceof InvalidConfirmationCodeException) {
+        setNewPassword("");
+        setStep(ResetPasswordStep.VERIFY_CODE);
+      }
+    },
+  });
 
   const goToVerifyingStep = async () => {
     await initiateReset();

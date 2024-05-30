@@ -4,7 +4,10 @@ import {
   ForgotPasswordCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { useMutation } from "react-query";
-import { getAuthApiUrlForEmail, getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
+import {
+  getAuthApiUrlForEmail,
+  getAuthApiUrlForResetPassword,
+} from "../../common/ApiUrlUtil";
 import {
   API_URLS,
   ERROR_MESSAGES,
@@ -126,7 +129,6 @@ export const useSignUp = ({
       body: JSON.stringify({ email, password }),
     });
 
-    console.log("SIGN UP WENT THRU");
     switch (response.status) {
       case 201:
         const data = await response.json();
@@ -307,8 +309,6 @@ export const useLogin = ({
   });
 };
 
-
-
 interface PasswordParams {
   email: string;
   onSuccess: (data: any) => void;
@@ -322,9 +322,9 @@ export const initiatePasswordReset = ({
 }: PasswordParams) => {
   const reset = async (): Promise<any> => {
     const response = await fetch(getAuthApiUrlForResetPassword(email), {
-      method: 'GET', 
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     switch (response.status) {
@@ -334,26 +334,31 @@ export const initiatePasswordReset = ({
         const errorText = await response.text();
         console.log("ERROR: ", errorText);
         if (errorText.includes("InvalidParameterException")) {
-          return Promise.reject(new Error("The provided email is unverified or doesn't exist."));
+          return Promise.reject(
+            new Error("The provided email is unverified or doesn't exist.")
+          );
         } else if (errorText.includes("TooManyRequestsException")) {
-          return Promise.reject(new Error("You have made too many requests. Please wait a while and try again later."));
+          return Promise.reject(
+            new Error(
+              "You have made too many requests. Please wait a while and try again later."
+            )
+          );
         }
-  
+
         return Promise.reject("Unknown Error");
       case 500:
         return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
-  
+
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  }
+  };
 
   return useMutation(reset, {
     onSuccess,
     onError,
   });
 };
-
 
 // export const initiatePasswordReset = async (email: string): Promise<void> => {
 //   try {
@@ -369,15 +374,19 @@ export const initiatePasswordReset = ({
 //   }
 // };
 
-
-
 interface ConfirmPasswordResetParams {
   email: string;
   verificationCode: string;
   newPassword: string;
   idToken: string;
-  onSuccess: (data: any) => void; 
+  onSuccess: (data: any) => void;
   onError: (err: unknown) => void;
+}
+
+export class InvalidConfirmationCodeException extends Error {
+  constructor() {
+    super("The provided confirmation code is incorrect or expired.");
+  }
 }
 
 export const confirmPasswordReset = ({
@@ -388,42 +397,55 @@ export const confirmPasswordReset = ({
   onSuccess,
   onError,
 }: ConfirmPasswordResetParams) => {
-    const confirm = async (): Promise<any> => {
-      console.log(verificationCode)
-      const response = await fetch(API_URLS.PASSWORD, { 
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ email, code: verificationCode, password: newPassword }),
-      });
-      switch (response.status) {
-        case 200:
-          return Promise.resolve(200);
-        case 401:
-          const errorText = await response.text();
-          console.log("ERROR: ", errorText);
-          if (errorText.includes("InvalidParameterException")) {
-            return Promise.reject(new Error("The provided confirmation code is incorrect or expired."));
-          } else if (errorText.includes("TooManyRequestsException")) {
-            return Promise.reject(new Error("You have made too many requests. Please wait a while and try again later."));
-          }
-    
-          return Promise.reject(ERROR_MESSAGES.UNKNOWN_ERROR);
-        case 500:
-          return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
-    
-        default:
-          return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
-      }
+  const confirm = async (): Promise<any> => {
+    newPassword = newPassword.trim();
+    const pErrs: string[] = validatePassword(newPassword);
+    if (pErrs.length != 0) {
+      return Promise.reject(new InvalidPasswordException(pErrs));
     }
 
-    return useMutation(confirm, {
-      onSuccess,
-      onError,
+    const response = await fetch(API_URLS.PASSWORD, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        email,
+        code: verificationCode,
+        password: newPassword,
+      }),
     });
+    switch (response.status) {
+      case 200:
+        return Promise.resolve(200);
+      case 401:
+        const errorText = await response.text();
+        console.log("ERROR: ", errorText);
+        if (errorText.includes("InvalidParameterException")) {
+          return Promise.reject(new InvalidConfirmationCodeException());
+        } else if (errorText.includes("TooManyRequestsException")) {
+          return Promise.reject(
+            new Error(
+              "You have made too many requests. Please wait a while and try again later."
+            )
+          );
+        }
+
+        return Promise.reject(ERROR_MESSAGES.UNKNOWN_ERROR);
+      case 500:
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+
+      default:
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+    }
+  };
+
+  return useMutation(confirm, {
+    onSuccess,
+    onError,
+  });
 };
 
 // export const confirmPasswordReset = async (
