@@ -59,14 +59,24 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		status := 500
 		errMsg := fmt.Sprintf("Error confirming password reset: %v", err.Error())
 
-		var invalid *types.InvalidParameterException
+		var invalidCode *types.CodeMismatchException
+		var expiredCode *types.ExpiredCodeException
+		var invalidPassword *types.InvalidPasswordException
 		var tmr *types.TooManyRequestsException
-		if errors.As(err, &invalid) {
+		var tmfa *types.TooManyFailedAttemptsException
+		var le *types.LimitExceededException
+		if errors.As(err, &invalidCode) {
 			status = 400
-			errMsg = "(InvalidParameterException) The provided confirmation code is incorrect or expired."
-		} else if errors.As(err, &tmr) {
+			errMsg = "The provided confirmation code is incorrect."
+		} else if errors.As(err, &expiredCode) {
 			status = 400
-			errMsg = "(TooManyRequestsException) You have made too many requests. Please wait a while and try again later."
+			errMsg = "The provided confirmation code is expired. Please restart the password reset process."
+		} else if errors.As(err, &invalidPassword) {
+			status = 400
+			errMsg = err.Error()
+		} else if errors.As(err, &tmr) || errors.As(err, &tmfa) || errors.As(err, &le) {
+			status = 400
+			errMsg = "You have made too many requests. Please wait a while and try again later."
 		}
 
 		if status == 500 {

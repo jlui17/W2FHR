@@ -9,6 +9,7 @@ interface VerifySignupWidgetProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   showResendVerificationCode: boolean;
   canSubmit: boolean;
+  goBack: () => void;
 }
 
 export const VerifyWidget = ({
@@ -19,6 +20,7 @@ export const VerifyWidget = ({
   handleChange,
   showResendVerificationCode,
   canSubmit,
+  goBack,
 }: VerifySignupWidgetProps) => {
   return (
     <AuthWidget>
@@ -47,13 +49,24 @@ export const VerifyWidget = ({
           </Button>
         ) : null}
       </div>
-      <Button
-        variant="contained"
-        onClick={onVerify}
-        disabled={isLoading || !canSubmit}
-      >
-        Verify
-      </Button>
+      <div className="flex w-auto items-center justify-evenly">
+        <Button
+          variant="contained"
+          onClick={onVerify}
+          disabled={isLoading || !canSubmit}
+          className="mr-4 w-full"
+        >
+          Verify
+        </Button>
+        <Button
+          variant="outlined"
+          disabled={isLoading}
+          onClick={goBack}
+          className="w-full"
+        >
+          Back
+        </Button>
+      </div>
     </AuthWidget>
   );
 };

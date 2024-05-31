@@ -1,6 +1,5 @@
-import { CodeMismatchException } from "@aws-sdk/client-cognito-identity-provider";
 import React, { useContext, useState } from "react";
-import { QueryClient, QueryClientProvider, useMutation } from "react-query";
+import { QueryClient, QueryClientProvider, UseQueryResult } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertType, useAlert } from "../../common/Alerts";
@@ -13,7 +12,6 @@ import { VerifyWidget } from "../common/VerifyWidget";
 import {
   confirmPasswordReset,
   initiatePasswordReset,
-  InvalidConfirmationCodeException,
 } from "../helpers/authentication";
 import { ResetPassowrdWidget } from "./ResetPasswordWidget";
 
@@ -32,9 +30,7 @@ const ResetPasswordController = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { setAlert } = useAlert();
-  const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(
-    AuthenticationContext
-  );
+  const { getAuthSession } = useContext(AuthenticationContext);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -55,7 +51,7 @@ const ResetPasswordController = () => {
 
   const { mutateAsync: initiateReset } = initiatePasswordReset({
     email,
-    onSuccess: (data) => {
+    onSuccess: () => {
       setStep(ResetPasswordStep.VERIFY_CODE);
       setAlert({
         type: AlertType.SUCCESS,
@@ -77,7 +73,7 @@ const ResetPasswordController = () => {
     verificationCode,
     newPassword,
     idToken: getAuthSession()?.IdToken || "",
-    onSuccess: (data) => {
+    onSuccess: () => {
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
@@ -86,8 +82,8 @@ const ResetPasswordController = () => {
         navigate(ROUTES.LOGIN);
       }, 1000);
     },
-    onError: (err: any) => {
-      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+    onError: (err: unknown) => {
+      let errorMessage: string = ERROR_MESSAGES.UNKNOWN_ERROR;
       if (err instanceof Error) {
         errorMessage = err.message;
       }
@@ -96,21 +92,27 @@ const ResetPasswordController = () => {
         type: AlertType.ERROR,
         message: errorMessage,
       });
-
-      if (err instanceof InvalidConfirmationCodeException) {
-        setNewPassword("");
-        setStep(ResetPasswordStep.VERIFY_CODE);
-      }
     },
   });
 
   const goToVerifyingStep = async () => {
-    await initiateReset();
+    try {
+      setIsLoading(true);
+      await initiateReset();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onSetNewPassword = async () => {
-    await confirmReset();
+    try {
+      setIsLoading(true);
+      await confirmReset();
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   if (step === ResetPasswordStep.VERIFY_CODE) {
     return (
       <div className="flex h-screen w-screen place-items-center">
@@ -122,6 +124,7 @@ const ResetPasswordController = () => {
           onResendVerificationCode={() => {}}
           showResendVerificationCode={false}
           canSubmit={verificationCode.length !== 0}
+          goBack={() => setStep(ResetPasswordStep.ENTER_EMAIL)}
         />
       </div>
     );
@@ -139,12 +142,15 @@ const ResetPasswordController = () => {
         goToVerifyingStep={goToVerifyingStep}
         showPassword={showPassword}
         onShowPassword={() => setShowPassword(!showPassword)}
-        onCancel={() => navigate(ROUTES.LOGIN)}
+        onCancel={() => setStep(ResetPasswordStep.VERIFY_CODE)}
         canSubmit={
           (step === ResetPasswordStep.ENTER_EMAIL && email.length !== 0) ||
           (step === ResetPasswordStep.ENTER_NEW_PASSWORD &&
             newPassword.length !== 0)
         }
+        goBackToVerifyCode={() => {
+          setStep(ResetPasswordStep.VERIFY_CODE);
+        }}
       />
     </div>
   );

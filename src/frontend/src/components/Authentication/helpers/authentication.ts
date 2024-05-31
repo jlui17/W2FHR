@@ -1,68 +1,6 @@
-import {
-  CognitoIdentityProviderClient,
-  ConfirmForgotPasswordCommand,
-  ForgotPasswordCommand,
-} from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation } from "react-query";
-import {
-  getAuthApiUrlForEmail,
-  getAuthApiUrlForResetPassword,
-} from "../../common/ApiUrlUtil";
-import {
-  API_URLS,
-  ERROR_MESSAGES,
-  RESPONSE_ERROR_MESSAGE_MAP,
-} from "../../common/constants";
-
-const COGNITO_CONFIG = {
-  region: "us-west-2",
-  clientId: "4kkjr0at3bjoeli3uuprqrthru",
-};
-const COGNITO_CLIENT = new CognitoIdentityProviderClient({
-  region: "us-west-2",
-});
-
-// export const signUpAndGetNeedToConfirm = async (
-//   email: string,
-//   password: string
-// ): Promise<boolean> => {
-//   try {
-//     const employeeId = await getEmployeeIdFromEmail(email);
-//     const signUpResponse = await doSignUp(email, password, employeeId);
-//     if (
-//       signUpResponse.UserSub === undefined ||
-//       signUpResponse.UserConfirmed === undefined
-//     ) {
-//       return Promise.reject(new Error(ERROR_MESSAGES.SIGNUP_ERROR));
-//     }
-
-//     return Promise.resolve(!signUpResponse.UserConfirmed);
-//   } catch (err) {
-//     return Promise.reject(err);
-//   }
-
-// };
-
-const getEmployeeIdFromEmail = async (email: string): Promise<string> => {
-  const response = await fetch(getAuthApiUrlForEmail(email));
-  const data = await response.text();
-
-  switch (response.status) {
-    case 200:
-      if (typeof data !== "string") {
-        return Promise.reject(
-          new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
-        );
-      }
-      return Promise.resolve(data);
-    default:
-      const errorMessage = RESPONSE_ERROR_MESSAGE_MAP[data];
-      if (errorMessage !== undefined) {
-        return Promise.reject(new Error(errorMessage));
-      }
-      return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
-  }
-};
+import { useMutation, useQuery } from "react-query";
+import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
+import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
 export class InvalidPasswordException extends Error {
   constructor(missing: string[]) {
@@ -73,6 +11,7 @@ export class InvalidPasswordException extends Error {
     super(message.slice(0, -1));
   }
 }
+
 const hasLowercase: RegExp = /[a-z]/;
 const hasUppercase: RegExp = /[A-Z]/;
 const hasNumber: RegExp = /\d/;
@@ -94,6 +33,9 @@ function validatePassword(p: string): string[] {
     res.push(
       "1 of the following SPECIAL CHARACTERS: ^ $ * . [ ] { } ( ) ? - \" ! @ # % & /  , > < ' : ; | _ ~ ` + = ?"
     );
+  }
+  if (p.length < 8) {
+    res.push("At least 8 characters long");
   }
   return res;
 }
@@ -223,37 +165,6 @@ export const resendSignupVerificationCode = async (
   }
 };
 
-// export const loginAndGetAuthSession = async (
-//   email: string,
-//   password: string
-// ): Promise<AuthenticationResultType> => {
-//   try {
-//     const loginResponse = await doLogin(email, password);
-//     if (loginResponse.AuthenticationResult == undefined) {
-//       return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
-//     }
-
-//     return Promise.resolve(loginResponse.AuthenticationResult);
-//   } catch (err) {
-//     return Promise.reject(err);
-//   }
-// };
-
-// const doLogin = async (
-//   email: string,
-//   password: string
-// ): Promise<InitiateAuthCommandOutput> => {
-//   const loginCommand = new InitiateAuthCommand({
-//     AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-//     ClientId: COGNITO_CONFIG.clientId,
-//     AuthParameters: {
-//       USERNAME: email,
-//       PASSWORD: password,
-//     },
-//   });
-//   return COGNITO_CLIENT.send(loginCommand);
-// };
-
 interface LoginParams {
   email: string;
   password: string;
@@ -327,25 +238,14 @@ export const initiatePasswordReset = ({
         "Content-Type": "application/json",
       },
     });
+
     switch (response.status) {
       case 200:
         return Promise.resolve(200);
-      case 401:
-        const errorText = await response.text();
-        console.log("ERROR: ", errorText);
-        if (errorText.includes("InvalidParameterException")) {
-          return Promise.reject(
-            new Error("The provided email is unverified or doesn't exist.")
-          );
-        } else if (errorText.includes("TooManyRequestsException")) {
-          return Promise.reject(
-            new Error(
-              "You have made too many requests. Please wait a while and try again later."
-            )
-          );
-        }
-
-        return Promise.reject("Unknown Error");
+      case 400:
+      case 404:
+        const err: string = await response.text();
+        return Promise.reject(new Error(err));
       case 500:
         return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
 
@@ -360,20 +260,6 @@ export const initiatePasswordReset = ({
   });
 };
 
-// export const initiatePasswordReset = async (email: string): Promise<void> => {
-//   try {
-//     const forgotPasswordCommand = new ForgotPasswordCommand({
-//       ClientId: COGNITO_CONFIG.clientId,
-//       Username: email,
-//     });
-
-//     await COGNITO_CLIENT.send(forgotPasswordCommand);
-//     return Promise.resolve();
-//   } catch (err) {
-//     return Promise.reject(err);
-//   }
-// };
-
 interface ConfirmPasswordResetParams {
   email: string;
   verificationCode: string;
@@ -381,12 +267,6 @@ interface ConfirmPasswordResetParams {
   idToken: string;
   onSuccess: (data: any) => void;
   onError: (err: unknown) => void;
-}
-
-export class InvalidConfirmationCodeException extends Error {
-  constructor() {
-    super("The provided confirmation code is incorrect or expired.");
-  }
 }
 
 export const confirmPasswordReset = ({
@@ -417,23 +297,13 @@ export const confirmPasswordReset = ({
         password: newPassword,
       }),
     });
+
     switch (response.status) {
       case 200:
         return Promise.resolve(200);
-      case 401:
-        const errorText = await response.text();
-        console.log("ERROR: ", errorText);
-        if (errorText.includes("InvalidParameterException")) {
-          return Promise.reject(new InvalidConfirmationCodeException());
-        } else if (errorText.includes("TooManyRequestsException")) {
-          return Promise.reject(
-            new Error(
-              "You have made too many requests. Please wait a while and try again later."
-            )
-          );
-        }
-
-        return Promise.reject(ERROR_MESSAGES.UNKNOWN_ERROR);
+      case 400:
+        let err: string = await response.text();
+        return Promise.reject(new Error(err));
       case 500:
         return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
 
@@ -447,23 +317,3 @@ export const confirmPasswordReset = ({
     onError,
   });
 };
-
-// export const confirmPasswordReset = async (
-//   email: string,
-//   newPassword: string,
-//   verificationCode: string
-// ) => {
-//   try {
-//     const confirmPasswordResetCommand = new ConfirmForgotPasswordCommand({
-//       ClientId: COGNITO_CONFIG.clientId,
-//       Username: email,
-//       ConfirmationCode: verificationCode,
-//       Password: newPassword,
-//     });
-
-//     await COGNITO_CLIENT.send(confirmPasswordResetCommand);
-//     return Promise.resolve();
-//   } catch (err) {
-//     return Promise.reject(err);
-//   }
-// };

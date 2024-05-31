@@ -1,4 +1,3 @@
-import { UserNotConfirmedException } from "@aws-sdk/client-cognito-identity-provider";
 import { useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -12,7 +11,6 @@ import {
 } from "../../common/constants";
 import { VerifyWidget } from "../common/VerifyWidget";
 import {
-  InvalidPasswordException,
   resendSignupVerificationCode,
   useConfirmAccount,
   useLogin,
@@ -216,6 +214,9 @@ const AuthenticationController = () => {
         handleChange={handleChange}
         showResendVerificationCode={true}
         canSubmit={verificationCode.length !== 0}
+        goBack={() => {
+          setIsConfirmingAccount(false);
+        }}
       />
     </div>
   ) : (
