@@ -50,7 +50,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		if awsErr, ok := err.(awserr.Error); ok {
 			switch awsErr.Code() {
 			case cognitoidentityprovider.ErrCodeUserNotFoundException:
-				statusCode = 400
+				statusCode = 404
 				errMsg = "User does not exist."
 			case cognitoidentityprovider.ErrCodeNotAuthorizedException:
 				statusCode = 400
