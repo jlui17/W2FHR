@@ -3,6 +3,10 @@ export const API_URLS = {
   TIMESHEET: `${BASE_URL}/timesheet`,
   AVAILABILITY: `${BASE_URL}/availability`,
   AUTH: `${BASE_URL}/auth`,
+  EMPLOYEE: `${BASE_URL}/auth/employee`,
+  VERIFY: `${BASE_URL}/auth/verify`,
+  LOGIN: `${BASE_URL}/auth/login`,
+  PASSWORD: `${BASE_URL}/auth/password`,
 };
 
 const PLEASE_CONTACT_JUSTIN =
@@ -24,6 +28,7 @@ export const ERROR_MESSAGES = {
   AUTH: {
     NOT_SIGNED_IN: "You are not signed in.",
   },
+  EMPLOYEE_NOT_CONFIRMED: "User is not confirmed.",
 };
 
 export const RESPONSE_ERROR_MESSAGE_MAP: {

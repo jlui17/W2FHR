@@ -15,6 +15,7 @@ interface ResetPassowrdWidgetProps {
   onShowPassword: () => void;
   onCancel: () => void;
   canSubmit: boolean;
+  goBackToVerifyCode: () => void;
 }
 
 export const ResetPassowrdWidget = ({
@@ -29,6 +30,7 @@ export const ResetPassowrdWidget = ({
   onShowPassword,
   onCancel,
   canSubmit,
+  goBackToVerifyCode,
 }: ResetPassowrdWidgetProps) => {
   return (
     <AuthWidget>
@@ -52,6 +54,7 @@ export const ResetPassowrdWidget = ({
           onShowPassword={onShowPassword}
           isLoading={isLoading}
           canSubmit={canSubmit}
+          goBackToVerifyCode={goBackToVerifyCode}
         />
       )}
     </AuthWidget>
@@ -94,7 +97,7 @@ const Step1 = ({
           Reset Password
         </Button>
         <Button
-          variant="contained"
+          variant="outlined"
           disabled={isLoading}
           onClick={onCancel}
           className="w-full"
@@ -114,6 +117,7 @@ const Step2 = ({
   onShowPassword,
   isLoading,
   canSubmit,
+  goBackToVerifyCode,
 }: {
   newPassword: ResetPassowrdWidgetProps["newPassword"];
   handleChange: ResetPassowrdWidgetProps["handleChange"];
@@ -122,6 +126,7 @@ const Step2 = ({
   onShowPassword: ResetPassowrdWidgetProps["onShowPassword"];
   isLoading: ResetPassowrdWidgetProps["isLoading"];
   canSubmit: ResetPassowrdWidgetProps["canSubmit"];
+  goBackToVerifyCode: ResetPassowrdWidgetProps["goBackToVerifyCode"];
 }) => {
   return (
     <>
@@ -133,13 +138,24 @@ const Step2 = ({
         onShowPassword={onShowPassword}
         disabled={isLoading}
       />
-      <Button
-        variant="contained"
-        onClick={onSetNewPassword}
-        disabled={isLoading || !canSubmit}
-      >
-        Set New Password
-      </Button>
+      <div className="flex w-auto items-center justify-evenly">
+        <Button
+          variant="contained"
+          onClick={onSetNewPassword}
+          disabled={isLoading || !canSubmit}
+          className="mr-4 w-full"
+        >
+          Reset Password
+        </Button>
+        <Button
+          variant="outlined"
+          disabled={isLoading}
+          onClick={goBackToVerifyCode}
+          className="w-full"
+        >
+          Back
+        </Button>
+      </div>
     </>
   );
 };

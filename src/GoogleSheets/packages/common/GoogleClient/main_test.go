@@ -14,39 +14,32 @@ func beforeEach() {
 func TestSuccessfullyConnectToSheets(t *testing.T) {
 	beforeEach()
 
-	sheetsService := GetSheetsService()
-	if sheetsService != nil {
-		t.Error("Sheets service should be unitialized")
-	}
-
-	err := ConnectSheetsServiceIfNecessary()
+	sheetsService, err := New()
 	if err != nil {
-		t.Errorf("Error while trying to create Google Sheets Service: %s", err.Error())
+		t.Errorf("Error while creating sheets service: %s", err)
 	}
-
-	sheetsService = GetSheetsService()
 	if sheetsService == nil {
-		t.Error("Sheets service should be initialized now")
+		t.Error("Sheets service should be unitialized")
 	}
 }
 
 func TestSkipConnection(t *testing.T) {
 	beforeEach()
 
-	err := ConnectSheetsServiceIfNecessary()
-	sheetsService := GetSheetsService()
+	sheetsService, err := New()
+	if err != nil {
+		t.Errorf("Error while creating sheets service: %s", err)
+	}
 	if err != nil {
 		t.Errorf("Error while trying to create Google Sheets Service: %s", err.Error())
 	}
 
-	newSheetsService := GetSheetsService()
+	newSheetsService, err := New()
+	if err != nil {
+		t.Errorf("Error while creating NEW sheets service: %s", err)
+	}
 	if newSheetsService == nil {
 		t.Errorf("Failed to connect to sheets")
-	}
-
-	err = ConnectSheetsServiceIfNecessary()
-	if err != nil {
-		t.Errorf("Error while trying to create Google Sheets Service: %s", err.Error())
 	}
 
 	if sheetsService != newSheetsService {

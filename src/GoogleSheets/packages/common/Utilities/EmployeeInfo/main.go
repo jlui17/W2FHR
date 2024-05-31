@@ -2,13 +2,18 @@ package EmployeeInfo
 
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"errors"
 	"log"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var jwtParser *jwt.Parser = jwt.NewParser()
+var (
+	jwtParser *jwt.Parser = jwt.NewParser()
+
+	errIdTokenWrongFormat = errors.New("id token format changed")
+)
 
 type EmployeeInfo struct {
 	email      string
@@ -32,22 +37,26 @@ func (e EmployeeInfo) GetEmployeeId() string {
 func New(bearerToken string) (EmployeeInfo, error) {
 	idToken, err := getIdTokenFromBearerToken(bearerToken)
 	if err != nil {
+		log.Printf("[ERROR] invalid token provided, err: %s", err)
 		return EmployeeInfo{}, err
 	}
 
 	decodedIdToken, err := parseIdToken(idToken)
 	if err != nil {
+		log.Printf("[ERROR] failed to get idToken, err: %s", err)
 		return EmployeeInfo{}, err
 	}
 
 	claims := decodedIdToken.Claims.(jwt.MapClaims)
 	employeeId, ok := claims["custom:employeeId"]
 	if !ok {
+		log.Print("[ERROR] user doesn't have employeeId attribute")
 		return EmployeeInfo{}, SharedConstants.ErrNoEmployeeIdInToken
 	}
 
 	email, ok := claims["email"]
 	if !ok {
+		log.Print("[ERROR] user doesn't have email attribute")
 		return EmployeeInfo{}, SharedConstants.ErrNoEmployeeEmailInToken
 	}
 

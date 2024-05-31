@@ -6,6 +6,7 @@
   },
   "scripts": {
     "build": "tsc; cd src/frontend; yarn build; cd ../..",
+    "deploy": "yarn build; cdk deploy",
     "watch": "tsc -w",
     "test": "yarn test:Googlesheets",
     "test:Googlesheets": "cd src/Googlesheets; go test ./...",

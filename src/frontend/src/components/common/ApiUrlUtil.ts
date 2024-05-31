@@ -7,3 +7,8 @@ export const getTimesheetApiUrlForEmployee = (getUpcoming: boolean) => {
 export const getAuthApiUrlForEmail = (email: string) => {
   return `${API_URLS.AUTH}/${email}`;
 };
+
+
+export const getAuthApiUrlForResetPassword = (email: string) => {
+  return `${API_URLS.AUTH}/password?email=${email}`;
+};

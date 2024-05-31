@@ -3,7 +3,6 @@ package Availability
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"GoogleSheets/packages/common/GoogleClient"
-	"errors"
 	"fmt"
 
 	"google.golang.org/api/sheets/v4"
@@ -156,5 +155,5 @@ func findRowOfEmployee(employeeIds [][]interface{}, employeeId string) (int, err
 			return i, nil
 		}
 	}
-	return 0, errors.New(SharedConstants.EMPLOYEE_NOT_FOUND_ERROR)
+	return 0, SharedConstants.ErrEmployeeNotFound
 }

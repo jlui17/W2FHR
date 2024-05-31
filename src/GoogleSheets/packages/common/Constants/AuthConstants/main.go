@@ -23,9 +23,33 @@ type SignUpResponse struct {
 	NeedsConfirmation bool `json:"needsConfirmation"`
 }
 
+type VerifyResponse struct {
+	Response string `json:"response"`
+}
+
 var (
 	DEFAULT_STAFF_LIST_INFO = &STAFF_LIST_INFO{
 		Emails:      []interface{}{},
 		EmployeeIds: []interface{}{},
 	}
 )
+
+type SendCodeRequest struct {
+	Username string `json:"username"`
+}
+
+type ConfirmCodeRequest struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type ResetPassword struct {
+	Email    string `json:"email"`
+	Code     string `json:"code"`
+	Password string `json:"password"`
+}
