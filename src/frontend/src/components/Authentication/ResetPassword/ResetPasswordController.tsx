@@ -142,7 +142,7 @@ const ResetPasswordController = () => {
         goToVerifyingStep={goToVerifyingStep}
         showPassword={showPassword}
         onShowPassword={() => setShowPassword(!showPassword)}
-        onCancel={() => setStep(ResetPasswordStep.VERIFY_CODE)}
+        onCancel={() => navigate(ROUTES.LOGIN)}
         canSubmit={
           (step === ResetPasswordStep.ENTER_EMAIL && email.length !== 0) ||
           (step === ResetPasswordStep.ENTER_NEW_PASSWORD &&
