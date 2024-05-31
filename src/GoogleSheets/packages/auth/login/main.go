@@ -3,6 +3,8 @@ package LoginEmployee
 import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"fmt"
+	"log"
 
 	"context"
 	"encoding/json"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 )
@@ -38,13 +41,36 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	authResp, err := cognitoClient.InitiateAuth(authInput)
-
 	if err != nil {
+		log.Printf("[ERROR] Auth - error initiating authentication, err: %s", err)
+
+		statusCode := 500
+		errMsg := fmt.Sprintf("An error occurred during authentication: %v", err.Error())
+
+		if awsErr, ok := err.(awserr.Error); ok {
+			switch awsErr.Code() {
+			case cognitoidentityprovider.ErrCodeUserNotFoundException:
+				statusCode = 400
+				errMsg = "User does not exist."
+			case cognitoidentityprovider.ErrCodeNotAuthorizedException:
+				statusCode = 400
+				errMsg = "Incorrect username or password."
+			case cognitoidentityprovider.ErrCodeUserNotConfirmedException:
+				statusCode = 400
+				errMsg = "User is not confirmed."
+			case cognitoidentityprovider.ErrCodePasswordResetRequiredException:
+				statusCode = 400
+				errMsg = "Password reset required for the user."
+			case cognitoidentityprovider.ErrCodeTooManyRequestsException:
+				statusCode = 400
+				errMsg = "Too many requests. Please try again later."
+			}
+		}
 
 		return events.APIGatewayProxyResponse{
-			StatusCode: 401,
+			StatusCode: statusCode,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			Body:       err.Error(),
+			Body:       errMsg,
 		}, nil
 	}
 	authResultJSON, err := json.Marshal(authResp.AuthenticationResult)

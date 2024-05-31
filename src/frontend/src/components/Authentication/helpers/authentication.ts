@@ -80,9 +80,9 @@ export const useSignUp = ({
         const err = await response.text();
         return Promise.reject(new Error(err));
       case 500:
-        return Promise.reject(new Error("Internal server error"));
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
       default:
-        return Promise.reject(new Error("Unknown error occurred"));
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
   };
   return useMutation(signUp, {
@@ -115,18 +115,18 @@ export const useConfirmAccount = ({
       },
       body: JSON.stringify({ email, code: verificationCode }),
     });
-
     switch (response.status) {
       case 200:
         console.log("good verify");
         return Promise.resolve(200);
       case 400:
-        return Promise.reject(new Error("Invalid request"));
+        let err: string = await response.text();
+        return Promise.reject(new Error(err));
       case 500:
-        return Promise.reject(new Error("Internal server error"));
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
 
       default:
-        return Promise.reject(new Error("Unknown error occurred"));
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
   };
 
@@ -194,21 +194,11 @@ export const useLogin = ({
       case 200:
         const data = await response.json();
         return Promise.resolve(data);
-      case 401:
-        const errorText = await response.text();
-        console.log("ERROR: ", errorText);
-        if (errorText.includes(ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED)) {
-          return Promise.reject(ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED);
-        } else if (errorText.includes("UserNotFound")) {
-          return Promise.reject(new Error("You have not registered yet."));
-        } else if (errorText.includes("NotAuthorized")) {
-          return Promise.reject(new Error("Incorrect email or password."));
-        }
-
-        return Promise.reject("Unknown Error");
+      case 400:
+        let err: string = await response.text();
+        return Promise.reject(new Error(err));
       case 500:
         return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
-
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }

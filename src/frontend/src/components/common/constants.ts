@@ -28,7 +28,7 @@ export const ERROR_MESSAGES = {
   AUTH: {
     NOT_SIGNED_IN: "You are not signed in.",
   },
-  EMPLOYEE_NOT_CONFIRMED: "UserNotConfirmedException",
+  EMPLOYEE_NOT_CONFIRMED: "User is not confirmed.",
 };
 
 export const RESPONSE_ERROR_MESSAGE_MAP: {

@@ -173,7 +173,7 @@ const AuthenticationController = () => {
     },
     onError: (err: any) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (err === ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED) {
+      if (err instanceof Error && err.message === ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED) {
         setVerificationCode("");
         setIsConfirmingAccount(true);
         onSendVerificationCode();
