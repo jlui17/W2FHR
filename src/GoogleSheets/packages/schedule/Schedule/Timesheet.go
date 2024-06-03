@@ -18,7 +18,7 @@ const (
 	scheduleEmployeeIdCol         = "C"
 	scheduleTitleCol              = "E"
 	scheduleDataColStart          = "G"
-	scheduleDataColEnd            = "J"
+	scheduleDataColEnd            = "K"
 )
 
 var (
@@ -33,7 +33,6 @@ var (
 	upcomingScheduleData = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
 		scheduleDataColStart,
 		scheduleDataColEnd)
-
 	scheduleEmployeeIds = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
 		scheduleEmployeeIdCol,
 		scheduleEmployeeIdCol)
@@ -55,6 +54,7 @@ type EmployeeShift struct {
 	StartTime     string `json:"startTime"`
 	EndTime       string `json:"endTime"`
 	BreakDuration string `json:"breakDuration"`
+	NetHours      string `json:"netHours"`
 }
 
 type allSchedules struct {
@@ -155,6 +155,7 @@ func (t *timesheet) getShifts(employeeId string, schedule *allSchedules, reverse
 				StartTime:     schedule.Shifts[i][1].(string),
 				EndTime:       schedule.Shifts[i][2].(string),
 				BreakDuration: schedule.Shifts[i][3].(string),
+				NetHours:      schedule.Shifts[i][4].(string),
 			})
 		}
 	}

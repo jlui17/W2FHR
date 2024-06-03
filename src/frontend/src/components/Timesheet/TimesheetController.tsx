@@ -13,6 +13,7 @@ export interface Shift {
   startTime: string;
   endTime: string;
   breakDuration: string;
+  netHours: string;
 }
 
 export interface TimesheetData {
