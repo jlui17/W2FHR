@@ -5,6 +5,7 @@ import (
 	"GoogleSheets/packages/common/TimeService"
 	"fmt"
 	"log"
+	"strconv"
 
 	"google.golang.org/api/sheets/v4"
 )
@@ -49,12 +50,12 @@ type Timesheet struct {
 }
 
 type EmployeeShift struct {
-	Date          string `json:"date"`
-	ShiftTitle    string `json:"shiftTitle"`
-	StartTime     string `json:"startTime"`
-	EndTime       string `json:"endTime"`
-	BreakDuration string `json:"breakDuration"`
-	NetHours      string `json:"netHours"`
+	Date          string  `json:"date"`
+	ShiftTitle    string  `json:"shiftTitle"`
+	StartTime     string  `json:"startTime"`
+	EndTime       string  `json:"endTime"`
+	BreakDuration string  `json:"breakDuration"`
+	NetHours      float64 `json:"netHours"`
 }
 
 type allSchedules struct {
@@ -149,13 +150,17 @@ func (t *timesheet) getShifts(employeeId string, schedule *allSchedules, reverse
 		}
 
 		if schedule.EmployeeIds[i][0] == employeeId {
+			netHours, err := strconv.ParseFloat(schedule.Shifts[i][4].(string), 64)
+			if err != nil {
+				log.Printf("[ERROR] Trying to parse nethours : %s", err.Error())
+			}
 			employeeShifts = append(employeeShifts, EmployeeShift{
 				ShiftTitle:    schedule.ShiftNames[i][0].(string),
 				Date:          schedule.Shifts[i][0].(string),
 				StartTime:     schedule.Shifts[i][1].(string),
 				EndTime:       schedule.Shifts[i][2].(string),
 				BreakDuration: schedule.Shifts[i][3].(string),
-				NetHours:      schedule.Shifts[i][4].(string),
+				NetHours:      netHours,
 			})
 		}
 	}
