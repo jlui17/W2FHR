@@ -1,4 +1,5 @@
-import { useMutation, useQuery } from "react-query";
+import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
+import { useMutation, UseMutationResult } from "react-query";
 import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
@@ -165,29 +166,29 @@ export const resendSignupVerificationCode = async (
   }
 };
 
-interface LoginParams {
+export function useLogin(p: {
   email: string;
   password: string;
-  idToken: string;
-  onSuccess: (data: any) => void;
+  refreshToken?: string;
+  onSuccess: (data: AuthenticationResultType) => void;
   onError: (err: unknown) => void;
-}
+}): UseMutationResult<AuthenticationResultType, unknown, void, unknown> {
+  const login = async (): Promise<AuthenticationResultType> => {
+    const body: {
+      email: string;
+      password: string;
+      refreshToken?: string;
+    } = { email: p.email, password: p.password };
+    if (p.refreshToken != undefined) body.refreshToken = p.refreshToken;
 
-export const useLogin = ({
-  email,
-  password,
-  onSuccess,
-  onError,
-  idToken,
-}: LoginParams) => {
-  const login = async (): Promise<any> => {
+    console.log(body);
+
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(body),
     });
 
     switch (response.status) {
@@ -205,10 +206,10 @@ export const useLogin = ({
   };
 
   return useMutation(login, {
-    onSuccess,
-    onError,
+    onSuccess: p.onSuccess,
+    onError: p.onError,
   });
-};
+}
 
 interface PasswordParams {
   email: string;

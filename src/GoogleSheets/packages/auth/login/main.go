@@ -3,6 +3,7 @@ package LoginEmployee
 import (
 	"GoogleSheets/packages/common/Constants/AuthConstants"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
+	"errors"
 	"fmt"
 	"log"
 
@@ -11,10 +12,10 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -28,43 +29,66 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	sess := session.Must(session.NewSession())
-	cognitoClient := cognitoidentityprovider.New(sess)
-
-	authInput := &cognitoidentityprovider.InitiateAuthInput{
-		AuthFlow: aws.String("USER_PASSWORD_AUTH"),
-		AuthParameters: map[string]*string{
-			"USERNAME": aws.String(loginReq.Email),
-			"PASSWORD": aws.String(loginReq.Password),
-		},
-		ClientId: aws.String(os.Getenv("COGNITO_CLIENT_ID")),
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		fmt.Println("configuration error,", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       "Internal server error",
+		}, nil
+	}
+	svc := cognitoidentityprovider.NewFromConfig(cfg)
+	log.Println(loginReq)
+	var flow types.AuthFlowType
+	params := map[string]string{}
+	if loginReq.RefreshToken != nil {
+		flow = "REFRESH_TOKEN"
+		params["REFRESH_TOKEN"] = *loginReq.RefreshToken
+		log.Printf("logging in via refresh token: %v", *&loginReq.RefreshToken)
+	} else {
+		flow = "USER_PASSWORD_AUTH"
+		params["USERNAME"] = loginReq.Email
+		params["PASSWORD"] = loginReq.Password
 	}
 
-	authResp, err := cognitoClient.InitiateAuth(authInput)
+	req := &cognitoidentityprovider.InitiateAuthInput{
+		AuthFlow:       flow,
+		AuthParameters: params,
+		ClientId:       aws.String(os.Getenv("COGNITO_CLIENT_ID")),
+	}
+
+	res, err := svc.InitiateAuth(ctx, req)
 	if err != nil {
 		log.Printf("[ERROR] Auth - error initiating authentication, err: %s", err)
 
 		statusCode := 500
 		errMsg := fmt.Sprintf("An error occurred during authentication: %v", err.Error())
 
-		if awsErr, ok := err.(awserr.Error); ok {
-			switch awsErr.Code() {
-			case cognitoidentityprovider.ErrCodeUserNotFoundException:
-				statusCode = 404
-				errMsg = "User does not exist."
-			case cognitoidentityprovider.ErrCodeNotAuthorizedException:
-				statusCode = 400
+		var userNotFound *types.UserNotFoundException
+		var notAuthorized *types.NotAuthorizedException
+		var notConfirmed *types.UserNotConfirmedException
+		var passResetRequired *types.PasswordResetRequiredException
+		var tooManyReqs *types.TooManyRequestsException
+		if errors.As(err, &userNotFound) {
+			statusCode = 404
+			errMsg = "User does not exist."
+		} else if errors.As(err, &notAuthorized) {
+			statusCode = 400
+			if flow == "REFRESH_TOKEN" {
+				errMsg = "Please login again."
+			} else {
 				errMsg = "Incorrect username or password."
-			case cognitoidentityprovider.ErrCodeUserNotConfirmedException:
-				statusCode = 400
-				errMsg = "User is not confirmed."
-			case cognitoidentityprovider.ErrCodePasswordResetRequiredException:
-				statusCode = 400
-				errMsg = "Password reset required for the user."
-			case cognitoidentityprovider.ErrCodeTooManyRequestsException:
-				statusCode = 400
-				errMsg = "Too many requests. Please try again later."
 			}
+		} else if errors.As(err, &notConfirmed) {
+			statusCode = 400
+			errMsg = "User is not confirmed."
+		} else if errors.As(err, &passResetRequired) {
+			statusCode = 400
+			errMsg = "Password reset required for the user."
+		} else if errors.As(err, &tooManyReqs) {
+			statusCode = 400
+			errMsg = "Too many requests. Please try again later."
 		}
 
 		return events.APIGatewayProxyResponse{
@@ -73,7 +97,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       errMsg,
 		}, nil
 	}
-	authResultJSON, err := json.Marshal(authResp.AuthenticationResult)
+	authResultJSON, err := json.Marshal(res.AuthenticationResult)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
