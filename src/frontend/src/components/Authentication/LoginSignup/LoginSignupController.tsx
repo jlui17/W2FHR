@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
@@ -25,11 +25,17 @@ const AuthenticationController = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { saveAuthSession, isLoggedIn, getAuthSession } = useContext(
-    AuthenticationContext
-  );
+  const {
+    saveAuthSession,
+    isLoggedIn,
+    getAuthSession,
+    stayLoggedIn,
+    setStayLoggedIn,
+    logout,
+  } = useContext(AuthenticationContext);
   const navigate = useNavigate();
   const { setAlert } = useAlert();
+  const [shouldStayLoggedIn, setShouldStayLoggedIn] = useState(stayLoggedIn());
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -153,17 +159,11 @@ const AuthenticationController = () => {
   const { mutateAsync: login } = useLogin({
     email,
     password,
-    idToken: getAuthSession()?.IdToken || "",
+    refreshToken: getAuthSession()?.RefreshToken,
 
     onSuccess: (data) => {
-      saveAuthSession({
-        AccessToken: data.AccessToken,
-        ExpiresIn: data.ExpiresIn,
-        IdToken: data.IdToken,
-        RefreshToken: data.RefreshToken,
-        TokenType: data.TokenType,
-      });
-
+      saveAuthSession(data);
+      setStayLoggedIn(shouldStayLoggedIn);
       setAlert({
         type: AlertType.SUCCESS,
         message: "Login successful",
@@ -173,7 +173,10 @@ const AuthenticationController = () => {
     },
     onError: (err: any) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (err instanceof Error && err.message === ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED) {
+      if (
+        err instanceof Error &&
+        err.message === ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED
+      ) {
         setVerificationCode("");
         setIsConfirmingAccount(true);
         onSendVerificationCode();
@@ -201,6 +204,17 @@ const AuthenticationController = () => {
   };
 
   const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
+
+  function onStayLoggedIn(event: React.ChangeEvent<HTMLInputElement>): void {
+    const { checked } = event.target;
+    setShouldStayLoggedIn(checked);
+  }
+
+  useEffect(() => {
+    if (stayLoggedIn() && !isLoggedIn()) {
+      onLogin();
+    }
+  }, []);
 
   return isLoggedIn() ? (
     <Navigate to={ROUTES.DASHBOARD} />
@@ -231,6 +245,8 @@ const AuthenticationController = () => {
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
       canSubmit={email.length !== 0 && password.length !== 0}
+      onStayLoggedIn={onStayLoggedIn}
+      stayLoggedIn={shouldStayLoggedIn}
     />
   );
 };

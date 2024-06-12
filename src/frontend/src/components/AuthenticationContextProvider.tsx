@@ -11,12 +11,16 @@ const getInitialAuthenticationContext = (): {
   saveAuthSession: (authSession: AuthenticationResultType | null) => void;
   isLoggedIn: () => boolean;
   logout: () => void;
+  stayLoggedIn: () => boolean;
+  setStayLoggedIn: (b: boolean) => void;
 } => {
   return {
     getAuthSession: () => null,
     saveAuthSession: (authSession: AuthenticationResultType | null) => {},
     isLoggedIn: () => false,
-    logout: () => {},
+    logout: () => null,
+    stayLoggedIn: () => false,
+    setStayLoggedIn: (b: boolean) => null,
   };
 };
 
@@ -27,7 +31,7 @@ export const AuthenticationContext = createContext(
 interface IdToken {
   exp: number;
 }
-const idTokenIsExpired = (idToken: string | undefined): boolean => {
+function idTokenIsExpired(idToken: string | undefined): boolean {
   if (idToken === undefined) {
     return true;
   }
@@ -39,18 +43,7 @@ const idTokenIsExpired = (idToken: string | undefined): boolean => {
   } catch (err) {
     return true;
   }
-};
-
-const getAuthSessionFromLocalStorage = (): AuthenticationResultType | null => {
-  const savedAuthSession = localStorage.getItem("authSession");
-  if (savedAuthSession) {
-    const authSession: AuthenticationResultType = JSON.parse(savedAuthSession);
-    if (!idTokenIsExpired(authSession.IdToken!)) {
-      return authSession;
-    }
-  }
-  return null;
-};
+}
 
 export const AuthenticationContextProvider = ({
   children,
@@ -60,19 +53,48 @@ export const AuthenticationContextProvider = ({
   };
 
   const getAuthSession = () => {
-    const savedAuthSession = getAuthSessionFromLocalStorage();
-    return savedAuthSession;
+    const savedAuthSession = localStorage.getItem("authSession");
+    if (savedAuthSession) {
+      const authSession: AuthenticationResultType =
+        JSON.parse(savedAuthSession);
+      return authSession;
+    }
+    return null;
   };
 
-  const isLoggedIn = () => getAuthSession() !== null;
+  function isLoggedIn(): boolean {
+    const authSession: AuthenticationResultType | null = getAuthSession();
+    return authSession !== null && !idTokenIsExpired(authSession.IdToken);
+  }
 
-  const logout = () => {
+  function logout(): void {
     localStorage.removeItem("authSession");
-  };
+    setStayLoggedIn(false);
+  }
+
+  function setStayLoggedIn(b: boolean): void {
+    localStorage.setItem("stayLoggedIn", b ? "yes" : "no");
+  }
+
+  function stayLoggedIn(): boolean {
+    const stayLoggedIn: string | null = localStorage.getItem("stayLoggedIn");
+    if (!stayLoggedIn) {
+      localStorage.setItem("stayLoggedIn", "no");
+      return false;
+    }
+    return stayLoggedIn === "yes";
+  }
 
   return (
     <AuthenticationContext.Provider
-      value={{ getAuthSession, saveAuthSession, isLoggedIn, logout }}
+      value={{
+        getAuthSession,
+        saveAuthSession,
+        isLoggedIn,
+        logout,
+        stayLoggedIn,
+        setStayLoggedIn,
+      }}
     >
       {children}
     </AuthenticationContext.Provider>

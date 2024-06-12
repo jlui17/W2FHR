@@ -44,8 +44,9 @@ type ConfirmCodeRequest struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email        string  `json:"email"`
+	Password     string  `json:"password"`
+	RefreshToken *string `json:"refreshToken,omitempty"`
 }
 
 type ResetPassword struct {
