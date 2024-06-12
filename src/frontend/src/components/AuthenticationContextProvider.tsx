@@ -57,15 +57,14 @@ export const AuthenticationContextProvider = ({
     if (savedAuthSession) {
       const authSession: AuthenticationResultType =
         JSON.parse(savedAuthSession);
-      if (!idTokenIsExpired(authSession.IdToken!)) {
-        return authSession;
-      }
+      return authSession;
     }
     return null;
   };
 
   function isLoggedIn(): boolean {
-    return getAuthSession() !== null;
+    const authSession: AuthenticationResultType | null = getAuthSession();
+    return authSession !== null && !idTokenIsExpired(authSession.IdToken);
   }
 
   function logout(): void {

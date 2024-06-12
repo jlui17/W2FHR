@@ -39,7 +39,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 	svc := cognitoidentityprovider.NewFromConfig(cfg)
-	log.Println(loginReq)
+
 	var flow types.AuthFlowType
 	params := map[string]string{}
 	if loginReq.RefreshToken != nil {

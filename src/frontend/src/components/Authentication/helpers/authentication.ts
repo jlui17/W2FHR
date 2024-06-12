@@ -181,8 +181,6 @@ export function useLogin(p: {
     } = { email: p.email, password: p.password };
     if (p.refreshToken != undefined) body.refreshToken = p.refreshToken;
 
-    console.log(body);
-
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
       headers: {

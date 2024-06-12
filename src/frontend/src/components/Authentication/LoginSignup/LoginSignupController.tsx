@@ -172,8 +172,6 @@ const AuthenticationController = () => {
       navigate(ROUTES.DASHBOARD);
     },
     onError: (err: any) => {
-      logout();
-      setShouldStayLoggedIn(false);
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
       if (
         err instanceof Error &&
