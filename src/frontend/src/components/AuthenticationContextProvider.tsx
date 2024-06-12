@@ -8,7 +8,7 @@ interface AuthenticationContextProviderProps {
 
 const getInitialAuthenticationContext = (): {
   getAuthSession: () => AuthenticationResultType | null;
-  saveAuthSession: (authSession: AuthenticationResultType | null) => void;
+  saveAuthSession: (authSession: AuthenticationResultType) => void;
   isLoggedIn: () => boolean;
   logout: () => void;
   stayLoggedIn: () => boolean;
@@ -16,7 +16,7 @@ const getInitialAuthenticationContext = (): {
 } => {
   return {
     getAuthSession: () => null,
-    saveAuthSession: (authSession: AuthenticationResultType | null) => {},
+    saveAuthSession: (authSession: AuthenticationResultType) => {},
     isLoggedIn: () => false,
     logout: () => null,
     stayLoggedIn: () => false,
@@ -48,13 +48,25 @@ function idTokenIsExpired(idToken: string | undefined): boolean {
 export const AuthenticationContextProvider = ({
   children,
 }: AuthenticationContextProviderProps) => {
-  const saveAuthSession = (authSession: AuthenticationResultType | null) => {
-    localStorage.setItem("authSession", JSON.stringify(authSession));
-  };
+  function saveAuthSession(newSess: AuthenticationResultType): void {
+    let sess: AuthenticationResultType | null = getAuthSession();
+    if (sess == null) {
+      sess = newSess;
+    } else {
+      sess.AccessToken = newSess.AccessToken || sess.AccessToken;
+      sess.IdToken = newSess.IdToken || sess.IdToken;
+      sess.ExpiresIn = newSess.ExpiresIn || sess.ExpiresIn;
+      sess.RefreshToken = newSess.RefreshToken || sess.RefreshToken;
+      sess.NewDeviceMetadata =
+        newSess.NewDeviceMetadata || sess.NewDeviceMetadata;
+    }
+
+    localStorage.setItem("authSession", JSON.stringify(sess));
+  }
 
   const getAuthSession = () => {
     const savedAuthSession = localStorage.getItem("authSession");
-    if (savedAuthSession) {
+    if (savedAuthSession != null) {
       const authSession: AuthenticationResultType =
         JSON.parse(savedAuthSession);
       return authSession;

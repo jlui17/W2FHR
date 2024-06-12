@@ -1,5 +1,5 @@
+import { Button } from "@/components/ui/button";
 import {
-  Button,
   Card,
   CardActions,
   CardContent,
@@ -89,7 +89,7 @@ export const AvailabilityFormWidget = ({
           <Button
             onClick={updateAvailability}
             disabled={!availabilityData.canUpdate}
-            variant="contained"
+            variant="default"
             className="w-full"
           >
             Save

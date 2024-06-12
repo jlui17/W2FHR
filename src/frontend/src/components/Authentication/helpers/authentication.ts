@@ -1,5 +1,5 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation, UseMutationResult } from "react-query";
+import { useMutation } from "react-query";
 import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
@@ -118,7 +118,6 @@ export const useConfirmAccount = ({
     });
     switch (response.status) {
       case 200:
-        console.log("good verify");
         return Promise.resolve(200);
       case 400:
         let err: string = await response.text();
@@ -166,20 +165,21 @@ export const resendSignupVerificationCode = async (
   }
 };
 
-export function useLogin(p: {
-  email: string;
-  password: string;
-  refreshToken?: string;
-  onSuccess: (data: AuthenticationResultType) => void;
-  onError: (err: unknown) => void;
-}): UseMutationResult<AuthenticationResultType, unknown, void, unknown> {
-  const login = async (): Promise<AuthenticationResultType> => {
+export function useLogin(
+  onSuccess: (data: AuthenticationResultType) => void,
+  onError: (err: unknown) => void
+) {
+  const login = async (
+    email: string,
+    password: string,
+    refreshToken?: string
+  ): Promise<AuthenticationResultType> => {
     const body: {
       email: string;
       password: string;
       refreshToken?: string;
-    } = { email: p.email, password: p.password };
-    if (p.refreshToken != undefined) body.refreshToken = p.refreshToken;
+    } = { email: email, password: password };
+    if (refreshToken != undefined) body.refreshToken = refreshToken;
 
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
@@ -203,9 +203,14 @@ export function useLogin(p: {
     }
   };
 
-  return useMutation(login, {
-    onSuccess: p.onSuccess,
-    onError: p.onError,
+  return useMutation({
+    mutationFn: (v: {
+      email: string;
+      password: string;
+      refreshToken?: string;
+    }) => login(v.email, v.password, v.refreshToken),
+    onSuccess: onSuccess,
+    onError: onError,
   });
 }
 
