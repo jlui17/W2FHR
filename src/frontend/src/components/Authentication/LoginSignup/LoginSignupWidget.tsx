@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { UseFormHandleSubmit, UseFormReturn } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
@@ -20,7 +21,7 @@ export const LoginSignupWidget = (p: {
   password: string;
   isLoading: boolean;
   onSignup: () => void;
-  onResetPassword: () => void;
+  resetPasswordRoute: string;
   showPassword: boolean;
   onShowPassword: () => void;
   canSubmit: boolean;
@@ -54,10 +55,22 @@ export const LoginSignupWidget = (p: {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type={p.showPassword ? "text" : "password"}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={p.showPassword ? "text" : "password"}
+                        {...field}
+                      />
+                      <div className="absolute inset-y-0 right-0 flex cursor-pointer items-center pr-3 text-gray-400">
+                        {p.showPassword ? (
+                          <EyeOff
+                            className="h-6 w-6"
+                            onClick={p.onShowPassword}
+                          />
+                        ) : (
+                          <Eye className="h-6 w-6" onClick={p.onShowPassword} />
+                        )}
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -81,8 +94,7 @@ export const LoginSignupWidget = (p: {
               />
               <Link
                 className={buttonVariants({ variant: "link" })}
-                onClick={p.onResetPassword}
-                to={""}
+                to={"/resetPassword"}
               >
                 Forgot password?
               </Link>
@@ -94,7 +106,11 @@ export const LoginSignupWidget = (p: {
                 disabled={p.isLoading}
                 type="submit"
               >
-                Login
+                {p.isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                ) : (
+                  "Login"
+                )}
               </Button>
               <Button
                 className="ml-4 w-full"
@@ -102,7 +118,11 @@ export const LoginSignupWidget = (p: {
                 onClick={p.onSignup}
                 disabled={p.isLoading}
               >
-                Sign up
+                {p.isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Sign Up"
+                )}
               </Button>
             </div>
           </form>

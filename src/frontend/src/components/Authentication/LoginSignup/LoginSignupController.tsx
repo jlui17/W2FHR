@@ -204,8 +204,6 @@ const AuthenticationController = () => {
     }
   );
 
-  const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -232,12 +230,14 @@ const AuthenticationController = () => {
   }
 
   useEffect(() => {
-    const sess = getAuthSession();
-    if (stayLoggedInContext() && !isLoggedIn() && sess != null) {
+    const refreshToken = getAuthSession()?.RefreshToken;
+    const canAutoLogin: boolean =
+      stayLoggedInContext() && !isLoggedIn() && refreshToken != null;
+    if (canAutoLogin) {
       login({
         email: "",
         password: "",
-        refreshToken: sess?.RefreshToken,
+        refreshToken: refreshToken,
       });
     }
   }, []);
@@ -265,7 +265,7 @@ const AuthenticationController = () => {
       password={password}
       isLoading={isLoading}
       onSignup={onSignup}
-      onResetPassword={onResetPassword}
+      resetPasswordRoute={ROUTES.RESET_PASSWORD}
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
       canSubmit={email.length !== 0 && password.length !== 0}

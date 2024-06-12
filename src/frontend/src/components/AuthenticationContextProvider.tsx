@@ -81,7 +81,6 @@ export const AuthenticationContextProvider = ({
 
   function logout(): void {
     localStorage.removeItem("authSession");
-    setStayLoggedIn(false);
   }
 
   function setStayLoggedIn(b: boolean): void {
