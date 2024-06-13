@@ -52,7 +52,7 @@ export const LoginSignupWidget = (p: {
               control={p.form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="mb-4 mt-4">
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">
