@@ -44,7 +44,7 @@ const AuthenticationController = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
+  const [confirmationCode, setConfirmationCode] = useState("");
   const [isConfirmingAccount, setIsConfirmingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -67,7 +67,7 @@ const AuthenticationController = () => {
         setPassword(value);
         break;
       case "verificationCode":
-        setVerificationCode(value.trim());
+        setConfirmationCode(value.trim());
         break;
       default:
         break;
@@ -75,9 +75,6 @@ const AuthenticationController = () => {
   };
 
   const { mutateAsync: doSignUp } = useSignUp({
-    email,
-    password,
-    idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
       if (data.needsConfirmation) {
         setIsLoading(false);
@@ -92,27 +89,14 @@ const AuthenticationController = () => {
     },
   });
 
-  const onSignup = async () => {
-    setIsLoading(true);
-    try {
-      await doSignUp();
-    } catch (e) {
-      console.error(e);
-      setIsLoading(false);
-    }
-  };
-
   const { mutateAsync: confirmAccount } = useConfirmAccount({
-    email,
-    verificationCode,
-    idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
       });
 
-      setVerificationCode("");
+      setConfirmationCode("");
       setIsLoading(false);
       navigate(ROUTES.DASHBOARD);
     },
@@ -133,23 +117,11 @@ const AuthenticationController = () => {
     },
   });
 
-  const onConfirmAccount = async () => {
-    setIsLoading(true);
-    try {
-      await confirmAccount();
-    } catch (e) {
-      console.error(e);
-      setIsLoading(false);
-    }
-  };
-
   const onSendVerificationCode = async () => {
     setIsLoading(true);
+    const { email } = form.getValues();
     try {
-      await resendSignupVerificationCode(
-        email,
-        getAuthSession()?.IdToken || ""
-      );
+      await resendSignupVerificationCode(email);
       setAlert({
         type: AlertType.INFO,
         message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
@@ -188,7 +160,7 @@ const AuthenticationController = () => {
         err instanceof Error &&
         err.message === ERROR_MESSAGES.EMPLOYEE_NOT_CONFIRMED
       ) {
-        setVerificationCode("");
+        setConfirmationCode("");
         setIsConfirmingAccount(true);
         onSendVerificationCode();
         return;
@@ -212,6 +184,29 @@ const AuthenticationController = () => {
       stayLoggedIn: stayLoggedInContext(),
     },
   });
+
+  const onSignup = async () => {
+    setIsLoading(true);
+    try {
+      const { email, password } = form.getValues();
+
+      await doSignUp({ email, password });
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
+    }
+  };
+
+  const onConfirmAccount = async () => {
+    setIsLoading(true);
+    const { email } = form.getValues();
+    try {
+      await confirmAccount({ email, confirmationCode });
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
+    }
+  };
 
   async function onSubmit(v: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -248,12 +243,12 @@ const AuthenticationController = () => {
     <div className="flex h-screen w-screen place-items-center">
       <VerifyWidget
         isLoading={isLoading}
-        verificationCode={verificationCode}
+        verificationCode={confirmationCode}
         onVerify={onConfirmAccount}
         onResendVerificationCode={onSendVerificationCode}
         handleChange={handleChange}
         showResendVerificationCode={true}
-        canSubmit={verificationCode.length !== 0}
+        canSubmit={confirmationCode.length !== 0}
         goBack={() => {
           setIsConfirmingAccount(false);
         }}

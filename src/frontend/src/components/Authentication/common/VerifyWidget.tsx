@@ -1,4 +1,5 @@
-import { Button, TextField } from "@mui/material";
+import { Button } from "@/components/ui/button";
+import { TextField } from "@mui/material";
 import { AuthWidget } from "../AuthWidget";
 
 interface VerifySignupWidgetProps {
@@ -41,7 +42,7 @@ export const VerifyWidget = ({
         {showResendVerificationCode ? (
           <Button
             className="mb-4 inline-block w-fit text-xs"
-            variant="text"
+            variant="link"
             onClick={onResendVerificationCode}
             disabled={isLoading}
           >
@@ -51,7 +52,6 @@ export const VerifyWidget = ({
       </div>
       <div className="flex w-auto items-center justify-evenly">
         <Button
-          variant="contained"
           onClick={onVerify}
           disabled={isLoading || !canSubmit}
           className="mr-4 w-full"
@@ -59,7 +59,7 @@ export const VerifyWidget = ({
           Verify
         </Button>
         <Button
-          variant="outlined"
+          variant="secondary"
           disabled={isLoading}
           onClick={goBack}
           className="w-full"
