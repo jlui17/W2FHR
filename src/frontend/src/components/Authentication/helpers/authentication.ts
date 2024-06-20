@@ -41,21 +41,11 @@ function validatePassword(p: string): string[] {
   return res;
 }
 
-interface SignUpParams {
-  email: string;
-  password: string;
-  idToken: string;
+export const useSignUp = (p: {
   onSuccess: (data: any) => void;
   onError: (err: unknown) => void;
-}
-export const useSignUp = ({
-  email,
-  password,
-  idToken,
-  onSuccess,
-  onError,
-}: SignUpParams) => {
-  const signUp = async (): Promise<any> => {
+}) => {
+  async function signUp(email: string, password: string): Promise<any> {
     password = password.trim();
     const pErrs: string[] = validatePassword(password);
     if (pErrs.length != 0) {
@@ -65,7 +55,6 @@ export const useSignUp = ({
     const response: Response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
       },
       method: "POST",
       mode: "cors",
@@ -85,10 +74,12 @@ export const useSignUp = ({
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
-  return useMutation(signUp, {
-    onSuccess: onSuccess,
-    onError: onError,
+  }
+  return useMutation({
+    mutationFn: (p: { email: string; password: string }) =>
+      signUp(p.email, p.password),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
   });
 };
 

@@ -75,9 +75,6 @@ const AuthenticationController = () => {
   };
 
   const { mutateAsync: doSignUp } = useSignUp({
-    email,
-    password,
-    idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
       if (data.needsConfirmation) {
         setIsLoading(false);
@@ -95,7 +92,7 @@ const AuthenticationController = () => {
   const onSignup = async () => {
     setIsLoading(true);
     try {
-      await doSignUp();
+      await doSignUp({ email: "", password: "" });
     } catch (e) {
       console.error(e);
       setIsLoading(false);
@@ -227,6 +224,10 @@ const AuthenticationController = () => {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function onSignUp(): void {
+    navigate(ROUTES.SIGNUP);
   }
 
   useEffect(() => {
