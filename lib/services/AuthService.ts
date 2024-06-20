@@ -1,4 +1,4 @@
-import { aws_cognito, Stack } from "aws-cdk-lib";
+import { aws_cognito, Duration, Stack } from "aws-cdk-lib";
 import {
   UserPool,
   UserPoolClient,
@@ -54,6 +54,7 @@ export class AuthService extends Stack {
         authFlows: {
           userPassword: true,
         },
+        idTokenValidity: Duration.days(1),
       }
     );
     this.userPool.addDomain(props.userPoolName + "-domain", {

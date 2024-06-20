@@ -1,6 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
 import {
@@ -18,6 +21,25 @@ import {
 } from "../helpers/authentication";
 import { LoginSignupWidget } from "./LoginSignupWidget";
 
+const passwordValidation = new RegExp(
+  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]).{8,}$/
+);
+
+export const formSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "You must provide an email." })
+    .email("This is not a valid email."),
+  password: z
+    .string()
+    .min(8, { message: "Your password must be at least 8 characters." })
+    .regex(passwordValidation, {
+      message:
+        "Your password must have at least 1 lowercase, uppercase, special character, and number.",
+    }),
+  stayLoggedIn: z.boolean(),
+});
+
 const AuthenticationController = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,13 +51,11 @@ const AuthenticationController = () => {
     saveAuthSession,
     isLoggedIn,
     getAuthSession,
-    stayLoggedIn,
-    setStayLoggedIn,
-    logout,
+    stayLoggedIn: stayLoggedInContext,
+    setStayLoggedIn: setStayLoggedInContext,
   } = useContext(AuthenticationContext);
   const navigate = useNavigate();
   const { setAlert } = useAlert();
-  const [shouldStayLoggedIn, setShouldStayLoggedIn] = useState(stayLoggedIn());
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -59,7 +79,6 @@ const AuthenticationController = () => {
     password,
     idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
-      console.log(data);
       if (data.needsConfirmation) {
         setIsLoading(false);
         setIsConfirmingAccount(true);
@@ -88,8 +107,6 @@ const AuthenticationController = () => {
     verificationCode,
     idToken: getAuthSession()?.IdToken || "",
     onSuccess: (data) => {
-      console.log(data);
-      console.log("success");
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
@@ -138,7 +155,6 @@ const AuthenticationController = () => {
         message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
       });
     } catch (err: any) {
-      console.log(err);
       const errorAlert: AlertInfo = {
         type: AlertType.ERROR,
         message: ERROR_MESSAGES.UNKNOWN_ERROR,
@@ -156,14 +172,9 @@ const AuthenticationController = () => {
     setIsLoading(false);
   };
 
-  const { mutateAsync: login } = useLogin({
-    email,
-    password,
-    refreshToken: getAuthSession()?.RefreshToken,
-
-    onSuccess: (data) => {
+  const { mutateAsync: login } = useLogin(
+    (data) => {
       saveAuthSession(data);
-      setStayLoggedIn(shouldStayLoggedIn);
       setAlert({
         type: AlertType.SUCCESS,
         message: "Login successful",
@@ -171,7 +182,7 @@ const AuthenticationController = () => {
 
       navigate(ROUTES.DASHBOARD);
     },
-    onError: (err: any) => {
+    (err: any) => {
       let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
       if (
         err instanceof Error &&
@@ -190,29 +201,44 @@ const AuthenticationController = () => {
       });
       console.error(err);
       setIsLoading(false);
+    }
+  );
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      stayLoggedIn: stayLoggedInContext(),
     },
   });
 
-  const onLogin = async () => {
+  async function onSubmit(v: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setStayLoggedInContext(v.stayLoggedIn);
     try {
-      await login();
-    } catch (e) {
-      console.error(e);
+      await login({
+        email: v.email,
+        password: v.password,
+        refreshToken: getAuthSession()?.RefreshToken,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
       setIsLoading(false);
     }
-  };
-
-  const onResetPassword = () => navigate(ROUTES.RESET_PASSWORD);
-
-  function onStayLoggedIn(event: React.ChangeEvent<HTMLInputElement>): void {
-    const { checked } = event.target;
-    setShouldStayLoggedIn(checked);
   }
 
   useEffect(() => {
-    if (stayLoggedIn() && !isLoggedIn()) {
-      onLogin();
+    const refreshToken = getAuthSession()?.RefreshToken;
+    const canAutoLogin: boolean =
+      stayLoggedInContext() && !isLoggedIn() && refreshToken != null;
+    if (canAutoLogin) {
+      login({
+        email: "",
+        password: "",
+        refreshToken: refreshToken,
+      });
     }
   }, []);
 
@@ -238,15 +264,14 @@ const AuthenticationController = () => {
       email={email}
       password={password}
       isLoading={isLoading}
-      handleChange={handleChange}
       onSignup={onSignup}
-      onLogin={onLogin}
-      onResetPassword={onResetPassword}
+      resetPasswordRoute={ROUTES.RESET_PASSWORD}
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
       canSubmit={email.length !== 0 && password.length !== 0}
-      onStayLoggedIn={onStayLoggedIn}
-      stayLoggedIn={shouldStayLoggedIn}
+      handleSubmit={form.handleSubmit}
+      onSubmit={onSubmit}
+      form={form}
     />
   );
 };
