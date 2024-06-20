@@ -58,7 +58,7 @@ export const useSignUp = (p: {
       },
       method: "POST",
       mode: "cors",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: email, password: password }),
     });
 
     switch (response.status) {
@@ -67,6 +67,7 @@ export const useSignUp = (p: {
         return Promise.resolve(data);
       case 400:
       case 401:
+      case 404:
         const err = await response.text();
         return Promise.reject(new Error(err));
       case 500:
@@ -83,29 +84,22 @@ export const useSignUp = (p: {
   });
 };
 
-interface ConfirmAccountParams {
-  email: string;
-  verificationCode: string;
-  idToken: string;
+interface ConfirmAccountParams {}
+
+export const useConfirmAccount = (p: {
   onSuccess: (data: any) => void;
   onError: (err: unknown) => void;
-}
-
-export const useConfirmAccount = ({
-  email,
-  verificationCode,
-  idToken,
-  onSuccess,
-  onError,
-}: ConfirmAccountParams) => {
-  const confirmAccount = async (): Promise<any> => {
+}) => {
+  const confirmAccount = async (
+    email: string,
+    confirmationCode: string
+  ): Promise<any> => {
     const response = await fetch(API_URLS.VERIFY, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
       },
-      body: JSON.stringify({ email, code: verificationCode }),
+      body: JSON.stringify({ email, code: confirmationCode }),
     });
     switch (response.status) {
       case 200:
@@ -121,10 +115,14 @@ export const useConfirmAccount = ({
     }
   };
 
-  return useMutation(confirmAccount, {
-    onSuccess: onSuccess,
-    onError: onError,
-  });
+  return useMutation(
+    (p: { email: string; confirmationCode: string }) =>
+      confirmAccount(p.email, p.confirmationCode),
+    {
+      onSuccess: p.onSuccess,
+      onError: p.onError,
+    }
+  );
 };
 
 interface ConfirmAccountParams {
@@ -133,26 +131,28 @@ interface ConfirmAccountParams {
 }
 
 export const resendSignupVerificationCode = async (
-  email: string,
-  idToken: string
+  email: string
 ): Promise<void> => {
   const url = new URL(API_URLS.VERIFY);
   url.searchParams.append("email", email);
-  try {
-    const response = await fetch(url.toString(), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Failed to resend verification code");
-    }
-  } catch (err) {
-    throw new Error("LimitExceededException");
+  switch (response.status) {
+    case 200:
+      return;
+    case 400:
+    case 404:
+      let err: string = await response.text();
+      return Promise.reject(new Error(err));
+    case 500:
+      return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+    default:
+      return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
   }
 };
 
