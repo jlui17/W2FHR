@@ -38,6 +38,7 @@ const LoginController = () => {
     saveAuthSession,
     isLoggedIn,
     getAuthSession,
+    logout,
     stayLoggedIn: stayLoggedInContext,
     setStayLoggedIn: setStayLoggedInContext,
   } = useContext(AuthenticationContext);
@@ -60,7 +61,7 @@ const LoginController = () => {
         setIsConfirming(true);
         return;
       }
-
+      logout();
       let errorMessage = err.message;
       setAlert({
         type: AlertType.ERROR,

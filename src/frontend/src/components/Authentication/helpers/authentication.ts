@@ -143,6 +143,9 @@ export function useLogin(
   onError: (err: Error) => void
 ): UseMutationResult<AuthenticationResultType, Error, LoginParams, unknown> {
   const login = async (p: LoginParams): Promise<AuthenticationResultType> => {
+    if (p.email !== "" && p.password !== "") {
+      delete p.refreshToken;
+    }
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
       headers: {
