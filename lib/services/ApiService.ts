@@ -83,7 +83,7 @@ export class ApiService extends Stack {
           "X-Api-Key",
           "Access-Control-Allow-Origins",
         ],
-        allowMethods: ["GET", "POST", "DELETE"],
+        allowMethods: ["GET", "POST", "PUT"],
         allowCredentials: true,
         allowOrigins: Cors.ALL_ORIGINS,
       },
@@ -129,15 +129,15 @@ export class ApiService extends Stack {
 
     const baseAuthRoute = api.root.addResource("auth");
     const employeeRoute = baseAuthRoute.addResource("employee");
-    employeeRoute.addMethod("GET", new LambdaIntegration(authHandler))
-    employeeRoute.addMethod("POST", new LambdaIntegration(authHandler))   
+    employeeRoute.addMethod("GET", new LambdaIntegration(authHandler));
+    employeeRoute.addMethod("POST", new LambdaIntegration(authHandler));
     const verifyRoute = baseAuthRoute.addResource("verify");
-    verifyRoute.addMethod("GET", new LambdaIntegration(authHandler));
-    verifyRoute.addMethod("POST", new LambdaIntegration(authHandler))
+    verifyRoute.addMethod("POST", new LambdaIntegration(authHandler));
+    verifyRoute.addMethod("PUT", new LambdaIntegration(authHandler));
     const loginRoute = baseAuthRoute.addResource("login");
-    loginRoute.addMethod("POST", new LambdaIntegration(authHandler))    
+    loginRoute.addMethod("POST", new LambdaIntegration(authHandler));
     const passwordRoute = baseAuthRoute.addResource("password");
-    passwordRoute.addMethod("GET", new LambdaIntegration(authHandler));
-    passwordRoute.addMethod("POST", new LambdaIntegration(authHandler))
+    passwordRoute.addMethod("POST", new LambdaIntegration(authHandler));
+    passwordRoute.addMethod("PUT", new LambdaIntegration(authHandler));
   }
 }

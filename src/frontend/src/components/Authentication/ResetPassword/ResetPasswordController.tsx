@@ -1,93 +1,63 @@
-import React, { useContext, useState } from "react";
-import { QueryClient, QueryClientProvider, UseQueryResult } from "react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { useNavigate } from "react-router-dom";
-import { AuthenticationContext } from "../../AuthenticationContextProvider";
+import { z } from "zod";
 import { AlertType, useAlert } from "../../common/Alerts";
 import {
-  ERROR_MESSAGES,
+  INFO_MESSAGES,
   ROUTES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
-import { VerifyWidget } from "../common/VerifyWidget";
+import {
+  AccountSecurityFormSchema,
+  AccountSecurityWidget,
+} from "../AccountSecurityWidget";
+import { Confirmation } from "../Confirmation/Confirmation";
 import {
   confirmPasswordReset,
   initiatePasswordReset,
 } from "../helpers/authentication";
-import { ResetPassowrdWidget } from "./ResetPasswordWidget";
-
-export enum ResetPasswordStep {
-  ENTER_EMAIL = "ENTER_EMAIL",
-  VERIFY_CODE = "VERIFY_CODE",
-  ENTER_NEW_PASSWORD = "ENTER_NEW_PASSWORD",
-}
 
 const ResetPasswordController = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [step, setStep] = useState(ResetPasswordStep.ENTER_EMAIL);
-  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const navigate = useNavigate();
   const { setAlert } = useAlert();
-  const { getAuthSession } = useContext(AuthenticationContext);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    switch (name) {
-      case "email":
-        setEmail(value);
-        break;
-      case "password":
-        setNewPassword(value);
-        break;
-      case "verificationCode":
-        setVerificationCode(value);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const { mutateAsync: initiateReset } = initiatePasswordReset({
-    email,
+  const { mutateAsync: doInitReset } = initiatePasswordReset({
     onSuccess: () => {
-      setStep(ResetPasswordStep.VERIFY_CODE);
+      setIsLoading(false);
       setAlert({
-        type: AlertType.SUCCESS,
-        message: "Verification code sent. Check your email.",
+        type: AlertType.INFO,
+        message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
       });
     },
-    onError: (err) => {
-      if (err instanceof Error) {
-        setAlert({
-          type: AlertType.ERROR,
-          message: err.message,
-        });
-      }
+    onError: (err: Error) => {
+      setIsLoading(false);
+      setAlert({
+        type: AlertType.ERROR,
+        message: err.message,
+      });
     },
   });
 
   const { mutateAsync: confirmReset } = confirmPasswordReset({
-    email,
-    verificationCode,
-    newPassword,
-    idToken: getAuthSession()?.IdToken || "",
     onSuccess: () => {
+      setIsLoading(false);
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
       });
-      setTimeout(() => {
-        navigate(ROUTES.LOGIN);
-      }, 1000);
+      navigate(ROUTES.LOGIN);
     },
-    onError: (err: unknown) => {
-      let errorMessage: string = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-
+    onError: (err: Error) => {
+      setIsLoading(false);
+      let errorMessage: string = err.message;
       setAlert({
         type: AlertType.ERROR,
         message: errorMessage,
@@ -95,64 +65,51 @@ const ResetPasswordController = () => {
     },
   });
 
-  const goToVerifyingStep = async () => {
-    try {
-      setIsLoading(true);
-      await initiateReset();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onSetNewPassword = async () => {
-    try {
-      setIsLoading(true);
-      await confirmReset();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (step === ResetPasswordStep.VERIFY_CODE) {
-    return (
-      <div className="flex h-screen w-screen place-items-center">
-        <VerifyWidget
-          isLoading={isLoading}
-          verificationCode={verificationCode}
-          onVerify={() => setStep(ResetPasswordStep.ENTER_NEW_PASSWORD)}
-          handleChange={handleChange}
-          onResendVerificationCode={() => {}}
-          showResendVerificationCode={false}
-          canSubmit={verificationCode.length !== 0}
-          goBack={() => setStep(ResetPasswordStep.ENTER_EMAIL)}
-        />
-      </div>
-    );
+  async function onConfirm(code: number): Promise<void> {
+    setIsLoading(true);
+    await confirmReset({ email, password, code: code.toString() });
   }
 
-  return (
-    <div className="flex h-screen w-screen place-items-center">
-      <ResetPassowrdWidget
-        isLoading={isLoading}
-        email={email}
-        newPassword={newPassword}
-        onSetNewPassword={onSetNewPassword}
-        handleChange={handleChange}
-        step={step}
-        goToVerifyingStep={goToVerifyingStep}
-        showPassword={showPassword}
-        onShowPassword={() => setShowPassword(!showPassword)}
-        onCancel={() => navigate(ROUTES.LOGIN)}
-        canSubmit={
-          (step === ResetPasswordStep.ENTER_EMAIL && email.length !== 0) ||
-          (step === ResetPasswordStep.ENTER_NEW_PASSWORD &&
-            newPassword.length !== 0)
-        }
-        goBackToVerifyCode={() => {
-          setStep(ResetPasswordStep.VERIFY_CODE);
-        }}
-      />
-    </div>
+  const form = useForm<z.infer<typeof AccountSecurityFormSchema>>({
+    resolver: zodResolver(AccountSecurityFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  async function resendConfirmationCode(): Promise<void> {
+    setIsLoading(true);
+    await doInitReset({ email });
+  }
+
+  async function onSubmit(v: z.infer<typeof AccountSecurityFormSchema>) {
+    setEmail(v.email);
+    setPassword(v.password);
+    setIsConfirming(true);
+  }
+
+  return isConfirming ? (
+    <Confirmation
+      isLoading={isLoading}
+      onConfirm={onConfirm}
+      onCancel={() => setIsConfirming(false)}
+      enableResend={true}
+      onResend={resendConfirmationCode}
+      resendOnMount={true}
+    />
+  ) : (
+    <AccountSecurityWidget
+      form={form}
+      showPassword={showPassword}
+      onShowPassword={() => setShowPassword(!showPassword)}
+      isLoading={isLoading}
+      onSubmit={onSubmit}
+      onCancel={() => navigate(ROUTES.LOGIN)}
+      submitButtonLabel="Reset"
+      type="reset"
+    />
   );
 };
 

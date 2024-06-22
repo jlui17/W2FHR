@@ -1,70 +1,42 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation } from "react-query";
-import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
+import { useMutation, UseMutationResult } from "react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
-export class InvalidPasswordException extends Error {
-  constructor(missing: string[]) {
-    let message: string = "Your password is missing the following: ";
-    for (const m of missing) {
-      message += m + ", ";
-    }
-    super(message.slice(0, -1));
-  }
+interface SignUpResponse {
+  needsConfirmation: boolean;
+}
+function isSignUpResponse(data: unknown): data is SignUpResponse {
+  return data instanceof Object && "needsConfirmation" in data;
+}
+interface SignUpParams {
+  email: string;
+  password: string;
 }
 
-const hasLowercase: RegExp = /[a-z]/;
-const hasUppercase: RegExp = /[A-Z]/;
-const hasNumber: RegExp = /\d/;
-// Check for at least one special character from the specified list
-const hasSpecialChar: RegExp =
-  /[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]/;
-function validatePassword(p: string): string[] {
-  const res: string[] = [];
-  if (!hasLowercase.test(p)) {
-    res.push("1 LOWERCASE letter");
-  }
-  if (!hasUppercase.test(p)) {
-    res.push("1 UPPERCASE letter");
-  }
-  if (!hasNumber.test(p)) {
-    res.push("1 NUMBER");
-  }
-  if (!hasSpecialChar.test(p)) {
-    res.push(
-      "1 of the following SPECIAL CHARACTERS: ^ $ * . [ ] { } ( ) ? - \" ! @ # % & /  , > < ' : ; | _ ~ ` + = ?"
-    );
-  }
-  if (p.length < 8) {
-    res.push("At least 8 characters long");
-  }
-  return res;
-}
-
-export const useSignUp = (p: {
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
-}) => {
-  const signUp = async (email: string, password: string): Promise<any> => {
-    password = password.trim();
-    const pErrs: string[] = validatePassword(password);
-    if (pErrs.length != 0) {
-      return Promise.reject(new InvalidPasswordException(pErrs));
-    }
-
+export function useSignUp(p: {
+  onSuccess: (data: SignUpResponse) => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<SignUpResponse, Error, SignUpParams, unknown> {
+  async function signUp(p: SignUpParams): Promise<SignUpResponse> {
     const response: Response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
       mode: "cors",
-      body: JSON.stringify({ email: email, password: password }),
+      body: JSON.stringify(p),
     });
 
     switch (response.status) {
       case 201:
         const data = await response.json();
-        return Promise.resolve(data);
+        if (isSignUpResponse(data)) {
+          return Promise.resolve(data);
+        } else {
+          const errMsg: string = `Unexpected response: ${data}`;
+          console.error(errMsg);
+          Promise.reject(new Error("errMsg"));
+        }
       case 400:
       case 401:
       case 404:
@@ -75,36 +47,34 @@ export const useSignUp = (p: {
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
-  return useMutation(
-    (p: { email: string; password: string }) => signUp(p.email, p.password),
-    {
-      onSuccess: p.onSuccess,
-      onError: p.onError,
-    }
-  );
-};
+  }
+  return useMutation({
+    mutationFn: (p: SignUpParams) => signUp(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
+  });
+}
 
-interface ConfirmAccountParams {}
-
-export const useConfirmAccount = (p: {
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
-}) => {
-  const confirmAccount = async (
-    email: string,
-    confirmationCode: string
-  ): Promise<any> => {
+interface ConfirmAccountParams {
+  email: string;
+  code: string;
+}
+export function useConfirmAccount(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<void, Error, ConfirmAccountParams, unknown> {
+  async function confirmAccount(p: ConfirmAccountParams): Promise<void> {
     const response = await fetch(API_URLS.VERIFY, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, code: confirmationCode }),
+      body: JSON.stringify(p),
     });
+
     switch (response.status) {
       case 200:
-        return Promise.resolve(200);
+        return Promise.resolve();
       case 400:
         let err: string = await response.text();
         return Promise.reject(new Error(err));
@@ -114,71 +84,71 @@ export const useConfirmAccount = (p: {
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
+  }
 
-  return useMutation(
-    (p: { email: string; confirmationCode: string }) =>
-      confirmAccount(p.email, p.confirmationCode),
-    {
-      onSuccess: p.onSuccess,
-      onError: p.onError,
-    }
-  );
-};
-
-interface ConfirmAccountParams {
-  email: string;
-  idToken: string;
+  return useMutation({
+    mutationFn: (p: ConfirmAccountParams) => confirmAccount(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
+  });
 }
 
-export const resendSignupVerificationCode = async (
-  email: string
-): Promise<void> => {
-  const url = new URL(API_URLS.VERIFY);
-  url.searchParams.append("email", email);
-  const response = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+interface SendConfirmationCodeParams {
+  email: string;
+}
+export function useSendSignUpConfirmationCode(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<void, Error, SendConfirmationCodeParams, unknown> {
+  async function getConfirmationCode(
+    p: SendConfirmationCodeParams
+  ): Promise<void> {
+    const url: URL = new URL(API_URLS.VERIFY);
+    url.searchParams.append("email", p.email);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  switch (response.status) {
-    case 200:
-      return;
-    case 400:
-    case 404:
-      let err: string = await response.text();
-      return Promise.reject(new Error(err));
-    case 500:
-      return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
-    default:
-      return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+    switch (response.status) {
+      case 200:
+        return Promise.resolve();
+      case 400:
+      case 404:
+        let err: string = await response.text();
+        return Promise.reject(new Error(err));
+      case 500:
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+      default:
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+    }
   }
-};
 
+  return useMutation({
+    mutationFn: (p: SendConfirmationCodeParams) => getConfirmationCode(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
+  });
+}
+export class NotConfirmedException extends Error {}
+interface LoginParams {
+  email: string;
+  password: string;
+  refreshToken?: string;
+}
 export function useLogin(
   onSuccess: (data: AuthenticationResultType) => void,
-  onError: (err: unknown) => void
-) {
-  const login = async (
-    email: string,
-    password: string,
-    refreshToken?: string
-  ): Promise<AuthenticationResultType> => {
-    const body: {
-      email: string;
-      password: string;
-      refreshToken?: string;
-    } = { email: email, password: password };
-    if (refreshToken != undefined) body.refreshToken = refreshToken;
-
+  onError: (err: Error) => void
+): UseMutationResult<AuthenticationResultType, Error, LoginParams, unknown> {
+  const login = async (p: LoginParams): Promise<AuthenticationResultType> => {
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(p),
     });
 
     switch (response.status) {
@@ -187,6 +157,9 @@ export function useLogin(
         return Promise.resolve(data);
       case 400:
         let err: string = await response.text();
+        if (err.includes("not confirmed")) {
+          return Promise.reject(new NotConfirmedException());
+        }
         return Promise.reject(new Error(err));
       case 500:
         return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
@@ -196,30 +169,24 @@ export function useLogin(
   };
 
   return useMutation({
-    mutationFn: (v: {
-      email: string;
-      password: string;
-      refreshToken?: string;
-    }) => login(v.email, v.password, v.refreshToken),
+    mutationFn: (v: LoginParams) => login(v),
     onSuccess: onSuccess,
     onError: onError,
   });
 }
 
-interface PasswordParams {
+interface InitPasswordResetParams {
   email: string;
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
 }
-
-export const initiatePasswordReset = ({
-  email,
-  onSuccess,
-  onError,
-}: PasswordParams) => {
-  const reset = async (): Promise<any> => {
-    const response = await fetch(getAuthApiUrlForResetPassword(email), {
-      method: "GET",
+export function initiatePasswordReset(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<void, Error, InitPasswordResetParams, unknown> {
+  async function reset(p: InitPasswordResetParams): Promise<void> {
+    const url: URL = new URL(API_URLS.PASSWORD);
+    url.searchParams.append("email", p.email);
+    const response = await fetch(url, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -227,7 +194,7 @@ export const initiatePasswordReset = ({
 
     switch (response.status) {
       case 200:
-        return Promise.resolve(200);
+        return Promise.resolve();
       case 400:
       case 404:
         const err: string = await response.text();
@@ -238,55 +205,37 @@ export const initiatePasswordReset = ({
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
+  }
 
-  return useMutation(reset, {
-    onSuccess,
-    onError,
+  return useMutation({
+    mutationFn: (p: InitPasswordResetParams) => reset(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
   });
-};
+}
 
 interface ConfirmPasswordResetParams {
   email: string;
-  verificationCode: string;
-  newPassword: string;
-  idToken: string;
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
+  code: string;
+  password: string;
 }
-
-export const confirmPasswordReset = ({
-  email,
-  verificationCode,
-  newPassword,
-  idToken,
-  onSuccess,
-  onError,
-}: ConfirmPasswordResetParams) => {
-  const confirm = async (): Promise<any> => {
-    newPassword = newPassword.trim();
-    const pErrs: string[] = validatePassword(newPassword);
-    if (pErrs.length != 0) {
-      return Promise.reject(new InvalidPasswordException(pErrs));
-    }
-
+export function confirmPasswordReset(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}) {
+  async function confirm(p: ConfirmPasswordResetParams): Promise<void> {
     const response = await fetch(API_URLS.PASSWORD, {
-      method: "POST",
+      method: "PUT",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
       },
-      body: JSON.stringify({
-        email,
-        code: verificationCode,
-        password: newPassword,
-      }),
+      body: JSON.stringify(p),
     });
 
     switch (response.status) {
       case 200:
-        return Promise.resolve(200);
+        return Promise.resolve();
       case 400:
         let err: string = await response.text();
         return Promise.reject(new Error(err));
@@ -296,10 +245,11 @@ export const confirmPasswordReset = ({
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
+  }
 
-  return useMutation(confirm, {
-    onSuccess,
-    onError,
+  return useMutation({
+    mutationFn: (p: ConfirmPasswordResetParams) => confirm(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
   });
-};
+}

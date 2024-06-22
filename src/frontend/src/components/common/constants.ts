@@ -53,6 +53,7 @@ export const INFO_MESSAGES = {
 
 export const ROUTES = {
   LOGIN: "/",
+  SIGNUP: "/signUp",
   RESET_PASSWORD: "/resetPassword",
   DASHBOARD: "/dashboard",
 };
