@@ -1,11 +1,5 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  UseQueryResult,
-} from "react-query";
-import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
+import { useMutation, UseMutationResult } from "react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
 interface SignUpResponse {
@@ -101,14 +95,15 @@ export function useConfirmAccount(p: {
 
 interface SendConfirmationCodeParams {
   email: string;
+}
+export function useSendSignUpConfirmationCode(p: {
   onSuccess: () => void;
   onError: (err: Error) => void;
-}
-export function useSendSignUpConfirmationCode(
-  p: SendConfirmationCodeParams
-): UseQueryResult<void, Error> {
-  async function getConfirmationCode(): Promise<void> {
-    const url = new URL(API_URLS.VERIFY);
+}): UseMutationResult<void, Error, SendConfirmationCodeParams, unknown> {
+  async function getConfirmationCode(
+    p: SendConfirmationCodeParams
+  ): Promise<void> {
+    const url: URL = new URL(API_URLS.VERIFY);
     url.searchParams.append("email", p.email);
     const response = await fetch(url.toString(), {
       method: "GET",
@@ -131,10 +126,8 @@ export function useSendSignUpConfirmationCode(
     }
   }
 
-  return useQuery({
-    queryKey: ["SendSignUpConfirmationCode"],
-    queryFn: getConfirmationCode,
-    enabled: false,
+  return useMutation({
+    mutationFn: (p: SendConfirmationCodeParams) => getConfirmationCode(p),
     onSuccess: p.onSuccess,
     onError: p.onError,
   });
@@ -182,19 +175,17 @@ export function useLogin(
   });
 }
 
-interface PasswordParams {
+interface InitPasswordResetParams {
   email: string;
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
 }
-
-export const initiatePasswordReset = ({
-  email,
-  onSuccess,
-  onError,
-}: PasswordParams) => {
-  const reset = async (): Promise<any> => {
-    const response = await fetch(getAuthApiUrlForResetPassword(email), {
+export function initiatePasswordReset(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<void, Error, InitPasswordResetParams, unknown> {
+  async function reset(p: InitPasswordResetParams): Promise<void> {
+    const url: URL = new URL(API_URLS.PASSWORD);
+    url.searchParams.append("email", p.email);
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -203,7 +194,7 @@ export const initiatePasswordReset = ({
 
     switch (response.status) {
       case 200:
-        return Promise.resolve(200);
+        return Promise.resolve();
       case 400:
       case 404:
         const err: string = await response.text();
@@ -214,49 +205,37 @@ export const initiatePasswordReset = ({
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
+  }
 
-  return useMutation(reset, {
-    onSuccess,
-    onError,
+  return useMutation({
+    mutationFn: (p: InitPasswordResetParams) => reset(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
   });
-};
+}
 
 interface ConfirmPasswordResetParams {
   email: string;
-  verificationCode: string;
-  newPassword: string;
-  idToken: string;
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
+  code: string;
+  password: string;
 }
-
-export const confirmPasswordReset = ({
-  email,
-  verificationCode,
-  newPassword,
-  idToken,
-  onSuccess,
-  onError,
-}: ConfirmPasswordResetParams) => {
-  const confirm = async (): Promise<any> => {
+export function confirmPasswordReset(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}) {
+  async function confirm(p: ConfirmPasswordResetParams): Promise<void> {
     const response = await fetch(API_URLS.PASSWORD, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
       },
-      body: JSON.stringify({
-        email,
-        code: verificationCode,
-        password: newPassword,
-      }),
+      body: JSON.stringify(p),
     });
 
     switch (response.status) {
       case 200:
-        return Promise.resolve(200);
+        return Promise.resolve();
       case 400:
         let err: string = await response.text();
         return Promise.reject(new Error(err));
@@ -266,10 +245,11 @@ export const confirmPasswordReset = ({
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
+  }
 
-  return useMutation(confirm, {
-    onSuccess,
-    onError,
+  return useMutation({
+    mutationFn: (p: ConfirmPasswordResetParams) => confirm(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
   });
-};
+}

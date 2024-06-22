@@ -10,13 +10,13 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
+import { AccountSecurityWidget } from "../AccountSecurityWidget";
 import { Confirmation } from "../Confirmation/Confirmation";
 import {
   useConfirmAccount,
   useSendSignUpConfirmationCode,
   useSignUp,
 } from "../helpers/authentication";
-import { SignUpWidget } from "./SignUpWidget";
 
 const passwordValidation = new RegExp(
   /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]).{8,}$/
@@ -55,10 +55,6 @@ function SignUpController(): JSX.Element {
   const { setAlert } = useAlert();
   const navigate = useNavigate();
 
-  function onShowPassword(): void {
-    setShowPassword(!showPassword);
-  }
-
   const { mutateAsync: doSignUp } = useSignUp({
     onSuccess: (data) => {
       setIsLoading(false);
@@ -72,22 +68,22 @@ function SignUpController(): JSX.Element {
 
   const { mutateAsync: doConfirm } = useConfirmAccount({
     onSuccess: () => {
+      setIsLoading(false);
       setAlert({
         type: AlertType.SUCCESS,
         message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
       });
 
-      setIsLoading(false);
       navigate(ROUTES.DASHBOARD);
     },
     onError: (err: Error) => {
+      setIsLoading(false);
       setAlert({
         type: AlertType.ERROR,
         message: err.message,
       });
 
       console.error(err);
-      setIsLoading(false);
     },
   });
 
@@ -96,9 +92,8 @@ function SignUpController(): JSX.Element {
     await doConfirm({ email, code: confirmationCode.toString() });
   };
 
-  const { refetch: doSendSignUpConfirmationCode } =
+  const { mutateAsync: doSendSignUpConfirmationCode } =
     useSendSignUpConfirmationCode({
-      email,
       onSuccess: () => {
         setIsLoading(false);
         setAlert({
@@ -120,7 +115,7 @@ function SignUpController(): JSX.Element {
 
   const onResend = async () => {
     setIsLoading(true);
-    await doSendSignUpConfirmationCode();
+    await doSendSignUpConfirmationCode({ email });
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -134,17 +129,11 @@ function SignUpController(): JSX.Element {
 
   async function onSubmit(v: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    try {
-      await doSignUp({
-        email: v.email,
-        password: v.password,
-      });
-      setEmail(v.email);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    setEmail(v.email);
+    await doSignUp({
+      email: v.email,
+      password: v.password,
+    });
   }
 
   return (
@@ -158,14 +147,14 @@ function SignUpController(): JSX.Element {
           onCancel={() => setIsConfirming(false)}
         />
       ) : (
-        <SignUpWidget
+        <AccountSecurityWidget
           isLoading={isLoading}
           form={form}
           showPassword={showPassword}
-          onShowPassword={onShowPassword}
+          onShowPassword={() => setShowPassword(!showPassword)}
           onCancel={() => navigate(ROUTES.LOGIN)}
           onSubmit={onSubmit}
-          handleSubmit={form.handleSubmit}
+          submitButtonLabel="Sign Up"
         />
       )}
     </>

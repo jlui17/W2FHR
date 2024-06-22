@@ -9,26 +9,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
-import { UseFormHandleSubmit, UseFormReturn } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { AuthWidget } from "../AuthWidget";
-import { formSchema } from "./SignupController";
+import { AuthWidget } from "./AuthWidget";
+import { formSchema } from "./SignUp/SignUpController";
 
-export function SignUpWidget(p: {
+export function AccountSecurityWidget(p: {
   form: UseFormReturn<z.infer<typeof formSchema>, any, undefined>;
   showPassword: boolean;
   onShowPassword: () => void;
   isLoading: boolean;
   onCancel: () => void;
   onSubmit: (v: z.infer<typeof formSchema>) => void;
-  handleSubmit: UseFormHandleSubmit<z.infer<typeof formSchema>, undefined>;
+  submitButtonLabel: string;
+  type?: "signUp" | "reset";
 }): JSX.Element {
   return (
     <div className="flex h-screen w-screen place-items-center">
       <AuthWidget>
         <h1 className="mx-auto mb-4 inline-block text-2xl">Employee Portal</h1>
         <Form {...p.form}>
-          <form onSubmit={p.handleSubmit(p.onSubmit)}>
+          <form onSubmit={p.form.handleSubmit(p.onSubmit)}>
             <FormField
               control={p.form.control}
               name="email"
@@ -47,7 +48,9 @@ export function SignUpWidget(p: {
               name="password"
               render={({ field }) => (
                 <FormItem className="mb-4 mt-4">
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>
+                    {p.type === "reset" ? "New " : null}Password
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -105,7 +108,7 @@ export function SignUpWidget(p: {
                 disabled={p.isLoading}
                 type="submit"
               >
-                Sign Up
+                {p.submitButtonLabel}
               </Button>
               <Button
                 onClick={p.onCancel}
