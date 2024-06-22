@@ -1,5 +1,10 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation, UseMutationResult } from "react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  UseQueryResult,
+} from "react-query";
 import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
@@ -62,8 +67,8 @@ interface ConfirmAccountParams {
 }
 export function useConfirmAccount(p: {
   onSuccess: () => void;
-  onError: (err: unknown) => void;
-}): UseMutationResult<void, unknown, ConfirmAccountParams, unknown> {
+  onError: (err: Error) => void;
+}): UseMutationResult<void, Error, ConfirmAccountParams, unknown> {
   async function confirmAccount(p: ConfirmAccountParams): Promise<void> {
     const response = await fetch(API_URLS.VERIFY, {
       method: "POST",
@@ -96,55 +101,61 @@ export function useConfirmAccount(p: {
 
 interface SendConfirmationCodeParams {
   email: string;
+  onSuccess: () => void;
+  onError: (err: Error) => void;
 }
-export async function resendSignupVerificationCode(
+export function useSendSignUpConfirmationCode(
   p: SendConfirmationCodeParams
-): Promise<void> {
-  const url = new URL(API_URLS.VERIFY);
-  url.searchParams.append("email", p.email);
-  const response = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+): UseQueryResult<void, Error> {
+  async function getConfirmationCode(): Promise<void> {
+    const url = new URL(API_URLS.VERIFY);
+    url.searchParams.append("email", p.email);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  switch (response.status) {
-    case 200:
-      return Promise.resolve();
-    case 400:
-    case 404:
-      let err: string = await response.text();
-      return Promise.reject(new Error(err));
-    case 500:
-      return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
-    default:
-      return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+    switch (response.status) {
+      case 200:
+        return Promise.resolve();
+      case 400:
+      case 404:
+        let err: string = await response.text();
+        return Promise.reject(new Error(err));
+      case 500:
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+      default:
+        return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
+    }
   }
-}
 
+  return useQuery({
+    queryKey: ["SendSignUpConfirmationCode"],
+    queryFn: getConfirmationCode,
+    enabled: false,
+    onSuccess: p.onSuccess,
+    onError: p.onError,
+  });
+}
+export class NotConfirmedException extends Error {}
+interface LoginParams {
+  email: string;
+  password: string;
+  refreshToken?: string;
+}
 export function useLogin(
   onSuccess: (data: AuthenticationResultType) => void,
-  onError: (err: unknown) => void
-) {
-  const login = async (
-    email: string,
-    password: string,
-    refreshToken?: string
-  ): Promise<AuthenticationResultType> => {
-    const body: {
-      email: string;
-      password: string;
-      refreshToken?: string;
-    } = { email: email, password: password };
-    if (refreshToken != undefined) body.refreshToken = refreshToken;
-
+  onError: (err: Error) => void
+): UseMutationResult<AuthenticationResultType, Error, LoginParams, unknown> {
+  const login = async (p: LoginParams): Promise<AuthenticationResultType> => {
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(p),
     });
 
     switch (response.status) {
@@ -153,6 +164,9 @@ export function useLogin(
         return Promise.resolve(data);
       case 400:
         let err: string = await response.text();
+        if (err.includes("not confirmed")) {
+          return Promise.reject(new NotConfirmedException());
+        }
         return Promise.reject(new Error(err));
       case 500:
         return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
@@ -162,11 +176,7 @@ export function useLogin(
   };
 
   return useMutation({
-    mutationFn: (v: {
-      email: string;
-      password: string;
-      refreshToken?: string;
-    }) => login(v.email, v.password, v.refreshToken),
+    mutationFn: (v: LoginParams) => login(v),
     onSuccess: onSuccess,
     onError: onError,
   });

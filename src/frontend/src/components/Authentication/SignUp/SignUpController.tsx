@@ -1,5 +1,4 @@
 import {
-  ERROR_MESSAGES,
   INFO_MESSAGES,
   ROUTES,
   SUCCESS_MESSAGES,
@@ -13,8 +12,8 @@ import { z } from "zod";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
 import { Confirmation } from "../Confirmation/Confirmation";
 import {
-  resendSignupVerificationCode,
   useConfirmAccount,
+  useSendSignUpConfirmationCode,
   useSignUp,
 } from "../helpers/authentication";
 import { SignUpWidget } from "./SignUpWidget";
@@ -81,16 +80,10 @@ function SignUpController(): JSX.Element {
       setIsLoading(false);
       navigate(ROUTES.DASHBOARD);
     },
-    onError: (err: unknown) => {
-      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (err instanceof TypeError && err.message === "Failed to fetch") {
-        errorMessage = "You have inputted the wrong code";
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
+    onError: (err: Error) => {
       setAlert({
         type: AlertType.ERROR,
-        message: errorMessage,
+        message: err.message,
       });
 
       console.error(err);
@@ -100,38 +93,34 @@ function SignUpController(): JSX.Element {
 
   const onConfirm = async (confirmationCode: number) => {
     setIsLoading(true);
-    try {
-      await doConfirm({ email, code: confirmationCode.toString() });
-    } catch (e) {
-      console.error(e);
-      setIsLoading(false);
-    }
+    await doConfirm({ email, code: confirmationCode.toString() });
   };
+
+  const { refetch: doSendSignUpConfirmationCode } =
+    useSendSignUpConfirmationCode({
+      email,
+      onSuccess: () => {
+        setIsLoading(false);
+        setAlert({
+          type: AlertType.INFO,
+          message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
+        });
+      },
+      onError: (err: Error) => {
+        setIsLoading(false);
+        const errorAlert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: err.message,
+        };
+
+        console.error(err);
+        setAlert(errorAlert);
+      },
+    });
 
   const onResend = async () => {
     setIsLoading(true);
-    try {
-      await resendSignupVerificationCode({ email });
-      setAlert({
-        type: AlertType.INFO,
-        message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
-      });
-    } catch (err: any) {
-      const errorAlert: AlertInfo = {
-        type: AlertType.ERROR,
-        message: ERROR_MESSAGES.UNKNOWN_ERROR,
-      };
-      if (err.message == "LimitExceededException") {
-        errorAlert.message =
-          "Too many requests, Please wait. (Check your email for the code)";
-      } else if (err instanceof Error) {
-        errorAlert.message = err.message;
-      }
-
-      console.error(err);
-      setAlert(errorAlert);
-    }
-    setIsLoading(false);
+    await doSendSignUpConfirmationCode();
   };
 
   const form = useForm<z.infer<typeof formSchema>>({

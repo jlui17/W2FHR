@@ -5,9 +5,19 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
-import { AlertType, useAlert } from "../../common/Alerts";
-import { ERROR_MESSAGES, ROUTES } from "../../common/constants";
-import { useLogin } from "../helpers/authentication";
+import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
+import {
+  INFO_MESSAGES,
+  ROUTES,
+  SUCCESS_MESSAGES,
+} from "../../common/constants";
+import { Confirmation } from "../Confirmation/Confirmation";
+import {
+  NotConfirmedException,
+  useConfirmAccount,
+  useLogin,
+  useSendSignUpConfirmationCode,
+} from "../helpers/authentication";
 import { LoginWidget } from "./LoginWidget";
 
 const passwordValidation = new RegExp(
@@ -30,8 +40,10 @@ export const formSchema = z.object({
 });
 
 const LoginController = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
   const {
     saveAuthSession,
     isLoggedIn,
@@ -52,19 +64,74 @@ const LoginController = () => {
 
       navigate(ROUTES.DASHBOARD);
     },
-    (err: any) => {
-      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (err instanceof Error) {
-        errorMessage = err.message;
+    (err: Error) => {
+      setIsLoading(false);
+      if (err instanceof NotConfirmedException) {
+        setIsConfirming(true);
+        return;
       }
+
+      let errorMessage = err.message;
       setAlert({
         type: AlertType.ERROR,
         message: errorMessage,
       });
       console.error(err);
-      setIsLoading(false);
     }
   );
+
+  const { mutateAsync: doConfirm } = useConfirmAccount({
+    onSuccess: () => {
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
+      });
+
+      setIsLoading(false);
+      navigate(ROUTES.DASHBOARD);
+    },
+    onError: (err: Error) => {
+      setAlert({
+        type: AlertType.ERROR,
+        message: err.message,
+      });
+
+      console.error(err);
+      setIsLoading(false);
+    },
+  });
+
+  const onConfirm = async (confirmationCode: number) => {
+    setIsLoading(true);
+    await doConfirm({ email, code: confirmationCode.toString() });
+  };
+
+  const { refetch: doSendSignUpConfirmationCode } =
+    useSendSignUpConfirmationCode({
+      email,
+      onSuccess: () => {
+        setIsLoading(false);
+        setAlert({
+          type: AlertType.INFO,
+          message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
+        });
+      },
+      onError: (err: Error) => {
+        setIsLoading(false);
+        const errorAlert: AlertInfo = {
+          type: AlertType.ERROR,
+          message: err.message,
+        };
+
+        console.error(err);
+        setAlert(errorAlert);
+      },
+    });
+
+  const onResend = async () => {
+    setIsLoading(true);
+    await doSendSignUpConfirmationCode();
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,6 +146,7 @@ const LoginController = () => {
     setIsLoading(true);
     setStayLoggedInContext(v.stayLoggedIn);
     try {
+      setEmail(v.email);
       await login({
         email: v.email,
         password: v.password,
@@ -91,10 +159,7 @@ const LoginController = () => {
     }
   }
 
-  function onSignUp(): void {
-    navigate(ROUTES.SIGNUP);
-  }
-
+  // try auto loggin in
   useEffect(() => {
     const refreshToken = getAuthSession()?.RefreshToken;
     const canAutoLogin: boolean =
@@ -110,10 +175,19 @@ const LoginController = () => {
 
   return isLoggedIn() ? (
     <Navigate to={ROUTES.DASHBOARD} />
+  ) : isConfirming ? (
+    <Confirmation
+      enableResend={true}
+      onResend={onResend}
+      isLoading={isLoading}
+      onConfirm={onConfirm}
+      onCancel={() => setIsConfirming(false)}
+      resendOnMount={true}
+    />
   ) : (
     <LoginWidget
       isLoading={isLoading}
-      onSignup={onSignUp}
+      onSignup={() => navigate(ROUTES.SIGNUP)}
       resetPasswordRoute={ROUTES.RESET_PASSWORD}
       showPassword={showPassword}
       onShowPassword={() => setShowPassword(!showPassword)}
