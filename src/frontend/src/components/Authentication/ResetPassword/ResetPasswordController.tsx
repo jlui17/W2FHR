@@ -10,40 +10,15 @@ import {
   ROUTES,
   SUCCESS_MESSAGES,
 } from "../../common/constants";
-import { AccountSecurityWidget } from "../AccountSecurityWidget";
+import {
+  AccountSecurityFormSchema,
+  AccountSecurityWidget,
+} from "../AccountSecurityWidget";
 import { Confirmation } from "../Confirmation/Confirmation";
 import {
   confirmPasswordReset,
   initiatePasswordReset,
 } from "../helpers/authentication";
-
-const passwordValidation = new RegExp(
-  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]).{8,}$/
-);
-export const formSchema = z
-  .object({
-    email: z
-      .string()
-      .min(1, { message: "You must provide an email." })
-      .email("This is not a valid email."),
-    password: z
-      .string()
-      .min(8, { message: "Your password must be at least 8 characters." })
-      .regex(passwordValidation, {
-        message:
-          "Your password must have at least 1 lowercase, uppercase, special character, and number.",
-      }),
-    confirmPassword: z.string().min(8),
-  })
-  .superRefine(({ password, confirmPassword }, ctx) => {
-    if (password !== confirmPassword) {
-      ctx.addIssue({
-        code: "custom",
-        message: "The passwords do not match.",
-        path: ["confirmPassword"],
-      });
-    }
-  });
 
 const ResetPasswordController = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -95,8 +70,8 @@ const ResetPasswordController = () => {
     await confirmReset({ email, password, code: code.toString() });
   }
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof AccountSecurityFormSchema>>({
+    resolver: zodResolver(AccountSecurityFormSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -109,7 +84,7 @@ const ResetPasswordController = () => {
     await doInitReset({ email });
   }
 
-  async function onSubmit(v: z.infer<typeof formSchema>) {
+  async function onSubmit(v: z.infer<typeof AccountSecurityFormSchema>) {
     setEmail(v.email);
     setPassword(v.password);
     setIsConfirming(true);

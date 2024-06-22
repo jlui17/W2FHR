@@ -65,7 +65,7 @@ export function useConfirmAccount(p: {
 }): UseMutationResult<void, Error, ConfirmAccountParams, unknown> {
   async function confirmAccount(p: ConfirmAccountParams): Promise<void> {
     const response = await fetch(API_URLS.VERIFY, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -106,7 +106,7 @@ export function useSendSignUpConfirmationCode(p: {
     const url: URL = new URL(API_URLS.VERIFY);
     url.searchParams.append("email", p.email);
     const response = await fetch(url.toString(), {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -186,7 +186,7 @@ export function initiatePasswordReset(p: {
     const url: URL = new URL(API_URLS.PASSWORD);
     url.searchParams.append("email", p.email);
     const response = await fetch(url, {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -225,7 +225,7 @@ export function confirmPasswordReset(p: {
 }) {
   async function confirm(p: ConfirmPasswordResetParams): Promise<void> {
     const response = await fetch(API_URLS.PASSWORD, {
-      method: "POST",
+      method: "PUT",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",

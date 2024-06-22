@@ -1,3 +1,3 @@
-import { SignUp } from "./SignupController";
+import { SignUp } from "./SignUpController";
 
 export default SignUp;

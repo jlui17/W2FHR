@@ -20,7 +20,6 @@ import (
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch event.HTTPMethod {
-
 	case http.MethodGet:
 		switch event.Resource {
 		case "auth/employee/{email}":
@@ -48,6 +47,17 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 				Body:       employeeId,
 			}, nil
+		default:
+			return events.APIGatewayProxyResponse{
+				StatusCode: 501,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			}, nil
+		}
+
+	case http.MethodPost:
+		switch event.Resource {
+		case "/auth/employee":
+			return CreateEmployeeID.HandleRequest(ctx, event)
 		case "/auth/verify":
 			email := event.QueryStringParameters["email"]
 			if email == "" {
@@ -69,6 +79,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 				}, nil
 			}
 			return response, nil
+		case "/auth/login":
+			return LoginEmployee.HandleRequest(ctx, event)
 		case "/auth/password":
 			email := event.QueryStringParameters["email"]
 			if email == "" {
@@ -90,7 +102,6 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 				}, nil
 			}
 			return response, nil
-
 		default:
 			return events.APIGatewayProxyResponse{
 				StatusCode: 501,
@@ -98,14 +109,10 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			}, nil
 		}
 
-	case http.MethodPost:
+	case http.MethodPut:
 		switch event.Resource {
-		case "/auth/employee":
-			return CreateEmployeeID.HandleRequest(ctx, event)
 		case "/auth/verify":
 			return ConfirmEmployee.HandleRequest(ctx, event)
-		case "/auth/login":
-			return LoginEmployee.HandleRequest(ctx, event)
 		case "/auth/password":
 			return ConfirmResetPassword.HandleRequest(ctx, event)
 		default:
@@ -114,13 +121,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			}, nil
 		}
+
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: 501,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 		}, nil
 	}
-
 }
 
 func main() {

@@ -106,9 +106,8 @@ const LoginController = () => {
     await doConfirm({ email, code: confirmationCode.toString() });
   };
 
-  const { refetch: doSendSignUpConfirmationCode } =
+  const { mutateAsync: doSendSignUpConfirmationCode } =
     useSendSignUpConfirmationCode({
-      email,
       onSuccess: () => {
         setIsLoading(false);
         setAlert({
@@ -130,7 +129,7 @@ const LoginController = () => {
 
   const onResend = async () => {
     setIsLoading(true);
-    await doSendSignUpConfirmationCode();
+    await doSendSignUpConfirmationCode({ email });
   };
 
   const form = useForm<z.infer<typeof formSchema>>({

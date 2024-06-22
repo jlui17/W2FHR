@@ -12,15 +12,46 @@ import { Eye, EyeOff } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { AuthWidget } from "./AuthWidget";
-import { formSchema } from "./SignUp/SignUpController";
+
+const passwordValidation = new RegExp(
+  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]).{8,}$/
+);
+export const AccountSecurityFormSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, { message: "You must provide an email." })
+      .email("This is not a valid email."),
+    password: z
+      .string()
+      .min(8, { message: "Your password must be at least 8 characters." })
+      .regex(passwordValidation, {
+        message:
+          "Your password must have at least 1 lowercase, uppercase, special character, and number.",
+      }),
+    confirmPassword: z.string().min(8),
+  })
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "The passwords do not match.",
+        path: ["confirmPassword"],
+      });
+    }
+  });
 
 export function AccountSecurityWidget(p: {
-  form: UseFormReturn<z.infer<typeof formSchema>, any, undefined>;
+  form: UseFormReturn<
+    z.infer<typeof AccountSecurityFormSchema>,
+    any,
+    undefined
+  >;
   showPassword: boolean;
   onShowPassword: () => void;
   isLoading: boolean;
   onCancel: () => void;
-  onSubmit: (v: z.infer<typeof formSchema>) => void;
+  onSubmit: (v: z.infer<typeof AccountSecurityFormSchema>) => void;
   submitButtonLabel: string;
   type?: "signUp" | "reset";
 }): JSX.Element {
