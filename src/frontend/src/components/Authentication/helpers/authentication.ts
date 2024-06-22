@@ -1,5 +1,5 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation, UseMutationResult } from "react-query";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
 interface SignUpResponse {

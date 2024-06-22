@@ -4,9 +4,9 @@ import {
   SUCCESS_MESSAGES,
 } from "@/components/common/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
