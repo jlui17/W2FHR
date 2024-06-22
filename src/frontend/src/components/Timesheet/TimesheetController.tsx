@@ -1,5 +1,9 @@
+import {
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { useContext } from "react";
-import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES } from "../common/constants";
@@ -24,18 +28,20 @@ const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 const TimesheetController = (): JSX.Element => {
   const { getAuthSession } = useContext(AuthenticationContext);
-  const { isFetching, data } = useTimesheetData({
+  const { isFetching, data: userAvailability } = useTimesheetData({
     idToken: getAuthSession()?.IdToken || "",
     getUpcoming: false,
   });
 
-  if (!data) {
+  if (!userAvailability) {
     return (
       <TimesheetWidget isLoading={isFetching} timesheetData={EMPTY_DATA} />
     );
   }
 
-  return <TimesheetWidget isLoading={isFetching} timesheetData={data} />;
+  return (
+    <TimesheetWidget isLoading={isFetching} timesheetData={userAvailability} />
+  );
 };
 
 export const Timesheet = (): JSX.Element => {

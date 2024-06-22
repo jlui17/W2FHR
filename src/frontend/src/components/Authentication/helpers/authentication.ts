@@ -1,5 +1,5 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation, UseMutationResult } from "react-query";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
 interface SignUpResponse {
@@ -143,6 +143,9 @@ export function useLogin(
   onError: (err: Error) => void
 ): UseMutationResult<AuthenticationResultType, Error, LoginParams, unknown> {
   const login = async (p: LoginParams): Promise<AuthenticationResultType> => {
+    if (p.email !== "" && p.password !== "") {
+      delete p.refreshToken;
+    }
     const response = await fetch(API_URLS.LOGIN, {
       method: "POST",
       headers: {

@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getTimesheetApiUrlForEmployee } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGES } from "../../common/constants";
 import { TimesheetData } from "../TimesheetController";
@@ -39,5 +39,8 @@ export const useTimesheetData = ({
     }
   };
 
-  return useQuery("timesheetData" + getUpcoming, getTimesheetData);
+  return useQuery({
+    queryKey: ["timesheetData", getUpcoming],
+    queryFn: getTimesheetData,
+  });
 };

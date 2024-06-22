@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
@@ -20,22 +20,12 @@ import {
 } from "../helpers/authentication";
 import { LoginWidget } from "./LoginWidget";
 
-const passwordValidation = new RegExp(
-  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]).{8,}$/
-);
-
 export const formSchema = z.object({
   email: z
     .string()
     .min(1, { message: "You must provide an email." })
     .email("This is not a valid email."),
-  password: z
-    .string()
-    .min(8, { message: "Your password must be at least 8 characters." })
-    .regex(passwordValidation, {
-      message:
-        "Your password must have at least 1 lowercase, uppercase, special character, and number.",
-    }),
+  password: z.string(),
   stayLoggedIn: z.boolean(),
 });
 
@@ -48,6 +38,7 @@ const LoginController = () => {
     saveAuthSession,
     isLoggedIn,
     getAuthSession,
+    logout,
     stayLoggedIn: stayLoggedInContext,
     setStayLoggedIn: setStayLoggedInContext,
   } = useContext(AuthenticationContext);
@@ -70,7 +61,7 @@ const LoginController = () => {
         setIsConfirming(true);
         return;
       }
-
+      logout();
       let errorMessage = err.message;
       setAlert({
         type: AlertType.ERROR,
