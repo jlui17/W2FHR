@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormHandleSubmit, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { AuthWidget } from "../AuthWidget";
 import { formSchema } from "./SignupController";
@@ -19,13 +19,16 @@ export function SignUpWidget(p: {
   showPassword: boolean;
   onShowPassword: () => void;
   isLoading: boolean;
+  onCancel: () => void;
+  onSubmit: (v: z.infer<typeof formSchema>) => void;
+  handleSubmit: UseFormHandleSubmit<z.infer<typeof formSchema>, undefined>;
 }): JSX.Element {
   return (
     <div className="flex h-screen w-screen place-items-center">
       <AuthWidget>
         <h1 className="mx-auto mb-4 inline-block text-2xl">Employee Portal</h1>
         <Form {...p.form}>
-          <form>
+          <form onSubmit={p.handleSubmit(p.onSubmit)}>
             <FormField
               control={p.form.control}
               name="email"
@@ -104,7 +107,12 @@ export function SignUpWidget(p: {
               >
                 Sign Up
               </Button>
-              <Button className="ml-4 w-full" variant="secondary">
+              <Button
+                onClick={p.onCancel}
+                disabled={p.isLoading}
+                className="ml-4 w-full"
+                variant="secondary"
+              >
                 Cancel
               </Button>
             </div>

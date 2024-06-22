@@ -1,10 +1,22 @@
+import {
+  ERROR_MESSAGES,
+  INFO_MESSAGES,
+  ROUTES,
+  SUCCESS_MESSAGES,
+} from "@/components/common/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { AlertType, useAlert } from "../../common/Alerts";
-import { useSignUp } from "../helpers/authentication";
+import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
+import { Confirmation } from "../Confirmation/Confirmation";
+import {
+  resendSignupVerificationCode,
+  useConfirmAccount,
+  useSignUp,
+} from "../helpers/authentication";
 import { SignUpWidget } from "./SignUpWidget";
 
 const passwordValidation = new RegExp(
@@ -37,9 +49,12 @@ export const formSchema = z
   });
 
 function SignUpController(): JSX.Element {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
   const { setAlert } = useAlert();
+  const navigate = useNavigate();
 
   function onShowPassword(): void {
     setShowPassword(!showPassword);
@@ -47,17 +62,77 @@ function SignUpController(): JSX.Element {
 
   const { mutateAsync: doSignUp } = useSignUp({
     onSuccess: (data) => {
-      if (data.needsConfirmation) {
-        setIsLoading(false);
-      }
-    },
-    onError: (err: any) => {
       setIsLoading(false);
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to sign up";
-      setAlert({ type: AlertType.ERROR, message: errorMessage });
+      setIsConfirming(data.needsConfirmation);
+    },
+    onError: (err: Error) => {
+      setIsLoading(false);
+      setAlert({ type: AlertType.ERROR, message: err.message });
     },
   });
+
+  const { mutateAsync: doConfirm } = useConfirmAccount({
+    onSuccess: () => {
+      setAlert({
+        type: AlertType.SUCCESS,
+        message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
+      });
+
+      setIsLoading(false);
+      navigate(ROUTES.DASHBOARD);
+    },
+    onError: (err: unknown) => {
+      let errorMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        errorMessage = "You have inputted the wrong code";
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setAlert({
+        type: AlertType.ERROR,
+        message: errorMessage,
+      });
+
+      console.error(err);
+      setIsLoading(false);
+    },
+  });
+
+  const onConfirm = async (confirmationCode: number) => {
+    setIsLoading(true);
+    try {
+      await doConfirm({ email, code: confirmationCode.toString() });
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
+    }
+  };
+
+  const onResend = async () => {
+    setIsLoading(true);
+    try {
+      await resendSignupVerificationCode({ email });
+      setAlert({
+        type: AlertType.INFO,
+        message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
+      });
+    } catch (err: any) {
+      const errorAlert: AlertInfo = {
+        type: AlertType.ERROR,
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
+      };
+      if (err.message == "LimitExceededException") {
+        errorAlert.message =
+          "Too many requests, Please wait. (Check your email for the code)";
+      } else if (err instanceof Error) {
+        errorAlert.message = err.message;
+      }
+
+      console.error(err);
+      setAlert(errorAlert);
+    }
+    setIsLoading(false);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,13 +143,43 @@ function SignUpController(): JSX.Element {
     },
   });
 
+  async function onSubmit(v: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      await doSignUp({
+        email: v.email,
+        password: v.password,
+      });
+      setEmail(v.email);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
-    <SignUpWidget
-      isLoading={isLoading}
-      form={form}
-      showPassword={showPassword}
-      onShowPassword={onShowPassword}
-    />
+    <>
+      {isConfirming ? (
+        <Confirmation
+          isLoading={false}
+          enableResend={true}
+          onResend={onResend}
+          onConfirm={onConfirm}
+          onCancel={() => setIsConfirming(false)}
+        />
+      ) : (
+        <SignUpWidget
+          isLoading={isLoading}
+          form={form}
+          showPassword={showPassword}
+          onShowPassword={onShowPassword}
+          onCancel={() => navigate(ROUTES.LOGIN)}
+          onSubmit={onSubmit}
+          handleSubmit={form.handleSubmit}
+        />
+      )}
+    </>
   );
 }
 

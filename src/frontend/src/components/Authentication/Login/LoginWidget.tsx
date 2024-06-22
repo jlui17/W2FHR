@@ -14,17 +14,14 @@ import { UseFormHandleSubmit, UseFormReturn } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { AuthWidget } from "../AuthWidget";
-import { formSchema } from "./LoginSignupController";
+import { formSchema } from "./LoginController";
 
-export const LoginSignupWidget = (p: {
-  email: string;
-  password: string;
+export const LoginWidget = (p: {
   isLoading: boolean;
   onSignup: () => void;
   resetPasswordRoute: string;
   showPassword: boolean;
   onShowPassword: () => void;
-  canSubmit: boolean;
   form: UseFormReturn<z.infer<typeof formSchema>, any, undefined>;
   handleSubmit: UseFormHandleSubmit<z.infer<typeof formSchema>, undefined>;
   onSubmit: (v: z.infer<typeof formSchema>) => void;

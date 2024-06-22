@@ -1,70 +1,43 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import { useMutation } from "react-query";
+import { useMutation, UseMutationResult } from "react-query";
 import { getAuthApiUrlForResetPassword } from "../../common/ApiUrlUtil";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
-export class InvalidPasswordException extends Error {
-  constructor(missing: string[]) {
-    let message: string = "Your password is missing the following: ";
-    for (const m of missing) {
-      message += m + ", ";
-    }
-    super(message.slice(0, -1));
-  }
+interface SignUpResponse {
+  needsConfirmation: boolean;
+}
+function isSignUpResponse(data: unknown): data is SignUpResponse {
+  return data instanceof Object && "needsConfirmation" in data;
+}
+interface SignUpParams {
+  email: string;
+  password: string;
 }
 
-const hasLowercase: RegExp = /[a-z]/;
-const hasUppercase: RegExp = /[A-Z]/;
-const hasNumber: RegExp = /\d/;
-// Check for at least one special character from the specified list
-const hasSpecialChar: RegExp =
-  /[\^\$\*\.\[\]\{\}\(\)\?\-\"!@#%&\/\\,><\':;|\_~`\+=]/;
-function validatePassword(p: string): string[] {
-  const res: string[] = [];
-  if (!hasLowercase.test(p)) {
-    res.push("1 LOWERCASE letter");
-  }
-  if (!hasUppercase.test(p)) {
-    res.push("1 UPPERCASE letter");
-  }
-  if (!hasNumber.test(p)) {
-    res.push("1 NUMBER");
-  }
-  if (!hasSpecialChar.test(p)) {
-    res.push(
-      "1 of the following SPECIAL CHARACTERS: ^ $ * . [ ] { } ( ) ? - \" ! @ # % & /  , > < ' : ; | _ ~ ` + = ?"
-    );
-  }
-  if (p.length < 8) {
-    res.push("At least 8 characters long");
-  }
-  return res;
-}
-
-export const useSignUp = (p: {
-  onSuccess: (data: any) => void;
-  onError: (err: unknown) => void;
-}) => {
-  async function signUp(email: string, password: string): Promise<any> {
-    password = password.trim();
-    const pErrs: string[] = validatePassword(password);
-    if (pErrs.length != 0) {
-      return Promise.reject(new InvalidPasswordException(pErrs));
-    }
-
+export function useSignUp(p: {
+  onSuccess: (data: SignUpResponse) => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<SignUpResponse, Error, SignUpParams, unknown> {
+  async function signUp(p: SignUpParams): Promise<SignUpResponse> {
     const response: Response = await fetch(API_URLS.EMPLOYEE, {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
       mode: "cors",
-      body: JSON.stringify({ email: email, password: password }),
+      body: JSON.stringify(p),
     });
 
     switch (response.status) {
       case 201:
         const data = await response.json();
-        return Promise.resolve(data);
+        if (isSignUpResponse(data)) {
+          return Promise.resolve(data);
+        } else {
+          const errMsg: string = `Unexpected response: ${data}`;
+          console.error(errMsg);
+          Promise.reject(new Error("errMsg"));
+        }
       case 400:
       case 401:
       case 404:
@@ -77,33 +50,32 @@ export const useSignUp = (p: {
     }
   }
   return useMutation({
-    mutationFn: (p: { email: string; password: string }) =>
-      signUp(p.email, p.password),
+    mutationFn: (p: SignUpParams) => signUp(p),
     onSuccess: p.onSuccess,
     onError: p.onError,
   });
-};
+}
 
-interface ConfirmAccountParams {}
-
-export const useConfirmAccount = (p: {
-  onSuccess: (data: any) => void;
+interface ConfirmAccountParams {
+  email: string;
+  code: string;
+}
+export function useConfirmAccount(p: {
+  onSuccess: () => void;
   onError: (err: unknown) => void;
-}) => {
-  const confirmAccount = async (
-    email: string,
-    confirmationCode: string
-  ): Promise<any> => {
+}): UseMutationResult<void, unknown, ConfirmAccountParams, unknown> {
+  async function confirmAccount(p: ConfirmAccountParams): Promise<void> {
     const response = await fetch(API_URLS.VERIFY, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, code: confirmationCode }),
+      body: JSON.stringify(p),
     });
+
     switch (response.status) {
       case 200:
-        return Promise.resolve(200);
+        return Promise.resolve();
       case 400:
         let err: string = await response.text();
         return Promise.reject(new Error(err));
@@ -113,28 +85,23 @@ export const useConfirmAccount = (p: {
       default:
         return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
     }
-  };
+  }
 
-  return useMutation(
-    (p: { email: string; confirmationCode: string }) =>
-      confirmAccount(p.email, p.confirmationCode),
-    {
-      onSuccess: p.onSuccess,
-      onError: p.onError,
-    }
-  );
-};
-
-interface ConfirmAccountParams {
-  email: string;
-  idToken: string;
+  return useMutation({
+    mutationFn: (p: ConfirmAccountParams) => confirmAccount(p),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
+  });
 }
 
-export const resendSignupVerificationCode = async (
-  email: string
-): Promise<void> => {
+interface SendConfirmationCodeParams {
+  email: string;
+}
+export async function resendSignupVerificationCode(
+  p: SendConfirmationCodeParams
+): Promise<void> {
   const url = new URL(API_URLS.VERIFY);
-  url.searchParams.append("email", email);
+  url.searchParams.append("email", p.email);
   const response = await fetch(url.toString(), {
     method: "GET",
     headers: {
@@ -144,7 +111,7 @@ export const resendSignupVerificationCode = async (
 
   switch (response.status) {
     case 200:
-      return;
+      return Promise.resolve();
     case 400:
     case 404:
       let err: string = await response.text();
@@ -154,7 +121,7 @@ export const resendSignupVerificationCode = async (
     default:
       return Promise.reject(new Error(ERROR_MESSAGES.UNKNOWN_ERROR));
   }
-};
+}
 
 export function useLogin(
   onSuccess: (data: AuthenticationResultType) => void,
@@ -263,12 +230,6 @@ export const confirmPasswordReset = ({
   onError,
 }: ConfirmPasswordResetParams) => {
   const confirm = async (): Promise<any> => {
-    newPassword = newPassword.trim();
-    const pErrs: string[] = validatePassword(newPassword);
-    if (pErrs.length != 0) {
-      return Promise.reject(new InvalidPasswordException(pErrs));
-    }
-
     const response = await fetch(API_URLS.PASSWORD, {
       method: "POST",
       mode: "cors",
