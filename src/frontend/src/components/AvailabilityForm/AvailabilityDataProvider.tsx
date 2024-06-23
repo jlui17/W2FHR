@@ -7,7 +7,7 @@ import { useContext } from "react";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
-import { AvailabilityForm } from "./AvailabilityForm";
+import { AvailabilityForm, AvailabilityLoading } from "./AvailabilityForm";
 import {
   UserAvailability,
   useUpdateAvailability,
@@ -51,17 +51,31 @@ function AvailabilityDataProvider(): JSX.Element {
       },
     });
 
-  function getFormData() {
-    const res: string[] = [];
+  function doUpdate(days: string[] | undefined): void {
+    const newAvailability: UserAvailability = {
+      day1: {
+        isAvailable: days?.includes("day1") || false,
+        date: "",
+      },
+      day2: {
+        isAvailable: days?.includes("day2") || false,
+        date: "",
+      },
+      day3: {
+        isAvailable: days?.includes("day3") || false,
+        date: "",
+      },
+      day4: {
+        isAvailable: days?.includes("day4") || false,
+        date: "",
+      },
+      canUpdate: true,
+    };
 
-    if (!isPending && data !== undefined) {
-      if (data.day1.isAvailable) res.push("day1");
-      if (data.day2.isAvailable) res.push("day2");
-      if (data.day3.isAvailable) res.push("day3");
-      if (data.day4.isAvailable) res.push("day4");
-    }
-
-    return res;
+    updateAvailability({
+      availabilityData: newAvailability,
+      idToken: getAuthSession()?.IdToken || "",
+    });
   }
 
   if (isError) {
@@ -76,11 +90,15 @@ function AvailabilityDataProvider(): JSX.Element {
     setAlert(errorAlert);
   }
 
+  if (isPending) {
+    return <AvailabilityLoading />;
+  }
+
   return (
     <AvailabilityForm
-      isLoading={isPending || updateIsPending}
+      isLoading={updateIsPending}
       availability={data || defaultAvailability}
-      formData={getFormData()}
+      updateAvailability={doUpdate}
     />
   );
 }

@@ -10,23 +10,50 @@ import { z } from "zod";
 import { UserAvailability } from "./helpers/hooks";
 
 const AvailabilitySchema = z.object({
-  days: z.array(z.string()).refine((v) => v.some((d) => d)),
+  days: z.array(z.string()).optional(),
 });
+
+export function AvailabilityLoading() {
+  return (
+    <Card className="w-[275px]">
+      <CardHeader>
+        <CardTitle className="m-auto">Availability</CardTitle>
+      </CardHeader>
+      <CardContent className="flex items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin" />
+      </CardContent>
+    </Card>
+  );
+}
 
 export const AvailabilityForm = (p: {
   isLoading: boolean;
   availability: UserAvailability;
-  formData: string[];
+  updateAvailability: (days: string[] | undefined) => void;
 }): JSX.Element => {
   const form = useForm<z.infer<typeof AvailabilitySchema>>({
     resolver: zodResolver(AvailabilitySchema),
     defaultValues: {
-      days: p.formData,
+      days: getFormData(),
     },
   });
 
+  function getFormData() {
+    const res: string[] = [];
+
+    if (!p.isLoading && p.availability !== undefined) {
+      if (p.availability.day1.isAvailable) res.push("day1");
+      if (p.availability.day2.isAvailable) res.push("day2");
+      if (p.availability.day3.isAvailable) res.push("day3");
+      if (p.availability.day4.isAvailable) res.push("day4");
+    }
+
+    return res;
+  }
+
   async function onSubmit(v: z.infer<typeof AvailabilitySchema>) {
     console.log(v);
+    p.updateAvailability(v.days);
   }
 
   const items: { id: string; date: string }[] = [
@@ -55,7 +82,9 @@ export const AvailabilityForm = (p: {
                         checked={field.value?.includes(d.id)}
                         onCheckedChange={(checked) => {
                           return checked
-                            ? field.onChange([...field.value, d.id])
+                            ? field.onChange(
+                                field.value ? [...field.value, d.id] : [d.id]
+                              )
                             : field.onChange(
                                 field.value?.filter((value) => value !== d.id)
                               );
@@ -78,26 +107,24 @@ export const AvailabilityForm = (p: {
   }
 
   return (
-    <Card className="w-[275px]">
-      <CardHeader>
-        <CardTitle className="m-auto">Availability</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            {getAvailabilityBoxes()}
-          </form>
-        </Form>
-      </CardContent>
-      <CardFooter>
-        <Button className="m-auto" type="submit" disabled={p.isLoading}>
-          {p.isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Update"
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Card className="w-[275px]">
+          <CardHeader>
+            <CardTitle className="m-auto">Availability</CardTitle>
+          </CardHeader>
+          <CardContent>{getAvailabilityBoxes()}</CardContent>
+          <CardFooter>
+            <Button className="m-auto" type="submit" disabled={p.isLoading}>
+              {p.isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Update"
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </Form>
   );
 };
