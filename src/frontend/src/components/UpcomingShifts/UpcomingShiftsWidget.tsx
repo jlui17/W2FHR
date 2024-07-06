@@ -37,9 +37,6 @@ export const UpcomingShiftsWidget = ({
               <p className="text-sm text-gray-600">
                 Net Hours: {shift.netHours}
               </p>
-              {/* {i + 1 !== upcomingShiftsData.shifts.length ? ( */}
-              {/* <Divider className="my-2" /> */}
-              {/* ) : null} */}
             </div>
           );
         })}

@@ -7,18 +7,11 @@ const isTimesheetData = (data: any): data is TimesheetData => {
   return "shifts" in data;
 };
 
-interface UseTimesheetDataProps {
-  idToken: string;
-  getUpcoming: boolean;
-}
-export const useTimesheetData = ({
-  idToken,
-  getUpcoming,
-}: UseTimesheetDataProps) => {
+export function useTimesheetData(p: { idToken: string; getUpcoming: boolean }) {
   const getTimesheetData = async (): Promise<TimesheetData> => {
-    const response = await fetch(getTimesheetApiUrlForEmployee(getUpcoming), {
+    const response = await fetch(getTimesheetApiUrlForEmployee(p.getUpcoming), {
       headers: {
-        Authorization: `Bearer ${idToken}`,
+        Authorization: `Bearer ${p.idToken}`,
       },
       mode: "cors",
     });
@@ -40,7 +33,8 @@ export const useTimesheetData = ({
   };
 
   return useQuery({
-    queryKey: ["timesheetData", getUpcoming],
+    queryKey: ["timesheetData", p.getUpcoming],
     queryFn: getTimesheetData,
+    enabled: p.getUpcoming,
   });
-};
+}

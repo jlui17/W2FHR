@@ -3,11 +3,10 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES } from "../common/constants";
-import ExpandableCard from "../common/ExpandableCard";
 import { useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
 
@@ -27,20 +26,53 @@ export interface TimesheetData {
 const EMPTY_DATA: TimesheetData = { shifts: [] };
 
 const TimesheetController = (): JSX.Element => {
+  const [open, setOpen] = useState<boolean>(false);
   const { getAuthSession } = useContext(AuthenticationContext);
-  const { isFetching, data: userAvailability } = useTimesheetData({
+  const {
+    refetch,
+    isFetching,
+    data: userAvailability,
+  } = useTimesheetData({
     idToken: getAuthSession()?.IdToken || "",
     getUpcoming: false,
   });
 
+  function onOpenChange(): void {
+    if (!open && userAvailability === undefined) {
+      refetch();
+    }
+    setOpen(!open);
+  }
+
+  if (!open) {
+    return (
+      <TimesheetWidget
+        isLoading={false}
+        timesheetData={EMPTY_DATA}
+        open={open}
+        onOpenChange={onOpenChange}
+      />
+    );
+  }
+
   if (!userAvailability) {
     return (
-      <TimesheetWidget isLoading={isFetching} timesheetData={EMPTY_DATA} />
+      <TimesheetWidget
+        isLoading={isFetching}
+        timesheetData={EMPTY_DATA}
+        open={open}
+        onOpenChange={onOpenChange}
+      />
     );
   }
 
   return (
-    <TimesheetWidget isLoading={isFetching} timesheetData={userAvailability} />
+    <TimesheetWidget
+      isLoading={isFetching}
+      timesheetData={EMPTY_DATA}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
   );
 };
 
@@ -64,12 +96,7 @@ export const Timesheet = (): JSX.Element => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ExpandableCard
-        className="my-6 flex w-72 flex-col items-center justify-center"
-        headerTitle="Shift History"
-      >
-        <TimesheetController />
-      </ExpandableCard>
+      <TimesheetController />
     </QueryClientProvider>
   );
 };
