@@ -70,36 +70,38 @@ export const AvailabilityForm = (p: {
         name="days"
         render={() => (
           <FormItem>
-            {items.map((d) => (
-              <FormField
-                key={d.id}
-                control={form.control}
-                name="days"
-                render={({ field }) => (
-                  <FormItem key={d.id}>
-                    <FormControl className="mb-5 flex flex-row items-center">
-                      <Checkbox
-                        checked={field.value?.includes(d.id)}
-                        onCheckedChange={(checked) => {
-                          return checked
-                            ? field.onChange(
-                                field.value ? [...field.value, d.id] : [d.id]
-                              )
-                            : field.onChange(
-                                field.value?.filter((value) => value !== d.id)
-                              );
-                        }}
-                        id={"check" + d.id}
-                        disabled={p.isLoading}
-                      />
-                      <FormLabel htmlFor={"check" + d.id} className="ml-2">
-                        {d.date}
-                      </FormLabel>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            ))}
+            {items.map((d) =>
+              d.date === "" ? null : (
+                <FormField
+                  key={d.id}
+                  control={form.control}
+                  name="days"
+                  render={({ field }) => (
+                    <FormItem key={d.id}>
+                      <FormControl className="mb-5 flex flex-row items-center">
+                        <Checkbox
+                          checked={field.value?.includes(d.id)}
+                          onCheckedChange={(checked) => {
+                            return checked
+                              ? field.onChange(
+                                  field.value ? [...field.value, d.id] : [d.id]
+                                )
+                              : field.onChange(
+                                  field.value?.filter((value) => value !== d.id)
+                                );
+                          }}
+                          id={"check" + d.id}
+                          disabled={p.isLoading}
+                        />
+                        <FormLabel htmlFor={"check" + d.id} className="ml-2">
+                          {d.date}
+                        </FormLabel>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )
+            )}
           </FormItem>
         )}
       />
