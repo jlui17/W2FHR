@@ -97,7 +97,10 @@ export const AvailabilityForm = (p: {
                           id={"check" + d.id}
                           disabled={p.isLoading}
                         />
-                        <FormLabel htmlFor={"check" + d.id} className="ml-2">
+                        <FormLabel
+                          htmlFor={"check" + d.id}
+                          className="text-md ml-2"
+                        >
                           {d.date}
                         </FormLabel>
                       </FormControl>
@@ -115,7 +118,7 @@ export const AvailabilityForm = (p: {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card className="w-[275px]">
+        <Card>
           <CardHeader>
             <CardTitle className="m-auto">Availability</CardTitle>
           </CardHeader>

@@ -1,10 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  Typography,
-} from "@mui/material";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { Shift, TimesheetData } from "../Timesheet/TimesheetController";
 
 interface UpcomingShiftsWidgetProps {
@@ -18,7 +13,7 @@ export const UpcomingShiftsWidget = ({
 }: UpcomingShiftsWidgetProps): JSX.Element => {
   const hasNoUpcomingShifts = upcomingShiftsData.shifts.length === 0;
 
-  const displayNoUpcomingShifts = () => {
+  const noUpcomingShifts = () => {
     return (
       <div className="mt-2 flex flex-col items-center justify-center">
         <p className="text-sm text-gray-600">You have no upcoming shifts</p>
@@ -26,12 +21,12 @@ export const UpcomingShiftsWidget = ({
     );
   };
 
-  const displayUpcomingShifts = () => {
+  const upcomingShifts = () => {
     return (
       <div className="mt-2 flex flex-col">
         {upcomingShiftsData.shifts.map((shift: Shift, i: number) => {
           return (
-            <div className="flex flex-col" key={i}>
+            <div className="flex flex-col mb-6" key={i}>
               <p className="text-md">{shift.date}</p>
               <p className="text-sm">{shift.shiftTitle}</p>
               <p className="text-sm text-gray-600">Start: {shift.startTime}</p>
@@ -39,10 +34,12 @@ export const UpcomingShiftsWidget = ({
               <p className="text-sm text-gray-600">
                 Break Duration: {shift.breakDuration}
               </p>
-              <p className="text-sm text-gray-600">Net Hours: {shift.netHours}</p>
-              {i + 1 !== upcomingShiftsData.shifts.length ? (
-                <Divider className="my-2" />
-              ) : null}
+              <p className="text-sm text-gray-600">
+                Net Hours: {shift.netHours}
+              </p>
+              {/* {i + 1 !== upcomingShiftsData.shifts.length ? ( */}
+              {/* <Divider className="my-2" /> */}
+              {/* ) : null} */}
             </div>
           );
         })}
@@ -51,18 +48,18 @@ export const UpcomingShiftsWidget = ({
   };
 
   return (
-    <Card className="mt-6 w-80 md:mt-0">
+    <Card>
+      <CardHeader>
+        <CardTitle className="m-auto">Upcoming Shifts</CardTitle>
+      </CardHeader>
       <CardContent>
-        <>
-          <Typography className="text-lg font-bold">Upcoming Shifts</Typography>
-          {isLoading ? (
-            <CircularProgress />
-          ) : hasNoUpcomingShifts ? (
-            displayNoUpcomingShifts()
-          ) : (
-            displayUpcomingShifts()
-          )}
-        </>
+        {isLoading ? (
+          <Loader2 className="m-auto h-16 w-16 animate-spin" />
+        ) : hasNoUpcomingShifts ? (
+          noUpcomingShifts()
+        ) : (
+          upcomingShifts()
+        )}
       </CardContent>
     </Card>
   );
