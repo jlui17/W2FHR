@@ -7,7 +7,7 @@ import { useContext } from "react";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
-import { AvailabilityForm, AvailabilityLoading } from "./AvailabilityForm";
+import { AvailabilityForm } from "./AvailabilityForm";
 import {
   UserAvailability,
   useUpdateAvailability,
@@ -22,7 +22,7 @@ const defaultAvailability: UserAvailability = {
   day4: { isAvailable: false, date: "" },
 };
 
-function AvailabilityDataProvider(): JSX.Element {
+function AvailabilityController(): JSX.Element {
   const { setAlert } = useAlert();
   const { getAuthSession } = useContext(AuthenticationContext);
 
@@ -90,13 +90,9 @@ function AvailabilityDataProvider(): JSX.Element {
     setAlert(errorAlert);
   }
 
-  if (isPending) {
-    return <AvailabilityLoading />;
-  }
-
   return (
     <AvailabilityForm
-      isLoading={updateIsPending}
+      isLoading={isPending || updateIsPending}
       availability={data || defaultAvailability}
       updateAvailability={doUpdate}
     />
@@ -123,7 +119,7 @@ export const Availability = (): JSX.Element => {
   });
   return (
     <QueryClientProvider client={queryClient}>
-      <AvailabilityDataProvider />
+      <AvailabilityController />
     </QueryClientProvider>
   );
 };

@@ -13,7 +13,7 @@ const AvailabilitySchema = z.object({
   days: z.array(z.string()).optional(),
 });
 
-export function AvailabilityLoading() {
+function Loading() {
   return (
     <Card className="w-[275px]">
       <CardHeader>
@@ -31,6 +31,10 @@ export const AvailabilityForm = (p: {
   availability: UserAvailability;
   updateAvailability: (days: string[] | undefined) => void;
 }): JSX.Element => {
+  if (p.isLoading) {
+    return <Loading />;
+  }
+
   const form = useForm<z.infer<typeof AvailabilitySchema>>({
     resolver: zodResolver(AvailabilitySchema),
     defaultValues: {
@@ -63,7 +67,7 @@ export const AvailabilityForm = (p: {
     { id: "day4", date: p.availability.day4.date },
   ];
 
-  function getAvailabilityBoxes(): JSX.Element {
+  function checkboxes(): JSX.Element {
     return (
       <FormField
         control={form.control}
@@ -115,7 +119,7 @@ export const AvailabilityForm = (p: {
           <CardHeader>
             <CardTitle className="m-auto">Availability</CardTitle>
           </CardHeader>
-          <CardContent>{getAvailabilityBoxes()}</CardContent>
+          <CardContent>{checkboxes()}</CardContent>
           <CardFooter>
             <Button className="m-auto" type="submit" disabled={p.isLoading}>
               {p.isLoading ? (

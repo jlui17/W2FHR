@@ -1,3 +1,3 @@
-import { Availability } from "./AvailabilityDataProvider";
+import { Availability } from "./AvailabilityController";
 
 export default Availability;
