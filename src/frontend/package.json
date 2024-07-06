@@ -8,7 +8,6 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "tsc && vite build",
-    "deploy": "cd ../..; yarn deploy; cd src/frontend",
     "preview": "vite preview"
   },
   "dependencies": {
