@@ -1,5 +1,4 @@
-import { AppBar, Button, Toolbar } from "@mui/material";
-import { Container } from "@mui/system";
+import { AppBar, Button, Container, Toolbar } from "@mui/material";
 
 interface HeaderWidgetProps {
   onLogout: () => void;

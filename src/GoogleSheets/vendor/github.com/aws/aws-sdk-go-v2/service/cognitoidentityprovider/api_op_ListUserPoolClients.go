@@ -11,13 +11,21 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Lists the clients that have been created for the specified user pool. Amazon
-// Cognito evaluates Identity and Access Management (IAM) policies in requests for
-// this API operation. For this operation, you must use IAM credentials to
-// authorize requests, and you must grant yourself the corresponding IAM permission
-// in a policy. Learn more
-//   - Signing Amazon Web Services API Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html)
-//   - Using the Amazon Cognito user pools API and user pool endpoints (https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html)
+// Lists the clients that have been created for the specified user pool.
+//
+// Amazon Cognito evaluates Identity and Access Management (IAM) policies in
+// requests for this API operation. For this operation, you must use IAM
+// credentials to authorize requests, and you must grant yourself the corresponding
+// IAM permission in a policy.
+//
+// # Learn more
+//
+// [Signing Amazon Web Services API Requests]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html
+// [Signing Amazon Web Services API Requests]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
 func (c *Client) ListUserPoolClients(ctx context.Context, params *ListUserPoolClientsInput, optFns ...func(*Options)) (*ListUserPoolClientsOutput, error) {
 	if params == nil {
 		params = &ListUserPoolClientsInput{}
@@ -123,6 +131,12 @@ func (c *Client) addOperationListUserPoolClientsMiddlewares(stack *middleware.St
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = addOpListUserPoolClientsValidationMiddleware(stack); err != nil {
 		return err
 	}
@@ -146,14 +160,6 @@ func (c *Client) addOperationListUserPoolClientsMiddlewares(stack *middleware.St
 	}
 	return nil
 }
-
-// ListUserPoolClientsAPIClient is a client that implements the
-// ListUserPoolClients operation.
-type ListUserPoolClientsAPIClient interface {
-	ListUserPoolClients(context.Context, *ListUserPoolClientsInput, ...func(*Options)) (*ListUserPoolClientsOutput, error)
-}
-
-var _ ListUserPoolClientsAPIClient = (*Client)(nil)
 
 // ListUserPoolClientsPaginatorOptions is the paginator options for
 // ListUserPoolClients
@@ -220,6 +226,9 @@ func (p *ListUserPoolClientsPaginator) NextPage(ctx context.Context, optFns ...f
 	}
 	params.MaxResults = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.ListUserPoolClients(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -238,6 +247,14 @@ func (p *ListUserPoolClientsPaginator) NextPage(ctx context.Context, optFns ...f
 
 	return result, nil
 }
+
+// ListUserPoolClientsAPIClient is a client that implements the
+// ListUserPoolClients operation.
+type ListUserPoolClientsAPIClient interface {
+	ListUserPoolClients(context.Context, *ListUserPoolClientsInput, ...func(*Options)) (*ListUserPoolClientsOutput, error)
+}
+
+var _ ListUserPoolClientsAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opListUserPoolClients(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{

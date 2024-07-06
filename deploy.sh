@@ -18,6 +18,11 @@ if containsElement "FrontendService" "${args[@]}" || containsElement "--all" "${
   cd src/frontend && yarn build && cd ../..
 fi
 
+if containsElement "ApiService" "${args[@]}"; then
+  echo "Deploying ApiService..."
+  yarn test:GoogleSheets
+fi
+
 # Proceed with TypeScript compilation and CDK deploy
 # Note: Adjust the cdk deploy command as needed to include all services or based on passed arguments
 tsc
