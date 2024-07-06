@@ -11,12 +11,21 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Lists the groups that a user belongs to. Amazon Cognito evaluates Identity and
-// Access Management (IAM) policies in requests for this API operation. For this
-// operation, you must use IAM credentials to authorize requests, and you must
-// grant yourself the corresponding IAM permission in a policy. Learn more
-//   - Signing Amazon Web Services API Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html)
-//   - Using the Amazon Cognito user pools API and user pool endpoints (https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html)
+// Lists the groups that a user belongs to.
+//
+// Amazon Cognito evaluates Identity and Access Management (IAM) policies in
+// requests for this API operation. For this operation, you must use IAM
+// credentials to authorize requests, and you must grant yourself the corresponding
+// IAM permission in a policy.
+//
+// # Learn more
+//
+// [Signing Amazon Web Services API Requests]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html
+// [Signing Amazon Web Services API Requests]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
 func (c *Client) AdminListGroupsForUser(ctx context.Context, params *AdminListGroupsForUserInput, optFns ...func(*Options)) (*AdminListGroupsForUserOutput, error) {
 	if params == nil {
 		params = &AdminListGroupsForUserInput{}
@@ -41,8 +50,9 @@ type AdminListGroupsForUserInput struct {
 
 	// The username of the user that you want to query or modify. The value of this
 	// parameter is typically your user's username, but it can be any of their alias
-	// attributes. If username isn't an alias attribute in your user pool, you can
-	// also use their sub in this request.
+	// attributes. If username isn't an alias attribute in your user pool, this value
+	// must be the sub of a local user or the username of a user from a third-party
+	// IdP.
 	//
 	// This member is required.
 	Username *string
@@ -127,6 +137,12 @@ func (c *Client) addOperationAdminListGroupsForUserMiddlewares(stack *middleware
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = addOpAdminListGroupsForUserValidationMiddleware(stack); err != nil {
 		return err
 	}
@@ -150,14 +166,6 @@ func (c *Client) addOperationAdminListGroupsForUserMiddlewares(stack *middleware
 	}
 	return nil
 }
-
-// AdminListGroupsForUserAPIClient is a client that implements the
-// AdminListGroupsForUser operation.
-type AdminListGroupsForUserAPIClient interface {
-	AdminListGroupsForUser(context.Context, *AdminListGroupsForUserInput, ...func(*Options)) (*AdminListGroupsForUserOutput, error)
-}
-
-var _ AdminListGroupsForUserAPIClient = (*Client)(nil)
 
 // AdminListGroupsForUserPaginatorOptions is the paginator options for
 // AdminListGroupsForUser
@@ -223,6 +231,9 @@ func (p *AdminListGroupsForUserPaginator) NextPage(ctx context.Context, optFns .
 	}
 	params.Limit = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.AdminListGroupsForUser(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -241,6 +252,14 @@ func (p *AdminListGroupsForUserPaginator) NextPage(ctx context.Context, optFns .
 
 	return result, nil
 }
+
+// AdminListGroupsForUserAPIClient is a client that implements the
+// AdminListGroupsForUser operation.
+type AdminListGroupsForUserAPIClient interface {
+	AdminListGroupsForUser(context.Context, *AdminListGroupsForUserInput, ...func(*Options)) (*AdminListGroupsForUserOutput, error)
+}
+
+var _ AdminListGroupsForUserAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opAdminListGroupsForUser(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{

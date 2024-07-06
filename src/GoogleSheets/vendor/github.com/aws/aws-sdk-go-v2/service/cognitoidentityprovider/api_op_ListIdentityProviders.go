@@ -11,13 +11,21 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Lists information about all IdPs for a user pool. Amazon Cognito evaluates
-// Identity and Access Management (IAM) policies in requests for this API
-// operation. For this operation, you must use IAM credentials to authorize
-// requests, and you must grant yourself the corresponding IAM permission in a
-// policy. Learn more
-//   - Signing Amazon Web Services API Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html)
-//   - Using the Amazon Cognito user pools API and user pool endpoints (https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html)
+// Lists information about all IdPs for a user pool.
+//
+// Amazon Cognito evaluates Identity and Access Management (IAM) policies in
+// requests for this API operation. For this operation, you must use IAM
+// credentials to authorize requests, and you must grant yourself the corresponding
+// IAM permission in a policy.
+//
+// # Learn more
+//
+// [Signing Amazon Web Services API Requests]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html
+// [Signing Amazon Web Services API Requests]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
 func (c *Client) ListIdentityProviders(ctx context.Context, params *ListIdentityProvidersInput, optFns ...func(*Options)) (*ListIdentityProvidersOutput, error) {
 	if params == nil {
 		params = &ListIdentityProvidersInput{}
@@ -120,6 +128,12 @@ func (c *Client) addOperationListIdentityProvidersMiddlewares(stack *middleware.
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = addOpListIdentityProvidersValidationMiddleware(stack); err != nil {
 		return err
 	}
@@ -143,14 +157,6 @@ func (c *Client) addOperationListIdentityProvidersMiddlewares(stack *middleware.
 	}
 	return nil
 }
-
-// ListIdentityProvidersAPIClient is a client that implements the
-// ListIdentityProviders operation.
-type ListIdentityProvidersAPIClient interface {
-	ListIdentityProviders(context.Context, *ListIdentityProvidersInput, ...func(*Options)) (*ListIdentityProvidersOutput, error)
-}
-
-var _ ListIdentityProvidersAPIClient = (*Client)(nil)
 
 // ListIdentityProvidersPaginatorOptions is the paginator options for
 // ListIdentityProviders
@@ -216,6 +222,9 @@ func (p *ListIdentityProvidersPaginator) NextPage(ctx context.Context, optFns ..
 	}
 	params.MaxResults = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.ListIdentityProviders(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -234,6 +243,14 @@ func (p *ListIdentityProvidersPaginator) NextPage(ctx context.Context, optFns ..
 
 	return result, nil
 }
+
+// ListIdentityProvidersAPIClient is a client that implements the
+// ListIdentityProviders operation.
+type ListIdentityProvidersAPIClient interface {
+	ListIdentityProviders(context.Context, *ListIdentityProvidersInput, ...func(*Options)) (*ListIdentityProvidersOutput, error)
+}
+
+var _ ListIdentityProvidersAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opListIdentityProviders(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{

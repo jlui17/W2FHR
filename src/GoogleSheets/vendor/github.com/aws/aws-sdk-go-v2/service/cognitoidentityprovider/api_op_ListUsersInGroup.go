@@ -11,12 +11,21 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Lists the users in the specified group. Amazon Cognito evaluates Identity and
-// Access Management (IAM) policies in requests for this API operation. For this
-// operation, you must use IAM credentials to authorize requests, and you must
-// grant yourself the corresponding IAM permission in a policy. Learn more
-//   - Signing Amazon Web Services API Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html)
-//   - Using the Amazon Cognito user pools API and user pool endpoints (https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html)
+// Lists the users in the specified group.
+//
+// Amazon Cognito evaluates Identity and Access Management (IAM) policies in
+// requests for this API operation. For this operation, you must use IAM
+// credentials to authorize requests, and you must grant yourself the corresponding
+// IAM permission in a policy.
+//
+// # Learn more
+//
+// [Signing Amazon Web Services API Requests]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html
+// [Signing Amazon Web Services API Requests]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
 func (c *Client) ListUsersInGroup(ctx context.Context, params *ListUsersInGroupInput, optFns ...func(*Options)) (*ListUsersInGroupOutput, error) {
 	if params == nil {
 		params = &ListUsersInGroupInput{}
@@ -124,6 +133,12 @@ func (c *Client) addOperationListUsersInGroupMiddlewares(stack *middleware.Stack
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = addOpListUsersInGroupValidationMiddleware(stack); err != nil {
 		return err
 	}
@@ -147,14 +162,6 @@ func (c *Client) addOperationListUsersInGroupMiddlewares(stack *middleware.Stack
 	}
 	return nil
 }
-
-// ListUsersInGroupAPIClient is a client that implements the ListUsersInGroup
-// operation.
-type ListUsersInGroupAPIClient interface {
-	ListUsersInGroup(context.Context, *ListUsersInGroupInput, ...func(*Options)) (*ListUsersInGroupOutput, error)
-}
-
-var _ ListUsersInGroupAPIClient = (*Client)(nil)
 
 // ListUsersInGroupPaginatorOptions is the paginator options for ListUsersInGroup
 type ListUsersInGroupPaginatorOptions struct {
@@ -219,6 +226,9 @@ func (p *ListUsersInGroupPaginator) NextPage(ctx context.Context, optFns ...func
 	}
 	params.Limit = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.ListUsersInGroup(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -237,6 +247,14 @@ func (p *ListUsersInGroupPaginator) NextPage(ctx context.Context, optFns ...func
 
 	return result, nil
 }
+
+// ListUsersInGroupAPIClient is a client that implements the ListUsersInGroup
+// operation.
+type ListUsersInGroupAPIClient interface {
+	ListUsersInGroup(context.Context, *ListUsersInGroupInput, ...func(*Options)) (*ListUsersInGroupOutput, error)
+}
+
+var _ ListUsersInGroupAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opListUsersInGroup(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{

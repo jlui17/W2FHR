@@ -12,12 +12,21 @@ import (
 )
 
 // A history of user activity and any risks detected as part of Amazon Cognito
-// advanced security. Amazon Cognito evaluates Identity and Access Management (IAM)
-// policies in requests for this API operation. For this operation, you must use
-// IAM credentials to authorize requests, and you must grant yourself the
-// corresponding IAM permission in a policy. Learn more
-//   - Signing Amazon Web Services API Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html)
-//   - Using the Amazon Cognito user pools API and user pool endpoints (https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html)
+// advanced security.
+//
+// Amazon Cognito evaluates Identity and Access Management (IAM) policies in
+// requests for this API operation. For this operation, you must use IAM
+// credentials to authorize requests, and you must grant yourself the corresponding
+// IAM permission in a policy.
+//
+// # Learn more
+//
+// [Signing Amazon Web Services API Requests]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]
+//
+// [Using the Amazon Cognito user pools API and user pool endpoints]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html
+// [Signing Amazon Web Services API Requests]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
 func (c *Client) AdminListUserAuthEvents(ctx context.Context, params *AdminListUserAuthEventsInput, optFns ...func(*Options)) (*AdminListUserAuthEventsOutput, error) {
 	if params == nil {
 		params = &AdminListUserAuthEventsInput{}
@@ -42,8 +51,9 @@ type AdminListUserAuthEventsInput struct {
 
 	// The username of the user that you want to query or modify. The value of this
 	// parameter is typically your user's username, but it can be any of their alias
-	// attributes. If username isn't an alias attribute in your user pool, you can
-	// also use their sub in this request.
+	// attributes. If username isn't an alias attribute in your user pool, this value
+	// must be the sub of a local user or the username of a user from a third-party
+	// IdP.
 	//
 	// This member is required.
 	Username *string
@@ -128,6 +138,12 @@ func (c *Client) addOperationAdminListUserAuthEventsMiddlewares(stack *middlewar
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = addOpAdminListUserAuthEventsValidationMiddleware(stack); err != nil {
 		return err
 	}
@@ -151,14 +167,6 @@ func (c *Client) addOperationAdminListUserAuthEventsMiddlewares(stack *middlewar
 	}
 	return nil
 }
-
-// AdminListUserAuthEventsAPIClient is a client that implements the
-// AdminListUserAuthEvents operation.
-type AdminListUserAuthEventsAPIClient interface {
-	AdminListUserAuthEvents(context.Context, *AdminListUserAuthEventsInput, ...func(*Options)) (*AdminListUserAuthEventsOutput, error)
-}
-
-var _ AdminListUserAuthEventsAPIClient = (*Client)(nil)
 
 // AdminListUserAuthEventsPaginatorOptions is the paginator options for
 // AdminListUserAuthEvents
@@ -226,6 +234,9 @@ func (p *AdminListUserAuthEventsPaginator) NextPage(ctx context.Context, optFns 
 	}
 	params.MaxResults = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.AdminListUserAuthEvents(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -244,6 +255,14 @@ func (p *AdminListUserAuthEventsPaginator) NextPage(ctx context.Context, optFns 
 
 	return result, nil
 }
+
+// AdminListUserAuthEventsAPIClient is a client that implements the
+// AdminListUserAuthEvents operation.
+type AdminListUserAuthEventsAPIClient interface {
+	AdminListUserAuthEvents(context.Context, *AdminListUserAuthEventsInput, ...func(*Options)) (*AdminListUserAuthEventsOutput, error)
+}
+
+var _ AdminListUserAuthEventsAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opAdminListUserAuthEvents(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{

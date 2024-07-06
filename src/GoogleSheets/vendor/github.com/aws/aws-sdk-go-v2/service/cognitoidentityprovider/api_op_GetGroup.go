@@ -11,7 +11,9 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Gets a group. Calling this action requires developer credentials.
+// Gets a group.
+//
+// Calling this action requires developer credentials.
 func (c *Client) GetGroup(ctx context.Context, params *GetGroupInput, optFns ...func(*Options)) (*GetGroupOutput, error) {
 	if params == nil {
 		params = &GetGroupInput{}
@@ -106,6 +108,12 @@ func (c *Client) addOperationGetGroupMiddlewares(stack *middleware.Stack, option
 		return err
 	}
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
+		return err
+	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
 		return err
 	}
 	if err = addOpGetGroupValidationMiddleware(stack); err != nil {

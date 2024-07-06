@@ -1,5 +1,5 @@
 import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { createContext, ReactNode } from "react";
 
 interface AuthenticationContextProviderProps {
