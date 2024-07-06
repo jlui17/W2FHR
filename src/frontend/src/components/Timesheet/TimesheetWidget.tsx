@@ -19,7 +19,7 @@ export const TimesheetWidget = (p: {
 
   const displayEmptyTimesheet = (): JSX.Element => {
     return (
-      <p className="m-auto text-sm text-center text-gray-600">
+      <p className="m-auto text-center text-sm text-gray-600">
         You haven't worked any shifts yet
       </p>
     );
@@ -30,7 +30,7 @@ export const TimesheetWidget = (p: {
       <div className="mt-2 flex flex-col">
         {p.timesheetData.shifts.map((shift, i) => {
           return (
-            <div className="flex mb-6 flex-col">
+            <div className="mb-6 flex flex-col">
               <p className="text-md">{shift.date}</p>
               <p className="text-sm">{shift.shiftTitle}</p>
               <p className="text-sm text-gray-600">Start: {shift.startTime}</p>
@@ -52,7 +52,7 @@ export const TimesheetWidget = (p: {
     <Collapsible
       open={p.open}
       onOpenChange={p.onOpenChange}
-      className="rounded-md bg-white border bg-card text-card-foreground shadow-sm"
+      className="bg-card text-card-foreground w-1/2 rounded-md border bg-white shadow-sm md:w-auto"
     >
       <CollapsibleTrigger asChild>
         <div className="flex items-center justify-between px-4 py-3">

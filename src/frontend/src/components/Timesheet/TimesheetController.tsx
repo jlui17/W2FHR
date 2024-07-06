@@ -31,14 +31,14 @@ const TimesheetController = (): JSX.Element => {
   const {
     refetch,
     isFetching,
-    data: userAvailability,
+    data: shiftHistory,
   } = useTimesheetData({
     idToken: getAuthSession()?.IdToken || "",
     getUpcoming: false,
   });
 
   function onOpenChange(): void {
-    if (!open && userAvailability === undefined) {
+    if (!open && shiftHistory === undefined) {
       refetch();
     }
     setOpen(!open);
@@ -55,7 +55,7 @@ const TimesheetController = (): JSX.Element => {
     );
   }
 
-  if (!userAvailability) {
+  if (!shiftHistory) {
     return (
       <TimesheetWidget
         isLoading={isFetching}
@@ -69,7 +69,7 @@ const TimesheetController = (): JSX.Element => {
   return (
     <TimesheetWidget
       isLoading={isFetching}
-      timesheetData={EMPTY_DATA}
+      timesheetData={shiftHistory}
       open={open}
       onOpenChange={onOpenChange}
     />

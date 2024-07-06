@@ -15,7 +15,7 @@ const AvailabilitySchema = z.object({
 
 function Loading() {
   return (
-    <Card className="w-[275px]">
+    <Card className="w-[1/2 md:w-autopx]">
       <CardHeader>
         <CardTitle className="m-auto">Availability</CardTitle>
       </CardHeader>
@@ -82,16 +82,18 @@ export const AvailabilityForm = (p: {
                   name="days"
                   render={({ field }) => (
                     <FormItem key={d.id}>
-                      <FormControl className="flex flex-row items-center p-3 rounded transition-colors duration-200 ease-in-out hover:bg-slate-100">
+                      <FormControl className="flex flex-row items-center rounded p-3 transition-colors duration-200 ease-in-out hover:bg-slate-100">
                         <Checkbox
                           checked={field.value?.includes(d.id)}
                           onCheckedChange={(checked) => {
                             return checked
                               ? field.onChange(
-                                  field.value ? [...field.value, d.id] : [d.id]
+                                  field.value ? [...field.value, d.id] : [d.id],
                                 )
                               : field.onChange(
-                                  field.value?.filter((value) => value !== d.id)
+                                  field.value?.filter(
+                                    (value) => value !== d.id,
+                                  ),
                                 );
                           }}
                           id={"check" + d.id}
@@ -107,7 +109,7 @@ export const AvailabilityForm = (p: {
                     </FormItem>
                   )}
                 />
-              )
+              ),
             )}
           </FormItem>
         )}
@@ -117,7 +119,7 @@ export const AvailabilityForm = (p: {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="w-1/2 md:w-auto" onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
             <CardTitle className="m-auto">Availability</CardTitle>

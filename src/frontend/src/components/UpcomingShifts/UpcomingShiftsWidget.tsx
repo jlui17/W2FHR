@@ -26,7 +26,7 @@ export const UpcomingShiftsWidget = ({
       <div className="mt-2 flex flex-col">
         {upcomingShiftsData.shifts.map((shift: Shift, i: number) => {
           return (
-            <div className="flex flex-col mb-6" key={i}>
+            <div className="mb-6 flex flex-col" key={i}>
               <p className="text-md">{shift.date}</p>
               <p className="text-sm">{shift.shiftTitle}</p>
               <p className="text-sm text-gray-600">Start: {shift.startTime}</p>
@@ -45,7 +45,7 @@ export const UpcomingShiftsWidget = ({
   };
 
   return (
-    <Card>
+    <Card className="w-1/2 md:w-auto">
       <CardHeader>
         <CardTitle className="m-auto">Upcoming Shifts</CardTitle>
       </CardHeader>
