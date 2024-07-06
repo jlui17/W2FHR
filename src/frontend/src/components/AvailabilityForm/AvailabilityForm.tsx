@@ -78,7 +78,7 @@ export const AvailabilityForm = (p: {
                   name="days"
                   render={({ field }) => (
                     <FormItem key={d.id}>
-                      <FormControl className="mb-5 flex flex-row items-center">
+                      <FormControl className="flex flex-row items-center p-3 rounded transition-colors duration-200 ease-in-out hover:bg-slate-100">
                         <Checkbox
                           checked={field.value?.includes(d.id)}
                           onCheckedChange={(checked) => {
