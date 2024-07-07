@@ -67,7 +67,6 @@ export const AvailabilityForm = (p: {
   }
 
   async function onSubmit(v: z.infer<typeof AvailabilitySchema>) {
-    console.log(v);
     p.updateAvailability(v.days);
   }
 
@@ -92,35 +91,34 @@ export const AvailabilityForm = (p: {
                   control={form.control}
                   name="days"
                   render={({ field }) => (
-                    <FormItem key={d.id} className="space-y-0">
+                    <FormItem
+                      key={d.id}
+                      className="flex h-11 w-auto flex-row items-center space-y-0 rounded transition-colors duration-200 ease-in-out hover:bg-slate-100"
+                    >
                       <FormControl>
-                        <div className="flex h-11 w-auto flex-row items-center space-y-0 rounded transition-colors duration-200 ease-in-out hover:bg-slate-100">
-                          <Checkbox
-                            checked={field.value?.includes(d.id)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange(
-                                    field.value
-                                      ? [...field.value, d.id]
-                                      : [d.id],
-                                  )
-                                : field.onChange(
-                                    field.value?.filter(
-                                      (value) => value !== d.id,
-                                    ),
-                                  );
-                            }}
-                            id={"check" + d.id}
-                            disabled={p.isLoading}
-                          />
-                          <FormLabel
-                            htmlFor={"check" + d.id}
-                            className="ml-2 flex h-full w-full items-center font-normal"
-                          >
-                            {d.date}
-                          </FormLabel>
-                        </div>
+                        <Checkbox
+                          checked={field.value?.includes(d.id)}
+                          onCheckedChange={(checked) => {
+                            return checked
+                              ? field.onChange(
+                                  field.value ? [...field.value, d.id] : [d.id],
+                                )
+                              : field.onChange(
+                                  field.value?.filter(
+                                    (value) => value !== d.id,
+                                  ),
+                                );
+                          }}
+                          id={"check" + d.id}
+                          disabled={p.isLoading}
+                        />
                       </FormControl>
+                      <FormLabel
+                        htmlFor={"check" + d.id}
+                        className="ml-2 flex h-full w-full items-center font-normal"
+                      >
+                        {d.date}
+                      </FormLabel>
                     </FormItem>
                   )}
                 />

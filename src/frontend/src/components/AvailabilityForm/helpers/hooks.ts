@@ -51,7 +51,7 @@ export function useUserAvailability(p: {
         const data = await response.json();
         if (!isAvailabilityData(data)) {
           return Promise.reject(
-            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT)
+            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
           );
         }
         return Promise.resolve(data);
@@ -74,7 +74,7 @@ export function useUpdateAvailability(p: {
   onError: (err: Error) => void;
 }): UseMutationResult<void, Error, UpdateAvailabilityParams, unknown> {
   async function updateAvailability(
-    p: UpdateAvailabilityParams
+    p: UpdateAvailabilityParams,
   ): Promise<void> {
     const response = await fetch(API_URLS.AVAILABILITY, {
       headers: {

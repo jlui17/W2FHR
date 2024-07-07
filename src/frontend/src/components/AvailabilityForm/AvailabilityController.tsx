@@ -26,13 +26,14 @@ function AvailabilityController(): JSX.Element {
   const { setAlert } = useAlert();
   const { getAuthSession } = useContext(AuthenticationContext);
 
-  const { isPending, isError, data, error } = useUserAvailability({
+  const { refetch, isFetching, isError, data, error } = useUserAvailability({
     idToken: getAuthSession()?.IdToken || "",
   });
 
   const { mutate: updateAvailability, isPending: updateIsPending } =
     useUpdateAvailability({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await refetch();
         setAlert({
           type: AlertType.SUCCESS,
           message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
@@ -92,7 +93,7 @@ function AvailabilityController(): JSX.Element {
 
   return (
     <AvailabilityForm
-      isLoading={isPending || updateIsPending}
+      isLoading={isFetching || updateIsPending}
       availability={data || defaultAvailability}
       updateAvailability={doUpdate}
     />
