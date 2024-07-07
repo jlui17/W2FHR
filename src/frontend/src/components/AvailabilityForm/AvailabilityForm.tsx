@@ -1,9 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CardContent, FormControl } from "@mui/material";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -81,30 +92,34 @@ export const AvailabilityForm = (p: {
                   control={form.control}
                   name="days"
                   render={({ field }) => (
-                    <FormItem key={d.id}>
-                      <FormControl className="flex flex-row items-center rounded p-3 transition-colors duration-200 ease-in-out hover:bg-slate-100">
-                        <Checkbox
-                          checked={field.value?.includes(d.id)}
-                          onCheckedChange={(checked) => {
-                            return checked
-                              ? field.onChange(
-                                  field.value ? [...field.value, d.id] : [d.id],
-                                )
-                              : field.onChange(
-                                  field.value?.filter(
-                                    (value) => value !== d.id,
-                                  ),
-                                );
-                          }}
-                          id={"check" + d.id}
-                          disabled={p.isLoading}
-                        />
-                        <FormLabel
-                          htmlFor={"check" + d.id}
-                          className="text-md ml-2"
-                        >
-                          {d.date}
-                        </FormLabel>
+                    <FormItem key={d.id} className="space-y-0">
+                      <FormControl>
+                        <div className="flex h-11 w-auto flex-row items-center space-y-0 rounded transition-colors duration-200 ease-in-out hover:bg-slate-100">
+                          <Checkbox
+                            checked={field.value?.includes(d.id)}
+                            onCheckedChange={(checked) => {
+                              return checked
+                                ? field.onChange(
+                                    field.value
+                                      ? [...field.value, d.id]
+                                      : [d.id],
+                                  )
+                                : field.onChange(
+                                    field.value?.filter(
+                                      (value) => value !== d.id,
+                                    ),
+                                  );
+                            }}
+                            id={"check" + d.id}
+                            disabled={p.isLoading}
+                          />
+                          <FormLabel
+                            htmlFor={"check" + d.id}
+                            className="ml-2 flex h-full w-full items-center font-normal"
+                          >
+                            {d.date}
+                          </FormLabel>
+                        </div>
                       </FormControl>
                     </FormItem>
                   )}
