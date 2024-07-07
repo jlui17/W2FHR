@@ -26,7 +26,7 @@ const AvailabilitySchema = z.object({
 
 function Loading() {
   return (
-    <Card className="w-[1/2 md:w-autopx]">
+    <Card className="w-11/12 md:w-auto">
       <CardHeader>
         <CardTitle className="m-auto">Availability</CardTitle>
       </CardHeader>
