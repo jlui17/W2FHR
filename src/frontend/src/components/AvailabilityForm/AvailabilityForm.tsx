@@ -132,7 +132,10 @@ export const AvailabilityForm = (p: {
 
   return (
     <Form {...form}>
-      <form className="w-1/2 md:w-auto" onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        className="w-11/12 md:w-auto"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         <Card>
           <CardHeader>
             <CardTitle className="m-auto">Availability</CardTitle>

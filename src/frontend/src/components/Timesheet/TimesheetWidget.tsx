@@ -52,7 +52,7 @@ export const TimesheetWidget = (p: {
     <Collapsible
       open={p.open}
       onOpenChange={p.onOpenChange}
-      className="bg-card text-card-foreground w-1/2 rounded-md border bg-white shadow-sm md:w-auto"
+      className="bg-card text-card-foreground w-11/12 rounded-md border bg-white shadow-sm md:w-auto"
     >
       <CollapsibleTrigger asChild>
         <div className="flex items-center justify-between px-4 py-3">
