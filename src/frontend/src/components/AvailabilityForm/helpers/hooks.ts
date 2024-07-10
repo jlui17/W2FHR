@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
+export const AVAIALBILITY_QUERY_KEY = ["availability"] as const;
+
 export interface Day {
   isAvailable: boolean;
   date: string;
@@ -62,7 +64,10 @@ export function useUserAvailability(p: {
     }
   }
 
-  return useQuery({ queryKey: ["availability"], queryFn: fetchAvailability });
+  return useQuery({
+    queryKey: AVAIALBILITY_QUERY_KEY,
+    queryFn: fetchAvailability,
+  });
 }
 
 interface UpdateAvailabilityParams {
@@ -70,12 +75,17 @@ interface UpdateAvailabilityParams {
   idToken: string;
 }
 export function useUpdateAvailability(p: {
-  onSuccess: () => void;
+  onSuccess: (data: UserAvailability) => void;
   onError: (err: Error) => void;
-}): UseMutationResult<void, Error, UpdateAvailabilityParams, unknown> {
+}): UseMutationResult<
+  UserAvailability,
+  Error,
+  UpdateAvailabilityParams,
+  unknown
+> {
   async function updateAvailability(
     p: UpdateAvailabilityParams,
-  ): Promise<void> {
+  ): Promise<UserAvailability> {
     const response = await fetch(API_URLS.AVAILABILITY, {
       headers: {
         Authorization: `Bearer ${p.idToken}`,
@@ -87,7 +97,13 @@ export function useUpdateAvailability(p: {
 
     switch (response.status) {
       case 200:
-        return Promise.resolve();
+        const data: unknown = await response.json();
+        if (!isAvailabilityData(data)) {
+          return Promise.reject(
+            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
+          );
+        }
+        return Promise.resolve(data);
       case 403:
         return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
       case 404:

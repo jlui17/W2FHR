@@ -24,7 +24,7 @@ const AvailabilitySchema = z.object({
   days: z.array(z.string()).optional(),
 });
 
-function Loading() {
+export function LoadingAvailabilityForm() {
   return (
     <Card className="w-11/12 md:w-auto">
       <CardHeader>
@@ -37,34 +37,30 @@ function Loading() {
   );
 }
 
+function getInitialData(a: UserAvailability | undefined) {
+  const res: string[] = [];
+
+  if (a !== undefined) {
+    if (a.day1.isAvailable) res.push("day1");
+    if (a.day2.isAvailable) res.push("day2");
+    if (a.day3.isAvailable) res.push("day3");
+    if (a.day4.isAvailable) res.push("day4");
+  }
+
+  return res;
+}
+
 export const AvailabilityForm = (p: {
-  isLoading: boolean;
+  updateIsPending: boolean;
   availability: UserAvailability;
   updateAvailability: (days: string[] | undefined) => void;
 }): JSX.Element => {
-  if (p.isLoading) {
-    return <Loading />;
-  }
-
   const form = useForm<z.infer<typeof AvailabilitySchema>>({
     resolver: zodResolver(AvailabilitySchema),
     defaultValues: {
-      days: getFormData(),
+      days: getInitialData(p.availability),
     },
   });
-
-  function getFormData() {
-    const res: string[] = [];
-
-    if (!p.isLoading && p.availability !== undefined) {
-      if (p.availability.day1.isAvailable) res.push("day1");
-      if (p.availability.day2.isAvailable) res.push("day2");
-      if (p.availability.day3.isAvailable) res.push("day3");
-      if (p.availability.day4.isAvailable) res.push("day4");
-    }
-
-    return res;
-  }
 
   async function onSubmit(v: z.infer<typeof AvailabilitySchema>) {
     p.updateAvailability(v.days);
@@ -110,7 +106,7 @@ export const AvailabilityForm = (p: {
                                 );
                           }}
                           id={"check" + d.id}
-                          disabled={p.isLoading}
+                          disabled={p.updateIsPending}
                         />
                       </FormControl>
                       <FormLabel
@@ -142,8 +138,12 @@ export const AvailabilityForm = (p: {
           </CardHeader>
           <CardContent>{checkboxes()}</CardContent>
           <CardFooter>
-            <Button className="m-auto" type="submit" disabled={p.isLoading}>
-              {p.isLoading ? (
+            <Button
+              className="m-auto"
+              type="submit"
+              disabled={p.updateIsPending || !p.availability.canUpdate}
+            >
+              {p.updateIsPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Update"
