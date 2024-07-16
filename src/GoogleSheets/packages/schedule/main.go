@@ -33,15 +33,40 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	getUpcomingShifts, getUpcomingShiftsExists := event.QueryStringParameters["upcoming"]
-	shouldGetUpcoming := getUpcomingShiftsExists && getUpcomingShifts == "true"
-	log.Printf("[INFO] GET Timesheet request (upcoming = %t) for email: %s, employee id: %s",
-		shouldGetUpcoming,
-		employeeInfo.GetEmail(),
-		employeeInfo.GetEmployeeId(),
-	)
+	getAllShifts, getAllShiftsExists := event.QueryStringParameters["all"]
+	shouldGetAll := getAllShiftsExists && getAllShifts == "true"
 
-	schedule, err := Schedule.Get(employeeInfo.GetEmployeeId(), shouldGetUpcoming)
+	var schedule *Schedule.Timesheet
+	var allSchedule *Schedule.ManagerTimesheet
+
+	if shouldGetAll {
+		log.Println("[INFO] GET all schedules request")
+		allSchedule, err = Schedule.GetAllSchedules()
+		if err != nil {
+			log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
+			return events.APIGatewayProxyResponse{
+				StatusCode: 500,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       err.Error(),
+			}, nil
+		}
+		res, _ := json.Marshal(allSchedule)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       string(res),
+		}, nil
+	} else {
+		getUpcomingShifts, getUpcomingShiftsExists := event.QueryStringParameters["upcoming"]
+		shouldGetUpcoming := getUpcomingShiftsExists && getUpcomingShifts == "true"
+		log.Printf("[INFO] GET Timesheet request (upcoming = %t) for email: %s, employee id: %s",
+			shouldGetUpcoming,
+			employeeInfo.GetEmail(),
+			employeeInfo.GetEmployeeId(),
+		)
+		schedule, err = Schedule.Get(employeeInfo.GetEmployeeId(), shouldGetUpcoming)
+	}
+
 	if err != nil {
 		log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
 		return events.APIGatewayProxyResponse{

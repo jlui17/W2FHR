@@ -49,6 +49,10 @@ type Timesheet struct {
 	Shifts []EmployeeShift `json:"shifts"`
 }
 
+type ManagerTimesheet struct {
+	Shifts []allSchedules `json:"shifts"`
+}
+
 type EmployeeShift struct {
 	Date          string  `json:"date"`
 	ShiftTitle    string  `json:"shiftTitle"`
@@ -84,6 +88,26 @@ func (t *timesheet) Get(employeeId string) (*Timesheet, error) {
 	}
 
 	return t.getShifts(employeeId, all, false), nil
+}
+
+func (t *timesheet) GetAll() (*ManagerTimesheet, error) {
+	all, err := t.getUpcomingSchedule()
+	if err != nil {
+		return &ManagerTimesheet{}, err
+	}
+	all, err = t.filterForUpcomingShifts(all)
+	shifts := []allSchedules{}
+	for i := 0; i < len(all.EmployeeIds); i++ {
+		shifts = append(shifts, allSchedules{
+			EmployeeIds: [][]interface{}{all.EmployeeIds[i]},
+			ShiftNames:  [][]interface{}{all.ShiftNames[i]},
+			Shifts:      [][]interface{}{all.Shifts[i]},
+		})
+	}
+
+	return &ManagerTimesheet{
+		Shifts: shifts,
+	}, nil
 }
 
 func (t *timesheet) GetUpcoming(employeeId string) (*Timesheet, error) {

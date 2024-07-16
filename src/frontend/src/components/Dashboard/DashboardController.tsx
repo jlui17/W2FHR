@@ -3,11 +3,16 @@ import { Navigate } from "react-router-dom";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { ROUTES } from "../common/constants";
 import { DashboardWidget } from "./DashboardWidget";
+import { ManagerWidget } from "./ManagerDashboard/ManagerWidget";
 
 const DashboardController = () => {
-  const { isLoggedIn } = useContext(AuthenticationContext);
+  const { isLoggedIn, isManager } = useContext(AuthenticationContext);
 
-  return isLoggedIn() ? <DashboardWidget /> : <Navigate to={ROUTES.LOGIN} />;
+  if (!isLoggedIn()) {
+    return <Navigate to={ROUTES.LOGIN} />;
+  }
+
+  return isManager() ? <ManagerWidget /> : <DashboardWidget />;
 };
 
 export const Dashboard = () => {

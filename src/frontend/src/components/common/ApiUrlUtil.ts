@@ -4,6 +4,10 @@ export const getTimesheetApiUrlForEmployee = (getUpcoming: boolean) => {
   return `${API_URLS.TIMESHEET}?upcoming=${getUpcoming}`;
 };
 
+export const getTimesheetApiUrlForManagers = (getUpcoming: boolean) => {
+  return `${API_URLS.TIMESHEET}?all=${getUpcoming}`;
+};
+
 export const getAuthApiUrlForEmail = (email: string) => {
   return `${API_URLS.AUTH}/${email}`;
 };

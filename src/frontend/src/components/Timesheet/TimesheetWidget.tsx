@@ -8,12 +8,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Loader2 } from "lucide-react";
+import { ManagerTimesheetData } from "./ManagerTimesheet/ManagerTimesheetController";
 
 export const TimesheetWidget = (p: {
   open: boolean;
   onOpenChange: () => void;
   isLoading: boolean;
-  timesheetData: TimesheetData;
+  timesheetData: TimesheetData | ManagerTimesheetData;
 }): JSX.Element => {
   const hasNoShifts = p.timesheetData.shifts.length === 0;
 
@@ -25,27 +26,37 @@ export const TimesheetWidget = (p: {
     );
   };
 
+
   const displayTimesheet = (): JSX.Element => {
-    return (
-      <div className="mt-2 flex flex-col">
-        {p.timesheetData.shifts.map((shift, i) => {
-          return (
-            <div className="mb-6 flex flex-col">
-              <p className="text-md">{shift.date}</p>
-              <p className="text-sm">{shift.shiftTitle}</p>
-              <p className="text-sm text-gray-600">Start: {shift.startTime}</p>
-              <p className="text-sm text-gray-600">End: {shift.endTime}</p>
-              <p className="text-sm text-gray-600">
-                Break Duration: {shift.breakDuration}
-              </p>
-              <p className="text-sm text-gray-600">
-                Net Hours: {shift.netHours}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-    );
+    if(p.timesheetData as TimesheetData)
+    {
+      const data = p.timesheetData as TimesheetData;
+      return (
+        <div className="mt-2 flex flex-col">
+          {data.shifts.map((shift, i) => {
+            return (
+              <div className="mb-6 flex flex-col">
+                <p className="text-md">{shift.date}</p>
+                <p className="text-sm">{shift.shiftTitle}</p>
+                <p className="text-sm text-gray-600">Start: {shift.startTime}</p>
+                <p className="text-sm text-gray-600">End: {shift.endTime}</p>
+                <p className="text-sm text-gray-600">
+                  Break Duration: {shift.breakDuration}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Net Hours: {shift.netHours}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }else{
+      return (
+          displayEmptyTimesheet()
+      )
+    }
+
   };
 
   return (

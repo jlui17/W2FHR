@@ -34,3 +34,22 @@ func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 
 	return employeeShifts, err
 }
+
+func GetAllSchedules() (*ManagerTimesheet, error) {
+	timesheet, err := getTimesheet()
+	if err != nil {
+		log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
+		return &ManagerTimesheet{}, nil
+	}
+
+	var allShifts *ManagerTimesheet
+
+	allShifts, err = timesheet.GetAll()
+	if err != nil {
+		log.Printf("[ERROR] Failed to get all timesheets\nError: %s", err.Error())
+		return &ManagerTimesheet{}, nil
+	}
+	log.Printf("[INFO] Getting all schedules for managers")
+
+	return allShifts, nil
+}

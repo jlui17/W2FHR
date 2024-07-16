@@ -10,6 +10,7 @@ const getInitialAuthenticationContext = (): {
   getAuthSession: () => AuthenticationResultType | null;
   saveAuthSession: (authSession: AuthenticationResultType) => void;
   isLoggedIn: () => boolean;
+  isManager: () => boolean;
   logout: () => void;
   stayLoggedIn: () => boolean;
   setStayLoggedIn: (b: boolean) => void;
@@ -18,6 +19,7 @@ const getInitialAuthenticationContext = (): {
     getAuthSession: () => null,
     saveAuthSession: (authSession: AuthenticationResultType) => {},
     isLoggedIn: () => false,
+    isManager: () => false,
     logout: () => null,
     stayLoggedIn: () => false,
     setStayLoggedIn: (b: boolean) => null,
@@ -30,6 +32,8 @@ export const AuthenticationContext = createContext(
 
 interface IdToken {
   exp: number;
+  'cognito:groups'?: string[];
+
 }
 function idTokenIsExpired(idToken: string | undefined): boolean {
   if (idToken === undefined) {
@@ -48,6 +52,9 @@ function idTokenIsExpired(idToken: string | undefined): boolean {
 export const AuthenticationContextProvider = ({
   children,
 }: AuthenticationContextProviderProps) => {
+
+
+
   function saveAuthSession(newSess: AuthenticationResultType): void {
     let sess: AuthenticationResultType | null = getAuthSession();
     if (sess == null) {
@@ -79,6 +86,17 @@ export const AuthenticationContextProvider = ({
     return authSession !== null && !idTokenIsExpired(authSession.IdToken);
   }
 
+  const isManager = (): boolean => {
+    const session = getAuthSession();
+    if (!session || !session.IdToken) return false;
+    try {
+      const decoded: IdToken = jwtDecode(session.IdToken);
+      return decoded['cognito:groups']?.includes('managers') ?? false;
+    } catch {
+      return false;
+    }
+  };
+
   function logout(): void {
     localStorage.removeItem("authSession");
   }
@@ -102,6 +120,7 @@ export const AuthenticationContextProvider = ({
         getAuthSession,
         saveAuthSession,
         isLoggedIn,
+        isManager,
         logout,
         stayLoggedIn,
         setStayLoggedIn,

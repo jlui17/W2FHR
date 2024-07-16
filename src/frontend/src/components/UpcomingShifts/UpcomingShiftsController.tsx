@@ -23,6 +23,7 @@ const UpcomingShiftsController = (): JSX.Element => {
     } = useTimesheetData({
       idToken: getAuthSession()?.IdToken || "",
       getUpcoming: true,
+      all: false,
     });
 
     if (upcomingShiftsDataIsLoading) {

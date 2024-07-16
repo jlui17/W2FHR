@@ -35,6 +35,7 @@ const TimesheetController = (): JSX.Element => {
   } = useTimesheetData({
     idToken: getAuthSession()?.IdToken || "",
     getUpcoming: false,
+    all: false,
   });
 
   function onOpenChange(): void {
@@ -44,6 +45,7 @@ const TimesheetController = (): JSX.Element => {
     setOpen(!open);
   }
 
+  
   if (!open) {
     return (
       <TimesheetWidget

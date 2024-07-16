@@ -1,21 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
-import { getTimesheetApiUrlForEmployee } from "../../common/ApiUrlUtil";
+import { getTimesheetApiUrlForEmployee, getTimesheetApiUrlForManagers } from "../../common/ApiUrlUtil";
 import { ERROR_MESSAGES } from "../../common/constants";
 import { TimesheetData } from "../TimesheetController";
+import { ManagerTimesheetData } from "../ManagerTimesheet/ManagerTimesheetController";
 
 const isTimesheetData = (data: any): data is TimesheetData => {
   return "shifts" in data;
 };
 
-export function useTimesheetData(p: { idToken: string; getUpcoming: boolean }) {
-  const getTimesheetData = async (): Promise<TimesheetData> => {
-    const response = await fetch(getTimesheetApiUrlForEmployee(p.getUpcoming), {
-      headers: {
-        Authorization: `Bearer ${p.idToken}`,
-      },
-      mode: "cors",
-    });
+export function useTimesheetData(p: { idToken: string; getUpcoming: boolean; all: boolean }) {
+  const getTimesheetData = async (): Promise<TimesheetData | ManagerTimesheetData> => {
 
+    let response = null;
+    if(p.all)
+    {
+        console.log("all");
+        response = await fetch(getTimesheetApiUrlForManagers(p.getUpcoming), {
+        headers: {
+          Authorization: `Bearer ${p.idToken}`,
+        },
+        mode: "cors",
+      });
+    }else{
+        response = await fetch(getTimesheetApiUrlForEmployee(p.getUpcoming), {
+        headers: {
+          Authorization: `Bearer ${p.idToken}`,
+        },
+        mode: "cors",
+      });
+    }
     switch (response.status) {
       case 200:
         const data = await response.json();
