@@ -7,10 +7,10 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "tsc; cd src/frontend; yarn build; cd ../..",
+    "build": "tsc",
     "deploy": "./deploy.sh",
     "watch": "tsc -w",
-    "test": "yarn test:Googlesheets",
+    "test": "pnpm run test:Googlesheets",
     "test:Googlesheets": "cd src/Googlesheets; go test ./...",
     "cdk": "cdk"
   },

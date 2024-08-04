@@ -2,7 +2,6 @@ package Schedule
 
 import (
 	"GoogleSheets/packages/common/GoogleClient"
-	"GoogleSheets/packages/common/TimeService"
 	"fmt"
 	"log"
 	"strconv"
@@ -14,7 +13,7 @@ const (
 	scheduleSheetId               = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
 	upcomingScheduleRangeTemplate = "%s!%s2:%s200"
 	scheduleRangeTemplate         = "%s!%s2:%s"
-	scheduleUpcomingSheetName     = "Main Schedule SORT BY DESC DATE"
+	scheduleUpcomingSheetName     = "Upcoming Shifts"
 	scheduleSheetName             = "Main Schedule"
 	scheduleEmployeeIdCol         = "C"
 	scheduleTitleCol              = "E"
@@ -87,7 +86,7 @@ func (t *timesheet) Get(employeeId string) (*Timesheet, error) {
 		return &Timesheet{}, err
 	}
 
-	return t.getShifts(employeeId, all, false), nil
+	return t.getShifts(employeeId, all), nil
 }
 
 func (t *timesheet) GetAll() (*ManagerTimesheet, error) {
@@ -116,12 +115,7 @@ func (t *timesheet) GetUpcoming(employeeId string) (*Timesheet, error) {
 		return &Timesheet{}, err
 	}
 
-	all, err = t.filterForUpcomingShifts(all)
-	if err != nil {
-		return &Timesheet{}, err
-	}
-
-	return t.getShifts(employeeId, all, true), nil
+	return t.getShifts(employeeId, all), nil
 }
 
 func (t *timesheet) getSchedule() (*allSchedules, error) {
@@ -166,7 +160,7 @@ func (t *timesheet) getUpcomingSchedule() (*allSchedules, error) {
 	}, nil
 }
 
-func (t *timesheet) getShifts(employeeId string, schedule *allSchedules, reverse bool) *Timesheet {
+func (t *timesheet) getShifts(employeeId string, schedule *allSchedules) *Timesheet {
 	employeeShifts := []EmployeeShift{}
 	for i := 0; i < len(schedule.EmployeeIds); i++ {
 		if len(schedule.EmployeeIds[i]) != 1 {
@@ -189,46 +183,7 @@ func (t *timesheet) getShifts(employeeId string, schedule *allSchedules, reverse
 		}
 	}
 
-	// upcoming shifts sorted in desc date, need to return in asc date order
-	if reverse {
-		for i, j := 0, len(employeeShifts)-1; i < j; i, j = i+1, j-1 {
-			employeeShifts[i], employeeShifts[j] = employeeShifts[j], employeeShifts[i]
-		}
-	}
-
 	return &Timesheet{
 		Shifts: employeeShifts,
 	}
-}
-
-func (t *timesheet) filterForUpcomingShifts(schedule *allSchedules) (*allSchedules, error) {
-	employeeIds := [][]interface{}{}
-	shiftNames := [][]interface{}{}
-	shifts := [][]interface{}{}
-
-	today := TimeService.GetToday()
-	log.Printf("[INFO] Today: %s", today.String())
-	for i, row := range schedule.Shifts {
-		shiftDate := row[0].(string)
-		convertedDate, err := TimeService.ConvertDateToTime(shiftDate)
-		if err != nil {
-			log.Printf("[ERROR] Failed to convert date: %s\nError: %s", shiftDate, err.Error())
-			return &allSchedules{}, err
-		}
-
-		shiftIsUpcoming := convertedDate.After(today) || convertedDate.Equal(today)
-		if !shiftIsUpcoming {
-			break
-		}
-
-		employeeIds = append(employeeIds, schedule.EmployeeIds[i])
-		shiftNames = append(shiftNames, schedule.ShiftNames[i])
-		shifts = append(shifts, schedule.Shifts[i])
-	}
-
-	return &allSchedules{
-		EmployeeIds: employeeIds,
-		ShiftNames:  shiftNames,
-		Shifts:      shifts,
-	}, nil
 }

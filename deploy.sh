@@ -15,12 +15,12 @@ args=("$@")
 if containsElement "FrontendService" "${args[@]}" || containsElement "--all" "${args[@]}"; then
   echo "Deploying FrontendService..."
   # If FrontendService is a part of the deployment, build it
-  cd src/frontend && yarn build && cd ../..
+  cd src/frontend && pnpm run build && cd ../..
 fi
 
 if containsElement "ApiService" "${args[@]}"; then
   echo "Deploying ApiService..."
-  yarn test:GoogleSheets
+  pnpm run test:GoogleSheets
 fi
 
 # Proceed with TypeScript compilation and CDK deploy
