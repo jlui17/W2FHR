@@ -20,7 +20,7 @@ fi
 
 if containsElement "ApiService" "${args[@]}"; then
   echo "Deploying ApiService..."
-  pnpm run test:GoogleSheets
+  pnpm run test:Googlesheets
 fi
 
 # Proceed with TypeScript compilation and CDK deploy
