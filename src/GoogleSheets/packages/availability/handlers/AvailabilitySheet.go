@@ -9,18 +9,21 @@ import (
 )
 
 const (
-	availabilitySheetId       = "1m-t041RzaQRj2XqGo0KIpAnzUg6w71e0_9UFudIJnxU"
-	availabilitySheetName     = "Availability"
-	availabilityViewName      = "View"
-	availabilityDay1Col       = "E"
-	availabilityDay4Col       = "H"
-	availabilityCanUpdateCell = availabilityViewName + "!G4"
-	availabilityViewingDates  = availabilityViewName + "!B4:E4"
-	availabilityEmployeeIds   = availabilitySheetName + "!A2:A"
-	availabilityCells         = availabilitySheetName + "!E2:H"
-	availabilityUpdateOffset  = 2
+	availabilitySheetId      = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
+	availabilitySheetName    = "Availability"
+	availabilityViewName     = "View - Availability"
+	availabilityDay1Col      = "E"
+	availabilityDay4Col      = "H"
+	availabilityUpdateOffset = 3
 
 	UPDATE_AVAILABILITY_DISABLED_ERROR = "UPDATE_AVAILABILITY_DISABLED_ERROR"
+)
+
+var (
+	availabilityCanUpdateCell = fmt.Sprintf("'%s'!G4", availabilityViewName)
+	availabilityViewingDates  = fmt.Sprintf("'%s'!B4:E4", availabilityViewName)
+	availabilityEmployeeIds   = fmt.Sprintf("'%s'!A3:A", availabilitySheetName)
+	availabilityCells         = fmt.Sprintf("'%s'!%s3:%s", availabilitySheetName, availabilityDay1Col, availabilityDay4Col)
 )
 
 type EmployeeAvailabilityDay struct {
