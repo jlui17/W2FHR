@@ -1,15 +1,11 @@
-import {
-  INFO_MESSAGES,
-  ROUTES,
-  SUCCESS_MESSAGES,
-} from "@/components/common/constants";
+import { ROUTES, TOAST } from "@/components/common/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
-import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
 import {
   AccountSecurityFormSchema,
   AccountSecurityWidget,
@@ -26,7 +22,6 @@ function SignUpController(): JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
-  const { setAlert } = useAlert();
   const navigate = useNavigate();
 
   const { mutateAsync: doSignUp } = useSignUp({
@@ -36,27 +31,28 @@ function SignUpController(): JSX.Element {
     },
     onError: (err: Error) => {
       setIsLoading(false);
-      setAlert({ type: AlertType.ERROR, message: err.message });
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
+      });
     },
   });
 
   const { mutateAsync: doConfirm } = useConfirmAccount({
     onSuccess: () => {
       setIsLoading(false);
-      setAlert({
-        type: AlertType.SUCCESS,
-        message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
+      toast.success(TOAST.HEADERS.SUCCESS, {
+        description: TOAST.MESSAGES.SUCCESSFUL_VERIFICATION,
+        duration: TOAST.DURATIONS.SUCCESS,
       });
-
       navigate(ROUTES.DASHBOARD);
     },
     onError: (err: Error) => {
       setIsLoading(false);
-      setAlert({
-        type: AlertType.ERROR,
-        message: err.message,
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
       });
-
       console.error(err);
     },
   });
@@ -70,20 +66,18 @@ function SignUpController(): JSX.Element {
     useSendSignUpConfirmationCode({
       onSuccess: () => {
         setIsLoading(false);
-        setAlert({
-          type: AlertType.INFO,
-          message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
+        toast.success(TOAST.HEADERS.SUCCESS, {
+          description: TOAST.MESSAGES.VERIFICATION_CODE_SENT,
+          duration: TOAST.DURATIONS.SUCCESS,
         });
       },
       onError: (err: Error) => {
         setIsLoading(false);
-        const errorAlert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: err.message,
-        };
-
+        toast.error(TOAST.HEADERS.ERROR, {
+          description: err.message,
+          duration: TOAST.DURATIONS.ERROR,
+        });
         console.error(err);
-        setAlert(errorAlert);
       },
     });
 

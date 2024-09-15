@@ -3,14 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
 import { AuthenticationContext } from "../../AuthenticationContextProvider";
-import { AlertInfo, AlertType, useAlert } from "../../common/Alerts";
-import {
-  INFO_MESSAGES,
-  ROUTES,
-  SUCCESS_MESSAGES,
-} from "../../common/constants";
+import { ROUTES, TOAST } from "../../common/constants";
 import { Confirmation } from "../Confirmation/Confirmation";
 import {
   NotConfirmedException,
@@ -43,16 +39,10 @@ const LoginController = () => {
     setStayLoggedIn: setStayLoggedInContext,
   } = useContext(AuthenticationContext);
   const navigate = useNavigate();
-  const { setAlert } = useAlert();
 
   const { mutateAsync: login } = useLogin(
     (data) => {
       saveAuthSession(data);
-      setAlert({
-        type: AlertType.SUCCESS,
-        message: "Login successful",
-      });
-
       navigate(ROUTES.DASHBOARD);
     },
     (err: Error) => {
@@ -62,29 +52,27 @@ const LoginController = () => {
         return;
       }
       logout();
-      let errorMessage = err.message;
-      setAlert({
-        type: AlertType.ERROR,
-        message: errorMessage,
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
       });
       console.error(err);
-    }
+    },
   );
 
   const { mutateAsync: doConfirm } = useConfirmAccount({
     onSuccess: () => {
-      setAlert({
-        type: AlertType.SUCCESS,
-        message: SUCCESS_MESSAGES.SUCCESSFUL_VERIFICATION,
+      toast.success(TOAST.HEADERS.SUCCESS, {
+        description: TOAST.MESSAGES.SUCCESSFUL_VERIFICATION,
+        duration: TOAST.DURATIONS.SUCCESS,
       });
-
       setIsLoading(false);
       navigate(ROUTES.DASHBOARD);
     },
     onError: (err: Error) => {
-      setAlert({
-        type: AlertType.ERROR,
-        message: err.message,
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
       });
 
       console.error(err);
@@ -101,20 +89,18 @@ const LoginController = () => {
     useSendSignUpConfirmationCode({
       onSuccess: () => {
         setIsLoading(false);
-        setAlert({
-          type: AlertType.INFO,
-          message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
+        toast.info(TOAST.HEADERS.INFO, {
+          description: TOAST.MESSAGES.VERIFICATION_CODE_SENT,
+          duration: TOAST.DURATIONS.INFO,
         });
       },
       onError: (err: Error) => {
         setIsLoading(false);
-        const errorAlert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: err.message,
-        };
-
+        toast.error(TOAST.HEADERS.ERROR, {
+          description: err.message,
+          duration: TOAST.DURATIONS.ERROR,
+        });
         console.error(err);
-        setAlert(errorAlert);
       },
     });
 

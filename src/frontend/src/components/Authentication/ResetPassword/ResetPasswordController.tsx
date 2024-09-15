@@ -3,13 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
-import { AlertType, useAlert } from "../../common/Alerts";
-import {
-  INFO_MESSAGES,
-  ROUTES,
-  SUCCESS_MESSAGES,
-} from "../../common/constants";
+import { ROUTES, TOAST } from "../../common/constants";
 import {
   AccountSecurityFormSchema,
   AccountSecurityWidget,
@@ -27,21 +23,20 @@ const ResetPasswordController = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { setAlert } = useAlert();
 
   const { mutateAsync: doInitReset } = initiatePasswordReset({
     onSuccess: () => {
       setIsLoading(false);
-      setAlert({
-        type: AlertType.INFO,
-        message: INFO_MESSAGES.VERIFICATION_CODE_SENT,
+      toast.info(TOAST.HEADERS.INFO, {
+        description: TOAST.MESSAGES.VERIFICATION_CODE_SENT,
+        duration: TOAST.DURATIONS.INFO,
       });
     },
     onError: (err: Error) => {
       setIsLoading(false);
-      setAlert({
-        type: AlertType.ERROR,
-        message: err.message,
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
       });
     },
   });
@@ -49,18 +44,17 @@ const ResetPasswordController = () => {
   const { mutateAsync: confirmReset } = confirmPasswordReset({
     onSuccess: () => {
       setIsLoading(false);
-      setAlert({
-        type: AlertType.SUCCESS,
-        message: SUCCESS_MESSAGES.SUCCESSFUL_PASSWORD_RESET,
+      toast.success(TOAST.HEADERS.SUCCESS, {
+        description: TOAST.MESSAGES.SUCCESSFUL_PASSWORD_RESET,
+        duration: TOAST.DURATIONS.SUCCESS,
       });
       navigate(ROUTES.LOGIN);
     },
     onError: (err: Error) => {
       setIsLoading(false);
-      let errorMessage: string = err.message;
-      setAlert({
-        type: AlertType.ERROR,
-        message: errorMessage,
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
       });
     },
   });

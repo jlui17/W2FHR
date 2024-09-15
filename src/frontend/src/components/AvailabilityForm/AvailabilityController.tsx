@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useContext } from "react";
+import { toast } from "sonner";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
-import { AlertInfo, AlertType, useAlert } from "../common/Alerts";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
+import { ERROR_MESSAGES, TOAST } from "../common/constants";
 import { AvailabilityForm, LoadingAvailabilityForm } from "./AvailabilityForm";
 import {
   AVAIALBILITY_QUERY_KEY,
@@ -22,7 +22,6 @@ const defaultAvailability: UserAvailability = {
 const queryClient = new QueryClient();
 
 function AvailabilityController(): JSX.Element {
-  const { setAlert } = useAlert();
   const { getAuthSession } = useContext(AuthenticationContext);
 
   const { isFetching, isError, data, error } = useUserAvailability({
@@ -33,31 +32,31 @@ function AvailabilityController(): JSX.Element {
     useUpdateAvailability({
       onSuccess: async (updated: UserAvailability) => {
         queryClient.setQueryData(AVAIALBILITY_QUERY_KEY, () => updated);
-        setAlert({
-          type: AlertType.SUCCESS,
-          message: SUCCESS_MESSAGES.AVAILABILITY.SUCESSFUL_UPDATE,
+        toast.success(TOAST.HEADERS.SUCCESS, {
+          description: "Your availability has been updated.",
+          duration: TOAST.DURATIONS.SUCCESS,
         });
       },
       onError: (error: Error) => {
         console.error(`Error in Availability:\n${error}`);
-        const errorAlert: AlertInfo = {
-          type: AlertType.ERROR,
-          message: ERROR_MESSAGES.UNKNOWN_ERROR,
-        };
+        let message: string = ERROR_MESSAGES.UNKNOWN_ERROR;
         if (error instanceof Error) {
-          errorAlert.message = error.message;
+          message = error.message;
         }
-        setAlert(errorAlert);
+        toast.error(TOAST.HEADERS.ERROR, {
+          description: message,
+          duration: TOAST.DURATIONS.ERROR,
+        });
       },
     });
 
   function doUpdate(days: string[] | undefined): void {
     // shouldn never happen, (update is disabled and data is only undefined) when loading or error
     if (data === undefined) {
-      setAlert({
-        type: AlertType.ERROR,
-        message:
+      toast.error(TOAST.HEADERS.ERROR, {
+        description:
           "The impossible happened. Please refresh the page or contact Justin Lui on Slack after a few tries.",
+        duration: TOAST.DURATIONS.ERROR,
       });
       return;
     }
@@ -90,11 +89,10 @@ function AvailabilityController(): JSX.Element {
 
   if (isError) {
     console.error(`Error in Availability:\n${error}`);
-    const errorAlert: AlertInfo = {
-      type: AlertType.ERROR,
-      message: error.message,
-    };
-    setAlert(errorAlert);
+    toast.error(TOAST.HEADERS.ERROR, {
+      description: error.message,
+      duration: TOAST.DURATIONS.ERROR,
+    });
   }
 
   if (isFetching || updateIsPending) {

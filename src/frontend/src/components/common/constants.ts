@@ -38,22 +38,34 @@ export const RESPONSE_ERROR_MESSAGE_MAP: {
 };
 
 export const SUCCESS_MESSAGES = {
-  SUCCESSFUL_VERIFICATION:
-    "Succesfully verified your account. You may now log in.",
-  SUCCESSFUL_PASSWORD_RESET:
-    "Succesfully reset your password. You may now log in.",
   AVAILABILITY: {
     SUCESSFUL_UPDATE: "Your availability has been updated.",
   },
-};
-
-export const INFO_MESSAGES = {
-  VERIFICATION_CODE_SENT: "A verification code was sent to your email.",
-};
+} as const;
 
 export const ROUTES = {
   LOGIN: "/",
   SIGNUP: "/signUp",
   RESET_PASSWORD: "/resetPassword",
   DASHBOARD: "/dashboard",
-};
+} as const;
+
+export const TOAST = {
+  HEADERS: {
+    SUCCESS: "Success!",
+    INFO: "Info",
+    ERROR: "Uh oh!",
+  },
+  DURATIONS: {
+    SUCCESS: 2000,
+    INFO: 3000,
+    ERROR: 5000,
+  },
+  MESSAGES: {
+    VERIFICATION_CODE_SENT: "A verification code was sent to your email.",
+    SUCCESSFUL_PASSWORD_RESET:
+      "Succesfully reset your password. You may now log in.",
+    SUCCESSFUL_VERIFICATION:
+      "Succesfully verified your account. You may now log in.",
+  },
+} as const;
