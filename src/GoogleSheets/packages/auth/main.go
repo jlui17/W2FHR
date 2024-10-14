@@ -1,8 +1,7 @@
 package main
 
 import (
-	CreateEmployeeID "GoogleSheets/packages/auth/employee/create"
-	GetEmployeeId "GoogleSheets/packages/auth/employee/get"
+	Authorization "GoogleSheets/packages/auth/employee"
 	LoginEmployee "GoogleSheets/packages/auth/login"
 	ConfirmResetPassword "GoogleSheets/packages/auth/password/confirm"
 	ResetPassword "GoogleSheets/packages/auth/password/send"
@@ -20,44 +19,10 @@ import (
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch event.HTTPMethod {
-	case http.MethodGet:
-		switch event.Resource {
-		case "auth/employee/{email}":
-			email, emailExists := event.PathParameters["email"]
-			if !emailExists {
-				return events.APIGatewayProxyResponse{
-					StatusCode: 401,
-					Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-					Body:       SharedConstants.INCLUDE_EMAIL_ERROR,
-				}, nil
-			}
-			log.Printf("[INFO] Finding employeeId for email: %s", email)
-
-			employeeId, err := GetEmployeeId.HandleRequest(email)
-			if err != nil {
-				log.Printf("[ERROR] Auth - error getting employee id for %s: %s", email, err.Error())
-				return events.APIGatewayProxyResponse{
-					StatusCode: 500,
-					Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-					Body:       err.Error(),
-				}, nil
-			}
-			return events.APIGatewayProxyResponse{
-				StatusCode: 200,
-				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-				Body:       employeeId,
-			}, nil
-		default:
-			return events.APIGatewayProxyResponse{
-				StatusCode: 501,
-				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
-			}, nil
-		}
-
 	case http.MethodPost:
 		switch event.Resource {
 		case "/auth/employee":
-			return CreateEmployeeID.HandleRequest(ctx, event)
+			return Authorization.SignUpEmployee(ctx, event)
 		case "/auth/verify":
 			email := event.QueryStringParameters["email"]
 			if email == "" {
