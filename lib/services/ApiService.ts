@@ -8,20 +8,18 @@ import {
   MethodLoggingLevel,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
-import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
-interface ApiServiceProps {
-  AuthService: {
-    userPool: UserPool;
-    userPoolClient: UserPoolClient;
-  };
-}
+import { AuthService } from "./AuthService";
 
 export class ApiService extends Stack {
   public readonly api: RestApi;
 
-  constructor(scope: Construct, id: string, props: ApiServiceProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: { authService: AuthService }
+  ) {
     super(scope, id);
 
     const SOURCE_DIR = "src/GoogleSheets";
@@ -60,7 +58,7 @@ export class ApiService extends Stack {
       }
     );
 
-    const authHandler = new GoFunction(
+    const authHandler: GoFunction = new GoFunction(
       this,
       "GoogleSheetsGetEmployeeIdHandler",
       {
@@ -69,10 +67,18 @@ export class ApiService extends Stack {
         timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
-          COGNITO_CLIENT_ID: props.AuthService.userPoolClient.userPoolClientId,
+          COGNITO_POOL_ID: props.authService.userPool.userPoolId,
+          COGNITO_CLIENT_ID: props.authService.userPoolClient.userPoolClientId,
+          COGNITO_ATTENDANTS_GROUP_NAME:
+            props.authService.attendantGroup.groupName || "",
+          COGNITO_SUPERVISORS_GROUP_NAME:
+            props.authService.supervisorGroup.groupName || "",
+          COGNITO_MANAGERS_GROUP_NAME:
+            props.authService.managerGroup.groupName || "",
         },
       }
     );
+    props.authService.grantAuthHandlerRequiredPermissions(authHandler);
 
     const api = new RestApi(this, "RestApi", {
       defaultCorsPreflightOptions: {
@@ -99,7 +105,7 @@ export class ApiService extends Stack {
       this,
       "W2fhrApiAuthorizer",
       {
-        cognitoUserPools: [props.AuthService.userPool],
+        cognitoUserPools: [props.authService.userPool],
       }
     );
 
@@ -129,7 +135,6 @@ export class ApiService extends Stack {
 
     const baseAuthRoute = api.root.addResource("auth");
     const employeeRoute = baseAuthRoute.addResource("employee");
-    employeeRoute.addMethod("GET", new LambdaIntegration(authHandler));
     employeeRoute.addMethod("POST", new LambdaIntegration(authHandler));
     const verifyRoute = baseAuthRoute.addResource("verify");
     verifyRoute.addMethod("POST", new LambdaIntegration(authHandler));

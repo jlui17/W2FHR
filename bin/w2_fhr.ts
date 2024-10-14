@@ -11,10 +11,7 @@ const authService = new AuthService(app, "AuthService", {
 });
 
 const apiService = new ApiService(app, "ApiService", {
-  AuthService: {
-    userPool: authService.userPool,
-    userPoolClient: authService.userPoolClient,
-  },
+  authService: authService,
 });
 
 const frontendService = new FrontendService(app, "FrontendService");
