@@ -1,7 +1,7 @@
 package Availability
 
 import (
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"fmt"
 

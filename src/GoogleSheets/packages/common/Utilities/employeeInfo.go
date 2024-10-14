@@ -1,12 +1,19 @@
 package EmployeeInfo
 
 import (
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"errors"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	emailClaimsKey  = "email"
+	idClaimsKey     = "custom:employeeId"
+	groupsClaimsKey = "cognito:groups"
 )
 
 var (
@@ -35,22 +42,22 @@ func New(bearerToken string) (EmployeeInfo, error) {
 	}
 
 	claims := decodedIdToken.Claims.(jwt.MapClaims)
-	employeeId, ok := claims["custom:employeeId"]
+	employeeId, ok := claims[idClaimsKey]
 	if !ok {
 		log.Print("[ERROR] user doesn't have employeeId attribute")
 		return EmployeeInfo{}, SharedConstants.ErrNoEmployeeIdInToken
 	}
 
-	email, ok := claims["email"]
+	email, ok := claims[emailClaimsKey]
 	if !ok {
 		log.Print("[ERROR] user doesn't have email attribute")
 		return EmployeeInfo{}, SharedConstants.ErrNoEmployeeEmailInToken
 	}
 
-	groups, exists := claims["cognito:groups"]
+	groups, exists := claims[groupsClaimsKey]
 	if !exists {
 		log.Print("[ERROR] user doesn't have a group attribute")
-		return EmployeeInfo{}, SharedConstants.ErrNoCognitoGroupInToken
+		groups = []interface{}{os.Getenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY)}
 	}
 	groups, ok = groups.([]interface{})
 	if !ok {
@@ -85,7 +92,7 @@ func getIdTokenFromBearerToken(bearerToken string) (string, error) {
 }
 
 func parseIdToken(idToken string) (*jwt.Token, error) {
-	decodedIdToken, _, err := jwtParser.ParseUnverified(idToken, jwt.MapClaims{})
+	decodedIdToken, _, err := jwtParser.ParseUnverified(idToken, jwt.MapClaims{}) // Cognito Authorizer will verify idToken, we just need to get attributes from token
 	if err != nil {
 		log.Println(err)
 		return nil, err

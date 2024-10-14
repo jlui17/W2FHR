@@ -1,8 +1,8 @@
 package VerifyEmployeeCode
 
 import (
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
-	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"context"
 	"encoding/json"
 	"errors"

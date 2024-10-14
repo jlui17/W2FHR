@@ -1,7 +1,7 @@
 package main
 
 import (
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"GoogleSheets/packages/schedule/Schedule"
 	"context"

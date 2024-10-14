@@ -1,7 +1,7 @@
 package Authorization
 
 import (
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"context"
 	"encoding/json"
 	"errors"

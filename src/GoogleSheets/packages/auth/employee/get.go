@@ -1,7 +1,7 @@
 package Authorization
 
 import (
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"errors"
 	"log"
@@ -18,7 +18,6 @@ const (
 )
 
 var (
-	cognitoAttendantsGroupKey  = "COGNITO_ATTENDANTS_GROUP_NAME"
 	cognitoSupervisorsGroupKey = "COGNITO_SUPERVISORS_GROUP_NAME"
 	cognitoManagersGroupKey    = "COGNITO_MANAGERS_GROUP_NAME"
 )
@@ -110,7 +109,7 @@ func doGetInfo(email string, staffListInfo *staffListInfo) (*EmployeeInfoForSign
 }
 
 func translateToCognitoGroup(position string) string {
-	group := os.Getenv(cognitoAttendantsGroupKey)
+	group := os.Getenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY)
 	if strings.Contains(strings.ToLower(position), "supervisor") {
 		group = os.Getenv(cognitoSupervisorsGroupKey)
 	} else if strings.Contains(strings.ToLower(position), "manager") {

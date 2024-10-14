@@ -1,8 +1,8 @@
 package LoginEmployee
 
 import (
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
-	"GoogleSheets/packages/common/Constants/SharedConstants"
 	"errors"
 	"fmt"
 	"log"

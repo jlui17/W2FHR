@@ -8,7 +8,7 @@ import (
 
 	ConfirmEmployee "GoogleSheets/packages/auth/verify/confirm"
 	VerifyEmployee "GoogleSheets/packages/auth/verify/send"
-	"GoogleSheets/packages/common/Constants/SharedConstants"
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"context"
 	"log"
 	"net/http"

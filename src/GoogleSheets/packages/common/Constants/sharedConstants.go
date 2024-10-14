@@ -9,10 +9,13 @@ var (
 type ErrorMessages string
 
 const (
-	NUM_OF_DATES              = 4
+	NUM_OF_DATES = 4
+
 	INCLUDE_AUTH_HEADER_ERROR = "Please include Authorization header in request."
 	NOT_VALID_REQUEST_ERROR   = "Not a valid request"
 	INCLUDE_EMAIL_ERROR       = "Please include employee email in request."
+
+	COGNITO_ATTENDANTS_GROUP_ENV_KEY = "COGNITO_ATTENDANTS_GROUP_NAME"
 )
 
 var (
