@@ -3,7 +3,7 @@ package EmployeeInfo
 import (
 	"testing"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
