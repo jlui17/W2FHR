@@ -8,6 +8,7 @@ import os
 STAFF_LIST_SHEET_ID = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
 STAFF_LIST_EMPLOYEE_ID_RANGE = "'Total Staff'!A2:A"
 STAFF_LIST_EMAIL_RANGE = "'Total Staff'!G2:G"
+STAFF_LIST_POSITION_RANGE = "'Total Staff'!J2:J"
 
 GOOGLE_SHEETS_SECRET_FILE_NAME = "google-sheets-secret.txt"
 client = None
@@ -67,4 +68,26 @@ def get_emails_to_ids_map():
 
     for i in range(len(emails)):
         res[emails[i]] = ids[i]
+    return res
+
+def get_positions():
+    result = (
+        client.values()
+        .get(spreadsheetId=STAFF_LIST_SHEET_ID, range=STAFF_LIST_POSITION_RANGE, majorDimension="COLUMNS")
+        .execute()
+    )
+
+    return result.get("values", [None])[0]
+
+def get_emails_to_positions_map():
+    res = {}
+    emails = get_emails()
+    positions = get_positions()
+
+    if len(positions) != len(emails):
+        print("[ERROR] Email and POSITION column not in sync in staff list")
+        exit(0)
+
+    for i in range(len(emails)):
+        res[emails[i]] = positions[i]
     return res
