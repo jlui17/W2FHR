@@ -3,7 +3,7 @@ package main
 import (
 	Availability "GoogleSheets/packages/availability/handlers"
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/Utilities/EmployeeInfo"
+	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"context"
 	"encoding/json"
 	"log"

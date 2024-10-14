@@ -2,7 +2,7 @@ package main
 
 import (
 	"GoogleSheets/packages/common/Constants/SharedConstants"
-	"GoogleSheets/packages/common/Utilities/EmployeeInfo"
+	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"GoogleSheets/packages/schedule/Schedule"
 	"context"
 	"encoding/json"

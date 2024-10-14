@@ -21,12 +21,6 @@ type EmployeeInfo struct {
 	Group string
 }
 
-type EmployeeInfoProvider interface {
-	New(bearerToken string) EmployeeInfoProvider
-	GetEmail() string
-	GetEmployeeId() string
-}
-
 func New(bearerToken string) (EmployeeInfo, error) {
 	idToken, err := getIdTokenFromBearerToken(bearerToken)
 	if err != nil {
