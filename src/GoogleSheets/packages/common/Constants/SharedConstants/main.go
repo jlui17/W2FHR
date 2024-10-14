@@ -21,4 +21,5 @@ var (
 	ErrNoEmployeeIdInToken    = errors.New("employeeId not found in idToken")
 	ErrNoEmployeeEmailInToken = errors.New("email not found in idToken")
 	ErrEmployeeNotFound       = errors.New("employee not found")
+	ErrNoCognitoGroupInToken  = errors.New("cognito groups not found in idToken")
 )

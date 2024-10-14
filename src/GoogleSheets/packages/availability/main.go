@@ -36,15 +36,15 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	log.Printf("[INFO] %s Availability Request for email: %s, employee id: %s",
 		strings.ToUpper(event.HTTPMethod),
-		employeeInfo.GetEmail(),
-		employeeInfo.GetEmployeeId(),
+		employeeInfo.Email,
+		employeeInfo.Id,
 	)
 
 	switch event.HTTPMethod {
 	case "GET":
-		availability, err := Availability.Get(employeeInfo.GetEmployeeId())
+		availability, err := Availability.Get(employeeInfo.Id)
 		if err != nil {
-			log.Printf("[ERROR] Failed to get availability for %s: %s", employeeInfo.GetEmployeeId(), err.Error())
+			log.Printf("[ERROR] Failed to get availability for %s: %s", employeeInfo.Id, err.Error())
 			statusCode := 500
 			if err == SharedConstants.ErrEmployeeNotFound {
 				statusCode = 404
@@ -66,12 +66,12 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	case "POST":
 		newAvailabilityFromRequestBody := event.Body
 		newEmployeeAvailability := Availability.EmployeeAvailability{}
-		log.Printf("[INFO] Trying to update availability for %s: %s", employeeInfo.GetEmployeeId(), newAvailabilityFromRequestBody)
+		log.Printf("[INFO] Trying to update availability for %s: %s", employeeInfo.Id, newAvailabilityFromRequestBody)
 		json.Unmarshal([]byte(newAvailabilityFromRequestBody), &newEmployeeAvailability)
 
-		err := Availability.Update(employeeInfo.GetEmployeeId(), &newEmployeeAvailability)
+		err := Availability.Update(employeeInfo.Id, &newEmployeeAvailability)
 		if err != nil {
-			log.Printf("[ERROR] Failed to update availability for %s: %s", employeeInfo.GetEmployeeId(), err.Error())
+			log.Printf("[ERROR] Failed to update availability for %s: %s", employeeInfo.Id, err.Error())
 			var statusCode int
 
 			switch err.Error() {

@@ -37,11 +37,11 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	shouldGetUpcoming := getUpcomingShiftsExists && getUpcomingShifts == "true"
 	log.Printf("[INFO] GET Timesheet request (upcoming = %t) for email: %s, employee id: %s",
 		shouldGetUpcoming,
-		employeeInfo.GetEmail(),
-		employeeInfo.GetEmployeeId(),
+		employeeInfo.Email,
+		employeeInfo.Id,
 	)
 
-	schedule, err := Schedule.Get(employeeInfo.GetEmployeeId(), shouldGetUpcoming)
+	schedule, err := Schedule.Get(employeeInfo.Id, shouldGetUpcoming)
 	if err != nil {
 		log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
 		return events.APIGatewayProxyResponse{
@@ -51,7 +51,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	log.Printf("[INFO] Found shifts for %s: %v", employeeInfo.GetEmployeeId(), schedule)
+	log.Printf("[INFO] Found shifts for %s: %v", employeeInfo.Id, schedule)
 	res, _ := json.Marshal(schedule)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,

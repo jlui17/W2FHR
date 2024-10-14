@@ -18,9 +18,9 @@ const (
 )
 
 var (
-	cognitoAttendantsGroup  = os.Getenv("COGNITO_ATTENDANTS_GROUP_NAME")
-	cognitoSupervisorsGroup = os.Getenv("COGNITO_SUPERVISORS_GROUP_NAME")
-	cognitoManagersGroup    = os.Getenv("COGNITO_MANAGERS_GROUP_NAME")
+	cognitoAttendantsGroupKey  = "COGNITO_ATTENDANTS_GROUP_NAME"
+	cognitoSupervisorsGroupKey = "COGNITO_SUPERVISORS_GROUP_NAME"
+	cognitoManagersGroupKey    = "COGNITO_MANAGERS_GROUP_NAME"
 )
 
 type EmployeeInfoForSignUp struct {
@@ -110,11 +110,11 @@ func doGetInfo(email string, staffListInfo *staffListInfo) (*EmployeeInfoForSign
 }
 
 func translateToCognitoGroup(position string) string {
-	group := cognitoAttendantsGroup
+	group := os.Getenv(cognitoAttendantsGroupKey)
 	if strings.Contains(strings.ToLower(position), "supervisor") {
-		group = cognitoSupervisorsGroup
+		group = os.Getenv(cognitoSupervisorsGroupKey)
 	} else if strings.Contains(strings.ToLower(position), "manager") {
-		group = cognitoManagersGroup
+		group = os.Getenv(cognitoManagersGroupKey)
 	}
 
 	return group

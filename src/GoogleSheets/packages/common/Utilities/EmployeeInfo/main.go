@@ -16,22 +16,15 @@ var (
 )
 
 type EmployeeInfo struct {
-	email      string
-	employeeId string
+	Email string
+	Id    string
+	Group string
 }
 
 type EmployeeInfoProvider interface {
 	New(bearerToken string) EmployeeInfoProvider
 	GetEmail() string
 	GetEmployeeId() string
-}
-
-func (e EmployeeInfo) GetEmail() string {
-	return e.email
-}
-
-func (e EmployeeInfo) GetEmployeeId() string {
-	return e.employeeId
 }
 
 func New(bearerToken string) (EmployeeInfo, error) {
@@ -60,9 +53,26 @@ func New(bearerToken string) (EmployeeInfo, error) {
 		return EmployeeInfo{}, SharedConstants.ErrNoEmployeeEmailInToken
 	}
 
+	groups, exists := claims["cognito:groups"]
+	if !exists {
+		log.Print("[ERROR] user doesn't have a group attribute")
+		return EmployeeInfo{}, SharedConstants.ErrNoCognitoGroupInToken
+	}
+	groups, ok = groups.([]interface{})
+	if !ok {
+		log.Print("[ERROR] for some weird reason, groups is not a string list")
+		return EmployeeInfo{}, SharedConstants.ErrNoCognitoGroupInToken
+	}
+	actualGroups := groups.([]interface{})
+	if len(actualGroups) < 1 {
+		log.Print("[ERROR] no groups for user")
+		return EmployeeInfo{}, SharedConstants.ErrNoCognitoGroupInToken
+	}
+
 	return EmployeeInfo{
-		employeeId: employeeId.(string),
-		email:      email.(string),
+		Id:    employeeId.(string),
+		Email: email.(string),
+		Group: actualGroups[0].(string),
 	}, nil
 }
 
