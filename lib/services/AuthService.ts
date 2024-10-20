@@ -10,6 +10,7 @@ import { Construct } from "constructs";
 
 export class AuthService extends Stack {
   public readonly userPool: UserPool;
+  public readonly newUserPool: UserPool;
   public readonly userPoolClient: UserPoolClient;
   public readonly attendantGroup: CfnUserPoolGroup;
   public readonly supervisorGroup: CfnUserPoolGroup;
@@ -42,6 +43,35 @@ export class AuthService extends Stack {
       },
       customAttributes: {
         employeeId: new aws_cognito.StringAttribute(),
+        availabilityRow: new aws_cognito.NumberAttribute(),
+      },
+      userVerification: {
+        emailSubject: "[Wun2Free Entertainment] Verify your email address",
+        emailBody:
+          "Your verification code is {####}. Please enter it in the verification page to complete your registration.",
+        emailStyle: VerificationEmailStyle.CODE,
+      },
+    });
+
+    this.newUserPool = new UserPool(this, props.userPoolName + 2025, {
+      userPoolName: props.userPoolName,
+      selfSignUpEnabled: true,
+      signInCaseSensitive: false,
+      signInAliases: {
+        email: true,
+      },
+      autoVerify: {
+        email: true,
+      },
+      standardAttributes: {
+        email: {
+          required: true,
+          mutable: true,
+        },
+      },
+      customAttributes: {
+        employeeId: new aws_cognito.StringAttribute(),
+        availabilityRow: new aws_cognito.StringAttribute(),
       },
       userVerification: {
         emailSubject: "[Wun2Free Entertainment] Verify your email address",

@@ -8,9 +8,13 @@ import (
 )
 
 func TestGetEmployeeInfoForSignUp(t *testing.T) {
+	attendantsGroupName := "attendants"
+	os.Setenv("COGNITO_ATTENDANTS_GROUP_NAME", attendantsGroupName)
+
 	type inputType struct {
-		email         string
-		staffListInfo *staffListInfo
+		email                        string
+		staffListInfo                *staffListInfo
+		availabilitySheetEmployeeIds *[][]interface{}
 	}
 
 	tests := []struct {
@@ -20,7 +24,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			name: "Throws employee not found error",
+			name: "Throws employee not found error when email doesn't exist in staff list",
 			input: inputType{
 				email: "some non existent email",
 				staffListInfo: &staffListInfo{
@@ -28,6 +32,21 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
+				availabilitySheetEmployeeIds: &[][]interface{}{},
+			},
+			expected:    &EmployeeInfoForSignUp{},
+			expectedErr: SharedConstants.ErrEmployeeNotFound,
+		},
+		{
+			name: "Throws employee not found error when id doesn't exist in availability sheet",
+			input: inputType{
+				email: "some non existent email",
+				staffListInfo: &staffListInfo{
+					Emails:    []interface{}{"EMAIL"},
+					Ids:       []interface{}{"1"},
+					Positions: []interface{}{""},
+				},
+				availabilitySheetEmployeeIds: &[][]interface{}{{"2"}},
 			},
 			expected:    &EmployeeInfoForSignUp{},
 			expectedErr: SharedConstants.ErrEmployeeNotFound,
@@ -41,10 +60,12 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
+				availabilitySheetEmployeeIds: &[][]interface{}{{"1"}},
 			},
 			expected: &EmployeeInfoForSignUp{
-				Id:    "1",
-				Group: "",
+				Id:                   "1",
+				Group:                attendantsGroupName,
+				AvailabilitySheetRow: 0 + availabilitySheetRowOffset,
 			},
 			expectedErr: nil,
 		},
@@ -57,10 +78,30 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
+				availabilitySheetEmployeeIds: &[][]interface{}{{"1"}},
 			},
 			expected: &EmployeeInfoForSignUp{
-				Id:    "1",
-				Group: "",
+				Id:                   "1",
+				Group:                attendantsGroupName,
+				AvailabilitySheetRow: 0 + availabilitySheetRowOffset,
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "Finds correct availability sheet row",
+			input: inputType{
+				email: "email",
+				staffListInfo: &staffListInfo{
+					Emails:    []interface{}{"   email "},
+					Ids:       []interface{}{"1"},
+					Positions: []interface{}{""},
+				},
+				availabilitySheetEmployeeIds: &[][]interface{}{{"2"}, {"1"}},
+			},
+			expected: &EmployeeInfoForSignUp{
+				Id:                   "1",
+				Group:                attendantsGroupName,
+				AvailabilitySheetRow: 1 + availabilitySheetRowOffset,
 			},
 			expectedErr: nil,
 		},
@@ -68,7 +109,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ans, err := doGetInfo(tt.input.email, tt.input.staffListInfo)
+			ans, err := doGetInfo(tt.input.email, tt.input.staffListInfo, tt.input.availabilitySheetEmployeeIds)
 			if tt.expectedErr != nil && err != tt.expectedErr {
 				t.Errorf("Got %v, expected: %v", err, tt.expectedErr)
 			}

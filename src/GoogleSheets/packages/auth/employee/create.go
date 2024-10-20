@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -50,7 +51,7 @@ func SignUpEmployee(ctx context.Context, event events.APIGatewayProxyRequest) (e
 		}, nil
 	}
 
-	fmt.Printf("[INFO] Auth - attempting to sign up employee! Email: %s, employee ID: %s", req, employeeInfoForSignUp)
+	fmt.Printf("[INFO] Auth - attempting to sign up employee! Email: %s, employee ID: %s", req.Email, employeeInfoForSignUp.Id)
 	cognitoClientId := os.Getenv("COGNITO_CLIENT_ID")
 	if cognitoClientId == "" {
 		log.Print("[ERROR] Auth - cognito client id not available")
@@ -71,7 +72,7 @@ func SignUpEmployee(ctx context.Context, event events.APIGatewayProxyRequest) (e
 	}
 	client := cognitoidentityprovider.NewFromConfig(cfg)
 
-	signUpRes, err := doSignUp(ctx, employeeInfoForSignUp.Id, req.Email, req.Password, cognitoClientId, client)
+	signUpRes, err := doSignUp(ctx, req.Email, req.Password, employeeInfoForSignUp, cognitoClientId, client)
 	if err != nil {
 		log.Printf("[ERROR] Auth - error while signing up %s, err: %s", req.Email, err)
 		status := 500
@@ -127,12 +128,18 @@ func SignUpEmployee(ctx context.Context, event events.APIGatewayProxyRequest) (e
 	}, nil
 }
 
-func doSignUp(ctx context.Context, employeeId string, email string, password string, cognitoClientId string, client *cognitoidentityprovider.Client) (*cognitoidentityprovider.SignUpOutput, error) {
+func doSignUp(ctx context.Context, email string, password string, info *EmployeeInfoForSignUp, cognitoClientId string, client *cognitoidentityprovider.Client) (*cognitoidentityprovider.SignUpOutput, error) {
 	employeeIdKey := "custom:employeeId"
+	availabilityRowKey := "custom:availabilityRow"
+	availabilityRowAsStr := strconv.Itoa(info.AvailabilitySheetRow)
 	attributes := []types.AttributeType{
 		{
 			Name:  &employeeIdKey,
-			Value: &employeeId,
+			Value: &info.Id,
+		},
+		{
+			Name:  &availabilityRowKey,
+			Value: &availabilityRowAsStr,
 		},
 	}
 	signUpInput := &cognitoidentityprovider.SignUpInput{

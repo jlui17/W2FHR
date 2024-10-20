@@ -5,7 +5,7 @@ import (
 )
 
 func Get(employeeId string) (*EmployeeAvailability, error) {
-	sheet, err := getAvailabilitySheet()
+	sheet, err := Connect()
 	if err != nil {
 		return &EmployeeAvailability{}, err
 	}

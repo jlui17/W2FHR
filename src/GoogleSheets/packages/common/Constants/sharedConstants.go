@@ -19,10 +19,8 @@ const (
 )
 
 var (
-	ErrNotABearerToken        = errors.New("please provide a bearer token")
-	ErrInvalidIdToken         = errors.New("invalid idToken")
-	ErrNoEmployeeIdInToken    = errors.New("employeeId not found in idToken")
-	ErrNoEmployeeEmailInToken = errors.New("email not found in idToken")
-	ErrEmployeeNotFound       = errors.New("employee not found")
-	ErrNoCognitoGroupInToken  = errors.New("cognito groups not found in idToken")
+	ErrNotABearerToken  = errors.New("please provide a bearer token")
+	ErrInvalidIdToken   = errors.New("invalid idToken")
+	ErrEmployeeNotFound = errors.New("employee not found")
+	ErrInternal         = errors.New("Something went wrong. Please try again later or contact a manager.")
 )

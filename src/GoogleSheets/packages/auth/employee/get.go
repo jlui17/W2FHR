@@ -1,6 +1,7 @@
 package Authorization
 
 import (
+	Availability "GoogleSheets/packages/availability/handlers"
 	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
 	"errors"
@@ -10,11 +11,12 @@ import (
 )
 
 const (
-	sheetId           = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
-	getRangePrefix    = "'Total Staff'!"
-	emailGetRange     = getRangePrefix + "G2:G"
-	idGetRange        = getRangePrefix + "A2:A"
-	positionsGetRange = getRangePrefix + "J2:J"
+	sheetId                    = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
+	getRangePrefix             = "'Total Staff'!"
+	emailGetRange              = getRangePrefix + "G2:G"
+	idGetRange                 = getRangePrefix + "A2:A"
+	positionsGetRange          = getRangePrefix + "J2:J"
+	availabilitySheetRowOffset = 3
 )
 
 var (
@@ -23,8 +25,9 @@ var (
 )
 
 type EmployeeInfoForSignUp struct {
-	Id    string
-	Group string
+	Id                   string
+	Group                string
+	AvailabilitySheetRow int
 }
 
 type staffListInfo struct {
@@ -50,7 +53,12 @@ func getEmployeeInfoForSignUp(email string) (*EmployeeInfoForSignUp, error) {
 		return &EmployeeInfoForSignUp{}, errors.New("number of emails is not the same as # of ids or positions")
 	}
 
-	res, err := doGetInfo(email, staffListInfo)
+	availabilitySheetEmployeeIds, err := getAvailabilitySheetEmployeeIds()
+	if err != nil {
+		return &EmployeeInfoForSignUp{}, err
+	}
+
+	res, err := doGetInfo(email, staffListInfo, availabilitySheetEmployeeIds)
 	if err != nil {
 		return &EmployeeInfoForSignUp{}, err
 	}
@@ -89,23 +97,53 @@ func getStaffListInfo() (*staffListInfo, error) {
 	}, nil
 }
 
-func doGetInfo(email string, staffListInfo *staffListInfo) (*EmployeeInfoForSignUp, error) {
+func getAvailabilitySheetEmployeeIds() (*[][]interface{}, error) {
+	availabilitySheet, err := Availability.Connect()
+	if err != nil {
+		return &[][]interface{}{}, err
+	}
+
+	info, err := availabilitySheet.GetAll()
+	if err != nil {
+		return &[][]interface{}{}, err
+	}
+
+	return &info.EmployeeIds, err
+}
+
+func doGetInfo(email string, staffListInfo *staffListInfo, availabilitySheetEmployeeIds *[][]interface{}) (*EmployeeInfoForSignUp, error) {
+	var id string
+	var group string
 	for i, staffEmail := range staffListInfo.Emails {
 		if strings.EqualFold(email, strings.TrimSpace(staffEmail.(string))) {
-			position := staffListInfo.Positions[i].(string)
-			group := translateToCognitoGroup(position)
-			id := staffListInfo.Ids[i].(string)
-
-			log.Printf("[INFO] Employee Info found for %s: %s", email, id)
-			return &EmployeeInfoForSignUp{
-				Id:    id,
-				Group: group,
-			}, nil
+			group = translateToCognitoGroup(staffListInfo.Positions[i].(string))
+			id = staffListInfo.Ids[i].(string)
 		}
 	}
 
-	log.Printf("[INFO] No employeeId found for %s", email)
-	return &EmployeeInfoForSignUp{}, SharedConstants.ErrEmployeeNotFound
+	if id == "" || group == "" {
+		log.Printf("[DEBUG] No employeeId found for %s\nStaff List Emails: %v", email, staffListInfo.Emails)
+		return &EmployeeInfoForSignUp{}, SharedConstants.ErrEmployeeNotFound
+	}
+
+	availabilitySheetRow := -1
+	for i, row := range *availabilitySheetEmployeeIds {
+		if row[0].(string) == id {
+			availabilitySheetRow = i + availabilitySheetRowOffset
+		}
+	}
+
+	if availabilitySheetRow == -1 {
+		log.Printf("[DEBUG] Couldn't find row of employee %s in availability sheet: %v", id, availabilitySheetEmployeeIds)
+		return &EmployeeInfoForSignUp{}, SharedConstants.ErrEmployeeNotFound
+	}
+
+	log.Printf("[INFO] Employee Info found for %s: %s", email, id)
+	return &EmployeeInfoForSignUp{
+		Id:                   id,
+		Group:                group,
+		AvailabilitySheetRow: availabilitySheetRow,
+	}, nil
 }
 
 func translateToCognitoGroup(position string) string {

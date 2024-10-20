@@ -5,7 +5,7 @@ import (
 )
 
 func Update(employeeId string, newAvailability *EmployeeAvailability) error {
-	sheet, err := getAvailabilitySheet()
+	sheet, err := Connect()
 	if err != nil {
 		return err
 	}

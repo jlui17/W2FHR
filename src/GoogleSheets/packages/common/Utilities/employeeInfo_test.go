@@ -13,17 +13,16 @@ import (
 var (
 	signingKey     = []byte("super secret key")
 	keysToCheckMap = map[string]interface{}{
-		emailClaimsKey:  "some email",
-		idClaimsKey:     "some id",
-		groupsClaimsKey: []interface{}{"some group"},
+		emailClaimsKey:           "some email",
+		IdClaimsKey:              "some id",
+		groupsClaimsKey:          []interface{}{"some group"},
+		AvailabilityRowClaimsKey: "1",
 	}
 )
 
 func TestGetIdTokenFromBearerToken(t *testing.T) {
 	expectedIdToken := getTestToken(jwt.MapClaims{
-		"email":             keysToCheckMap[emailClaimsKey],
-		"cognito:groups":    []interface{}{keysToCheckMap[groupsClaimsKey]},
-		"custom:employeeId": keysToCheckMap[idClaimsKey],
+		emailClaimsKey: keysToCheckMap[emailClaimsKey],
 	})
 
 	_, err := getIdTokenFromBearerToken("111111")
@@ -50,6 +49,13 @@ func TestCreateEmployeeInfoFromBearerToken(t *testing.T) {
 	defaultGroup := "default group"
 	os.Setenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY, defaultGroup)
 
+	claimsForAvailabilityRowTest := map[string]interface{}{
+		emailClaimsKey:           "some email",
+		IdClaimsKey:              "some id",
+		groupsClaimsKey:          []interface{}{"some group"},
+		AvailabilityRowClaimsKey: "some non integer",
+	}
+
 	var tests = []struct {
 		name        string
 		input       jwt.Claims
@@ -58,33 +64,47 @@ func TestCreateEmployeeInfoFromBearerToken(t *testing.T) {
 	}{
 		{
 			name:        "Error when user doesn't have employee email",
-			input:       generateClaims([]string{emailClaimsKey}),
+			input:       generateClaimsAndIngoreKeys([]string{emailClaimsKey}),
 			expected:    EmployeeInfo{},
-			expectedErr: SharedConstants.ErrNoEmployeeEmailInToken,
+			expectedErr: SharedConstants.ErrInternal,
 		},
 		{
 			name:        "Error when user doesn't have employee id",
-			input:       generateClaims([]string{idClaimsKey}),
+			input:       generateClaimsAndIngoreKeys([]string{IdClaimsKey}),
 			expected:    EmployeeInfo{},
-			expectedErr: SharedConstants.ErrNoEmployeeIdInToken,
+			expectedErr: SharedConstants.ErrInternal,
+		},
+		{
+			name:        "Error when user doesn't have availability row",
+			input:       generateClaimsAndIngoreKeys([]string{AvailabilityRowClaimsKey}),
+			expected:    EmployeeInfo{},
+			expectedErr: SharedConstants.ErrInternal,
+		},
+		{
+			name:        "Error when user availability row isn't an int",
+			input:       generateClaims(claimsForAvailabilityRowTest),
+			expected:    EmployeeInfo{},
+			expectedErr: SharedConstants.ErrInternal,
 		},
 		{
 			name:  "When no groups in token, default to attendants",
-			input: generateClaims([]string{groupsClaimsKey}),
+			input: generateClaimsAndIngoreKeys([]string{groupsClaimsKey}),
 			expected: EmployeeInfo{
-				Email: keysToCheckMap[emailClaimsKey].(string),
-				Id:    keysToCheckMap[idClaimsKey].(string),
-				Group: defaultGroup,
+				Email:           keysToCheckMap[emailClaimsKey].(string),
+				Id:              keysToCheckMap[IdClaimsKey].(string),
+				Group:           defaultGroup,
+				AvailabilityRow: 1,
 			},
 			expectedErr: nil,
 		},
 		{
 			name:  "When everything is present in the token, correctly get the info",
-			input: generateClaims([]string{}),
+			input: generateClaimsAndIngoreKeys([]string{}),
 			expected: EmployeeInfo{
-				Email: keysToCheckMap[emailClaimsKey].(string),
-				Id:    keysToCheckMap[idClaimsKey].(string),
-				Group: keysToCheckMap[groupsClaimsKey].([]interface{})[0].(string),
+				Email:           keysToCheckMap[emailClaimsKey].(string),
+				Id:              keysToCheckMap[IdClaimsKey].(string),
+				Group:           keysToCheckMap[groupsClaimsKey].([]interface{})[0].(string),
+				AvailabilityRow: 1,
 			},
 			expectedErr: nil,
 		},
@@ -107,12 +127,20 @@ func TestCreateEmployeeInfoFromBearerToken(t *testing.T) {
 	}
 }
 
-func generateClaims(toIgnore []string) jwt.Claims {
-	res := jwt.MapClaims{}
+func generateClaimsAndIngoreKeys(toIgnore []string) jwt.Claims {
+	claims := map[string]interface{}{}
 	for k, v := range keysToCheckMap {
 		if slices.Contains(toIgnore, k) {
 			continue
 		}
+		claims[k] = v
+	}
+	return generateClaims(claims)
+}
+
+func generateClaims(claims map[string]interface{}) jwt.Claims {
+	res := jwt.MapClaims{}
+	for k, v := range claims {
 		res[k] = v
 	}
 	return res

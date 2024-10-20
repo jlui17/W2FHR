@@ -50,7 +50,7 @@ type availabilitySheet struct {
 	service *sheets.Service
 }
 
-func getAvailabilitySheet() (*availabilitySheet, error) {
+func Connect() (*availabilitySheet, error) {
 	service, err := GoogleClient.New()
 	if err != nil {
 		return &availabilitySheet{}, err
@@ -60,7 +60,7 @@ func getAvailabilitySheet() (*availabilitySheet, error) {
 }
 
 func (a *availabilitySheet) Get(employeeId string) (*EmployeeAvailability, error) {
-	all, err := a.getAll()
+	all, err := a.GetAll()
 	if err != nil {
 		return &EmployeeAvailability{}, err
 	}
@@ -84,7 +84,7 @@ func (a *availabilitySheet) Get(employeeId string) (*EmployeeAvailability, error
 	}, nil
 }
 
-func (a *availabilitySheet) getAll() (*AllAvailability, error) {
+func (a *availabilitySheet) GetAll() (*AllAvailability, error) {
 	r1, err := a.service.Spreadsheets.Values.
 		BatchGet(availabilitySheetId).
 		Ranges(
@@ -113,7 +113,7 @@ func (a *availabilitySheet) getAll() (*AllAvailability, error) {
 }
 
 func (a *availabilitySheet) Update(employeeId string, newAvailability *EmployeeAvailability) error {
-	all, err := a.getAll()
+	all, err := a.GetAll()
 	if err != nil {
 		return err
 	}
