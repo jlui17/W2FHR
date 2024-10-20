@@ -42,7 +42,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 	switch event.HTTPMethod {
 	case "GET":
-		availability, err := Availability.Get(employeeInfo.Id)
+		availability, err := Availability.Get(employeeInfo)
 		if err != nil {
 			log.Printf("[ERROR] Failed to get availability for %s: %s", employeeInfo.Id, err.Error())
 			statusCode := 500

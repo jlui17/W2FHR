@@ -3,20 +3,21 @@ package Availability
 import (
 	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
+	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"fmt"
 
 	"google.golang.org/api/sheets/v4"
 )
 
 const (
-	availabilitySheetId      = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
-	availabilitySheetName    = "Availability"
-	availabilityViewName     = "View - Availability"
-	availabilityDay1Col      = "E"
-	availabilityDay4Col      = "H"
-	availabilityUpdateOffset = 3
+	availabilitySheetId      string = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
+	availabilitySheetName    string = "Availability"
+	availabilityViewName     string = "View - Availability"
+	availabilityDay1Col      string = "E"
+	availabilityDay4Col      string = "H"
+	availabilityUpdateOffset int    = 3
 
-	UPDATE_AVAILABILITY_DISABLED_ERROR = "UPDATE_AVAILABILITY_DISABLED_ERROR"
+	UPDATE_AVAILABILITY_DISABLED_ERROR string = "UPDATE_AVAILABILITY_DISABLED_ERROR"
 )
 
 var (
@@ -59,29 +60,28 @@ func Connect() (*availabilitySheet, error) {
 	return &availabilitySheet{service: service}, nil
 }
 
-func (a *availabilitySheet) Get(employeeId string) (*EmployeeAvailability, error) {
-	all, err := a.GetAll()
+func (a *availabilitySheet) Get(info EmployeeInfo.EmployeeInfo) (*EmployeeAvailability, error) {
+	res, err := a.service.Spreadsheets.Values.BatchGet(availabilitySheetId).
+		Ranges(
+			availabilityGetRange(info.AvailabilityRow),
+			availabilityViewingDates,
+			availabilityCanUpdateCell,
+		).
+		MajorDimension("ROWS").
+		Do()
 	if err != nil {
 		return &EmployeeAvailability{}, err
 	}
 
-	r, err := findRowOfEmployee(all.EmployeeIds, employeeId)
-	if err != nil {
-		return &EmployeeAvailability{}, err
-	}
+	daysAvailable := res.ValueRanges[0].Values[0]
+	dates := res.ValueRanges[1].Values[0]
+	canUpdate := res.ValueRanges[2].Values[0][0]
 
-	day1 := all.Availabilities[r][0] == "TRUE"
-	day2 := all.Availabilities[r][1] == "TRUE"
-	day3 := all.Availabilities[r][2] == "TRUE"
-	day4 := all.Availabilities[r][3] == "TRUE"
+	return createAvailability(daysAvailable, dates, canUpdate), nil
+}
 
-	return &EmployeeAvailability{
-		Day1:      EmployeeAvailabilityDay{IsAvailable: day1, Date: all.Dates[0].(string)},
-		Day2:      EmployeeAvailabilityDay{IsAvailable: day2, Date: all.Dates[1].(string)},
-		Day3:      EmployeeAvailabilityDay{IsAvailable: day3, Date: all.Dates[2].(string)},
-		Day4:      EmployeeAvailabilityDay{IsAvailable: day4, Date: all.Dates[3].(string)},
-		CanUpdate: all.CanUpdate,
-	}, nil
+func availabilityGetRange(row int) string {
+	return fmt.Sprintf("%s!%s%d:%s%d", availabilitySheetName, availabilityDay1Col, row, availabilityDay4Col, row)
 }
 
 func (a *availabilitySheet) GetAll() (*AllAvailability, error) {
@@ -100,9 +100,7 @@ func (a *availabilitySheet) GetAll() (*AllAvailability, error) {
 	}
 
 	dates := r1.ValueRanges[1].Values[0]
-	if len(dates) == 3 {
-		dates = append(dates, "")
-	}
+	transformDatesIfNecessary(&dates)
 
 	return &AllAvailability{
 		EmployeeIds:    r1.ValueRanges[3].Values,
@@ -110,6 +108,29 @@ func (a *availabilitySheet) GetAll() (*AllAvailability, error) {
 		Dates:          dates,
 		CanUpdate:      r1.ValueRanges[2].Values[0][0] == "FALSE",
 	}, nil
+}
+
+func createAvailability(daysAvailable []interface{}, dates []interface{}, canUpdate interface{}) *EmployeeAvailability {
+	day1 := daysAvailable[0] == "TRUE"
+	day2 := daysAvailable[1] == "TRUE"
+	day3 := daysAvailable[2] == "TRUE"
+	day4 := daysAvailable[3] == "TRUE"
+
+	transformDatesIfNecessary(&dates)
+
+	return &EmployeeAvailability{
+		Day1:      EmployeeAvailabilityDay{IsAvailable: day1, Date: dates[0].(string)},
+		Day2:      EmployeeAvailabilityDay{IsAvailable: day2, Date: dates[1].(string)},
+		Day3:      EmployeeAvailabilityDay{IsAvailable: day3, Date: dates[2].(string)},
+		Day4:      EmployeeAvailabilityDay{IsAvailable: day4, Date: dates[3].(string)},
+		CanUpdate: canUpdate == "FALSE",
+	}
+}
+
+func transformDatesIfNecessary(dates *[]interface{}) {
+	if len(*dates) == 3 {
+		*dates = append(*dates, "")
+	}
 }
 
 func (a *availabilitySheet) Update(employeeId string, newAvailability *EmployeeAvailability) error {
