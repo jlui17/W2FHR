@@ -97,21 +97,21 @@ func getStaffListInfo() (*staffListInfo, error) {
 	}, nil
 }
 
-func getAvailabilitySheetEmployeeIds() (*[][]interface{}, error) {
+func getAvailabilitySheetEmployeeIds() (*[]interface{}, error) {
 	availabilitySheet, err := Availability.Connect()
 	if err != nil {
-		return &[][]interface{}{}, err
+		return &[]interface{}{}, err
 	}
 
-	info, err := availabilitySheet.GetAll()
+	ids, err := availabilitySheet.GetIds()
 	if err != nil {
-		return &[][]interface{}{}, err
+		return &[]interface{}{}, err
 	}
 
-	return &info.EmployeeIds, err
+	return ids, err
 }
 
-func doGetInfo(email string, staffListInfo *staffListInfo, availabilitySheetEmployeeIds *[][]interface{}) (*EmployeeInfoForSignUp, error) {
+func doGetInfo(email string, staffListInfo *staffListInfo, availabilitySheetEmployeeIds *[]interface{}) (*EmployeeInfoForSignUp, error) {
 	var id string
 	var group string
 	for i, staffEmail := range staffListInfo.Emails {
@@ -127,8 +127,8 @@ func doGetInfo(email string, staffListInfo *staffListInfo, availabilitySheetEmpl
 	}
 
 	availabilitySheetRow := -1
-	for i, row := range *availabilitySheetEmployeeIds {
-		if row[0].(string) == id {
+	for i, sheetId := range *availabilitySheetEmployeeIds {
+		if sheetId.(string) == id {
 			availabilitySheetRow = i + availabilitySheetRowOffset
 		}
 	}

@@ -14,7 +14,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 	type inputType struct {
 		email                        string
 		staffListInfo                *staffListInfo
-		availabilitySheetEmployeeIds *[][]interface{}
+		availabilitySheetEmployeeIds *[]interface{}
 	}
 
 	tests := []struct {
@@ -32,7 +32,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
-				availabilitySheetEmployeeIds: &[][]interface{}{},
+				availabilitySheetEmployeeIds: &[]interface{}{},
 			},
 			expected:    &EmployeeInfoForSignUp{},
 			expectedErr: SharedConstants.ErrEmployeeNotFound,
@@ -46,7 +46,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
-				availabilitySheetEmployeeIds: &[][]interface{}{{"2"}},
+				availabilitySheetEmployeeIds: &[]interface{}{"2"},
 			},
 			expected:    &EmployeeInfoForSignUp{},
 			expectedErr: SharedConstants.ErrEmployeeNotFound,
@@ -60,7 +60,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
-				availabilitySheetEmployeeIds: &[][]interface{}{{"1"}},
+				availabilitySheetEmployeeIds: &[]interface{}{"1"},
 			},
 			expected: &EmployeeInfoForSignUp{
 				Id:                   "1",
@@ -78,7 +78,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
-				availabilitySheetEmployeeIds: &[][]interface{}{{"1"}},
+				availabilitySheetEmployeeIds: &[]interface{}{"1"},
 			},
 			expected: &EmployeeInfoForSignUp{
 				Id:                   "1",
@@ -96,7 +96,7 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 					Ids:       []interface{}{"1"},
 					Positions: []interface{}{""},
 				},
-				availabilitySheetEmployeeIds: &[][]interface{}{{"2"}, {"1"}},
+				availabilitySheetEmployeeIds: &[]interface{}{"2", "1"},
 			},
 			expected: &EmployeeInfoForSignUp{
 				Id:                   "1",

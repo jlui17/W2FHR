@@ -1,20 +1,21 @@
 package Availability
 
 import (
+	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"log"
 )
 
-func Update(employeeId string, newAvailability *EmployeeAvailability) error {
+func Update(employee EmployeeInfo.EmployeeInfo, newAvailability *EmployeeAvailability) error {
 	sheet, err := Connect()
 	if err != nil {
 		return err
 	}
 
-	err = sheet.Update(employeeId, newAvailability)
+	err = sheet.Update(employee, newAvailability)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[INFO] Availability updated for %s: %v", employeeId, newAvailability)
+	log.Printf("[INFO] Availability updated for %s: %v", employee.Id, newAvailability)
 	return nil
 }

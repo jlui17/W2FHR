@@ -21,6 +21,6 @@ const (
 var (
 	ErrNotABearerToken  = errors.New("please provide a bearer token")
 	ErrInvalidIdToken   = errors.New("invalid idToken")
-	ErrEmployeeNotFound = errors.New("employee not found")
+	ErrEmployeeNotFound = errors.New("Employee not found.")
 	ErrInternal         = errors.New("Something went wrong. Please try again later or contact a manager.")
 )
