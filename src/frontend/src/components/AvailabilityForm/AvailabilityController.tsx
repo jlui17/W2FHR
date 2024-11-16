@@ -25,7 +25,7 @@ function AvailabilityController(): JSX.Element {
   const { getAuthSession } = useContext(AuthenticationContext);
 
   const { isFetching, isError, data, error } = useUserAvailability({
-    idToken: getAuthSession()?.IdToken || "",
+    idToken: getAuthSession()?.idToken || "",
   });
 
   const { mutate: updateAvailability, isPending: updateIsPending } =
@@ -83,7 +83,7 @@ function AvailabilityController(): JSX.Element {
 
     updateAvailability({
       availabilityData: newAvailability,
-      idToken: getAuthSession()?.IdToken || "",
+      idToken: getAuthSession()?.idToken || "",
     });
   }
 

@@ -126,7 +126,7 @@ const LoginController = () => {
       await login({
         email: v.email,
         password: v.password,
-        refreshToken: getAuthSession()?.RefreshToken,
+        refreshToken: getAuthSession()?.refreshToken,
       });
     } catch (err) {
       console.error(err);
@@ -137,7 +137,7 @@ const LoginController = () => {
 
   // try auto loggin in
   useEffect(() => {
-    const refreshToken = getAuthSession()?.RefreshToken;
+    const refreshToken = getAuthSession()?.refreshToken;
     const canAutoLogin: boolean =
       stayLoggedInContext() && !isLoggedIn() && refreshToken != null;
     if (canAutoLogin) {

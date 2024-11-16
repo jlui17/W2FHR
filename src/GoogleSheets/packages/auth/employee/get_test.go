@@ -125,9 +125,9 @@ func TestTranslateToCognitoGroups(t *testing.T) {
 	attendantsGroupName := "attendants"
 	supervisorsGroupName := "supervisors"
 	managersGroupName := "managers"
-	os.Setenv("COGNITO_ATTENDANTS_GROUP_NAME", attendantsGroupName)
-	os.Setenv("COGNITO_SUPERVISORS_GROUP_NAME", supervisorsGroupName)
-	os.Setenv("COGNITO_MANAGERS_GROUP_NAME", managersGroupName)
+	os.Setenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY, attendantsGroupName)
+	os.Setenv(SharedConstants.COGNITO_SUPERVISORS_GROUP_ENV_KEY, supervisorsGroupName)
+	os.Setenv(SharedConstants.COGNITO_MANAGERS_GROUP_ENV_KEY, managersGroupName)
 
 	tests := []struct {
 		name     string

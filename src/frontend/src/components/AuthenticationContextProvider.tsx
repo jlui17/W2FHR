@@ -1,14 +1,17 @@
-import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
 import { jwtDecode } from "jwt-decode";
 import { createContext, ReactNode } from "react";
+import {
+  AuthSession,
+  isAuthSession,
+} from "./Authentication/helpers/authentication";
 
 interface AuthenticationContextProviderProps {
   children: ReactNode;
 }
 
 const getInitialAuthenticationContext = (): {
-  getAuthSession: () => AuthenticationResultType | null;
-  saveAuthSession: (authSession: AuthenticationResultType) => void;
+  getAuthSession: () => AuthSession | null;
+  saveAuthSession: (authSession: AuthSession) => void;
   isLoggedIn: () => boolean;
   logout: () => void;
   stayLoggedIn: () => boolean;
@@ -16,7 +19,7 @@ const getInitialAuthenticationContext = (): {
 } => {
   return {
     getAuthSession: () => null,
-    saveAuthSession: (authSession: AuthenticationResultType) => {},
+    saveAuthSession: (authSession: AuthSession) => {},
     isLoggedIn: () => false,
     logout: () => null,
     stayLoggedIn: () => false,
@@ -25,7 +28,7 @@ const getInitialAuthenticationContext = (): {
 };
 
 export const AuthenticationContext = createContext(
-  getInitialAuthenticationContext()
+  getInitialAuthenticationContext(),
 );
 
 interface IdToken {
@@ -48,35 +51,36 @@ function idTokenIsExpired(idToken: string | undefined): boolean {
 export const AuthenticationContextProvider = ({
   children,
 }: AuthenticationContextProviderProps) => {
-  function saveAuthSession(newSess: AuthenticationResultType): void {
-    let sess: AuthenticationResultType | null = getAuthSession();
+  function saveAuthSession(newSess: AuthSession): void {
+    let sess: AuthSession | null = getAuthSession();
     if (sess == null) {
       sess = newSess;
     } else {
-      sess.AccessToken = newSess.AccessToken || sess.AccessToken;
-      sess.IdToken = newSess.IdToken || sess.IdToken;
-      sess.ExpiresIn = newSess.ExpiresIn || sess.ExpiresIn;
-      sess.RefreshToken = newSess.RefreshToken || sess.RefreshToken;
-      sess.NewDeviceMetadata =
-        newSess.NewDeviceMetadata || sess.NewDeviceMetadata;
+      sess.idToken = newSess.idToken || sess.idToken;
+      sess.refreshToken = newSess.refreshToken || sess.refreshToken;
+      sess.features = newSess.features || sess.features;
     }
 
     localStorage.setItem("authSession", JSON.stringify(sess));
   }
 
-  const getAuthSession = () => {
+  const getAuthSession = (): AuthSession | null => {
     const savedAuthSession = localStorage.getItem("authSession");
-    if (savedAuthSession != null) {
-      const authSession: AuthenticationResultType =
-        JSON.parse(savedAuthSession);
-      return authSession;
+    if (savedAuthSession == null) {
+      return null;
     }
-    return null;
+
+    const authSession: unknown = JSON.parse(savedAuthSession);
+    if (!isAuthSession(authSession)) {
+      logout();
+      return null;
+    }
+    return authSession;
   };
 
   function isLoggedIn(): boolean {
-    const authSession: AuthenticationResultType | null = getAuthSession();
-    return authSession !== null && !idTokenIsExpired(authSession.IdToken);
+    const authSession: AuthSession | null = getAuthSession();
+    return authSession !== null && !idTokenIsExpired(authSession.idToken);
   }
 
   function logout(): void {

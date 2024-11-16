@@ -1,4 +1,3 @@
-import { AuthenticationResultType } from "@aws-sdk/client-cognito-identity-provider";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
@@ -101,7 +100,7 @@ export function useSendSignUpConfirmationCode(p: {
   onError: (err: Error) => void;
 }): UseMutationResult<void, Error, SendConfirmationCodeParams, unknown> {
   async function getConfirmationCode(
-    p: SendConfirmationCodeParams
+    p: SendConfirmationCodeParams,
   ): Promise<void> {
     const url: URL = new URL(API_URLS.VERIFY);
     url.searchParams.append("email", p.email);
@@ -132,17 +131,35 @@ export function useSendSignUpConfirmationCode(p: {
     onError: p.onError,
   });
 }
+
 export class NotConfirmedException extends Error {}
+export interface AuthSession {
+  idToken: string;
+  refreshToken: string;
+  features: string[];
+}
+export function isAuthSession(o: unknown): o is AuthSession {
+  return (
+    o !== null &&
+    typeof o === "object" &&
+    "idToken" in o &&
+    typeof o.idToken === "string" &&
+    "refreshToken" in o &&
+    typeof o.refreshToken === "string" &&
+    "features" in o &&
+    Array.isArray(o.features)
+  );
+}
 interface LoginParams {
   email: string;
   password: string;
   refreshToken?: string;
 }
 export function useLogin(
-  onSuccess: (data: AuthenticationResultType) => void,
-  onError: (err: Error) => void
-): UseMutationResult<AuthenticationResultType, Error, LoginParams, unknown> {
-  const login = async (p: LoginParams): Promise<AuthenticationResultType> => {
+  onSuccess: (data: AuthSession) => void,
+  onError: (err: Error) => void,
+): UseMutationResult<AuthSession, Error, LoginParams, unknown> {
+  const login = async (p: LoginParams): Promise<AuthSession> => {
     if (p.email !== "" && p.password !== "") {
       delete p.refreshToken;
     }
@@ -156,8 +173,13 @@ export function useLogin(
 
     switch (response.status) {
       case 200:
-        const data = await response.json();
-        return Promise.resolve(data);
+        const data: unknown = await response.json();
+        if (!isAuthSession(data)) {
+          return Promise.reject(
+            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
+          );
+        }
+        return Promise.resolve(data as AuthSession);
       case 400:
         let err: string = await response.text();
         if (err.includes("not confirmed")) {

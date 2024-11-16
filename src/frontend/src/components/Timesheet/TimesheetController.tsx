@@ -33,7 +33,7 @@ const TimesheetController = (): JSX.Element => {
     isFetching,
     data: shiftHistory,
   } = useTimesheetData({
-    idToken: getAuthSession()?.IdToken || "",
+    idToken: getAuthSession()?.idToken || "",
     getUpcoming: false,
   });
 

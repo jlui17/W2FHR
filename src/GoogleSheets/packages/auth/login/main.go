@@ -3,6 +3,7 @@ package LoginEmployee
 import (
 	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
+	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"errors"
 	"fmt"
 	"log"
@@ -17,6 +18,40 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 )
+
+const (
+	availability   string = "availability"
+	upcomingShifts string = "upcomingShifts"
+	shiftHistory   string = "shiftHistory"
+)
+
+type AuthSession struct {
+	IdToken      string   `json:"idToken"`
+	RefreshToken string   `json:"refreshToken"`
+	Features     []string `json:"features"`
+}
+
+func getFeaturesForUser(idToken string) ([]string, error) {
+	employeeInfo, err := EmployeeInfo.New("bearer " + idToken)
+	if err != nil {
+		return []string{}, err
+	}
+
+	attendant := os.Getenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY)
+	supervisor := os.Getenv(SharedConstants.COGNITO_SUPERVISORS_GROUP_ENV_KEY)
+	manager := os.Getenv(SharedConstants.COGNITO_MANAGERS_GROUP_ENV_KEY)
+
+	switch employeeInfo.Group {
+	case attendant:
+		return []string{availability, upcomingShifts, shiftHistory}, nil
+	case supervisor:
+		return []string{availability, upcomingShifts, shiftHistory}, nil
+	case manager:
+		return []string{availability, upcomingShifts, shiftHistory}, nil
+	default: // default to attendant
+		return []string{availability, upcomingShifts, shiftHistory}, nil
+	}
+}
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var loginReq AuthConstants.LoginRequest
@@ -97,7 +132,23 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       errMsg,
 		}, nil
 	}
-	authResultJSON, err := json.Marshal(res.AuthenticationResult)
+
+	features, err := getFeaturesForUser(*res.AuthenticationResult.IdToken)
+	if err != nil {
+		log.Printf("[ERROR] Login - failed to get employee info from ID token: %v, err: %s.", *res.AuthenticationResult.IdToken, err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	var resp AuthSession = AuthSession{
+		IdToken:      *res.AuthenticationResult.IdToken,
+		RefreshToken: *res.AuthenticationResult.RefreshToken,
+		Features:     features,
+	}
+	authResultJSON, err := json.Marshal(resp)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{

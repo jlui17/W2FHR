@@ -19,10 +19,7 @@ const (
 	availabilitySheetRowOffset = 3
 )
 
-var (
-	cognitoSupervisorsGroupKey = "COGNITO_SUPERVISORS_GROUP_NAME"
-	cognitoManagersGroupKey    = "COGNITO_MANAGERS_GROUP_NAME"
-)
+var ()
 
 type EmployeeInfoForSignUp struct {
 	Id                   string
@@ -149,9 +146,9 @@ func doGetInfo(email string, staffListInfo *staffListInfo, availabilitySheetEmpl
 func translateToCognitoGroup(position string) string {
 	group := os.Getenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY)
 	if strings.Contains(strings.ToLower(position), "supervisor") {
-		group = os.Getenv(cognitoSupervisorsGroupKey)
+		group = os.Getenv(SharedConstants.COGNITO_SUPERVISORS_GROUP_ENV_KEY)
 	} else if strings.Contains(strings.ToLower(position), "manager") {
-		group = os.Getenv(cognitoManagersGroupKey)
+		group = os.Getenv(SharedConstants.COGNITO_MANAGERS_GROUP_ENV_KEY)
 	}
 
 	return group

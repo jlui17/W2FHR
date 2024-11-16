@@ -21,7 +21,7 @@ const UpcomingShiftsController = (): JSX.Element => {
       isFetching: upcomingShiftsDataIsLoading,
       data: upcomingShiftsData,
     } = useTimesheetData({
-      idToken: getAuthSession()?.IdToken || "",
+      idToken: getAuthSession()?.idToken || "",
       getUpcoming: true,
     });
 
