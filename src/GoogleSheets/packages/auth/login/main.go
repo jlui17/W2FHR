@@ -37,16 +37,12 @@ func getFeaturesForUser(idToken string) ([]string, error) {
 		return []string{}, err
 	}
 
-	attendant := os.Getenv(SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY)
-	supervisor := os.Getenv(SharedConstants.COGNITO_SUPERVISORS_GROUP_ENV_KEY)
-	manager := os.Getenv(SharedConstants.COGNITO_MANAGERS_GROUP_ENV_KEY)
-
 	switch employeeInfo.Group {
-	case attendant:
+	case SharedConstants.AttendantUserGroup:
 		return []string{availability, upcomingShifts, shiftHistory}, nil
-	case supervisor:
+	case SharedConstants.SupervisorUserGroup:
 		return []string{availability, upcomingShifts, shiftHistory}, nil
-	case manager:
+	case SharedConstants.ManagerUserGroup:
 		return []string{availability, upcomingShifts, shiftHistory}, nil
 	default: // default to attendant
 		return []string{availability, upcomingShifts, shiftHistory}, nil
