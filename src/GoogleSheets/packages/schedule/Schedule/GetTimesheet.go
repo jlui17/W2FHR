@@ -1,13 +1,17 @@
 package Schedule
 
 import (
+	TimeUtil "GoogleSheets/packages/schedule/time"
+	"errors"
+	"fmt"
 	"log"
+	"time"
 )
 
 func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 	timesheet, err := getTimesheet()
 	if err != nil {
-		log.Printf("[ERROR] Failed to get timesheet: %s", err.Error())
+		log.Printf("[ERROR] Failed to connect to Google Sheets: %s", err.Error())
 		return &Timesheet{}, nil
 	}
 
@@ -33,4 +37,37 @@ func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 	}
 
 	return employeeShifts, err
+}
+
+func GetByTimeRange(start string, end string) (*Timesheet, error) {
+	timesheet, err := getTimesheet()
+	if err != nil {
+		log.Printf("[ERROR] Failed to connect to Google Sheets: %s", err.Error())
+		return &Timesheet{}, nil
+	}
+
+	startAsDate, endAsDate, err := getStartAndEndDates(start, end)
+	if err != nil {
+		log.Printf("[DEBUG] Invalid time range: %s", err.Error())
+		return &Timesheet{}, nil
+	}
+
+	shifts, err := timesheet.GetByTimeRange(startAsDate, endAsDate)
+	if err != nil {
+		log.Printf("[ERROR] Failed to get schedule from %s to %s: %s", start, end, err.Error())
+		return &Timesheet{}, nil
+	}
+
+	return shifts, err
+}
+
+func getStartAndEndDates(start string, end string) (time.Time, time.Time, error) {
+	startAsDate := TimeUtil.ConvertDateToTime(start, TimeUtil.ApiDateFormat)
+	endAsDate := TimeUtil.ConvertDateToTime(end, TimeUtil.ApiDateFormat)
+
+	if startAsDate.After(endAsDate) {
+		return time.Time{}, time.Time{}, errors.New(fmt.Sprintf("start date (%s) cannot be after end date (%s)", start, end))
+	}
+
+	return startAsDate, endAsDate, nil
 }

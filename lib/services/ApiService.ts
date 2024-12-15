@@ -31,6 +31,9 @@ export class ApiService extends Stack {
       "G_CLOUD_CONFIG_SECRET",
       "G_SERVICE_CONFIG"
     );
+    const COGNITO_ATTENDANTS_GROUP_NAME = props.authService.attendantGroup.groupName || "";
+    const COGNITO_SUPERVISORS_GROUP_NAME = props.authService.supervisorGroup.groupName || "";
+    const COGNITO_MANAGERS_GROUP_NAME = props.authService.managerGroup.groupName || "";
 
     const availabilityHandler = new GoFunction(
       this,
@@ -54,6 +57,9 @@ export class ApiService extends Stack {
         timeout: Duration.seconds(10),
         environment: {
           G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+          COGNITO_ATTENDANTS_GROUP_NAME: COGNITO_ATTENDANTS_GROUP_NAME,
+          COGNITO_SUPERVISORS_GROUP_NAME: COGNITO_SUPERVISORS_GROUP_NAME,
+          COGNITO_MANAGERS_GROUP_NAME: COGNITO_MANAGERS_GROUP_NAME,
         },
       }
     );

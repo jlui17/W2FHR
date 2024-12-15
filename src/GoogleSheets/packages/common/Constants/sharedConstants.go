@@ -29,3 +29,31 @@ var (
 	SupervisorUserGroup = os.Getenv(COGNITO_SUPERVISORS_GROUP_ENV_KEY)
 	ManagerUserGroup    = os.Getenv(COGNITO_MANAGERS_GROUP_ENV_KEY)
 )
+
+func ErrUnauthorized(msg string) error {
+	return errors.New("Unauthorized: " + msg)
+}
+
+func DToStrArr(arr []interface{}) []string {
+	converted := make([]string, len(arr))
+	for i, v := range arr {
+		converted[i] = v.(string)
+	}
+	return converted
+}
+
+func DDToStrArr(arr [][]interface{}) [][]string {
+	converted := make([][]string, len(arr))
+	for i, v := range arr {
+		converted[i] = DToStrArr(v)
+	}
+	return converted
+}
+
+func Flatten(arr [][]interface{}) []interface{} {
+	flat := make([]interface{}, 0)
+	for _, subArr := range arr {
+		flat = append(flat, subArr...)
+	}
+	return flat
+}

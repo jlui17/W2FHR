@@ -1,6 +1,9 @@
 package CognitoGroupAuthorizer
 
-import SharedConstants "GoogleSheets/packages/common/Constants"
+import (
+	SharedConstants "GoogleSheets/packages/common/Constants"
+	"log"
+)
 
 type cognitoGroupAuthorizer struct {
 	level int
@@ -23,8 +26,9 @@ func New(group string) *cognitoGroupAuthorizer {
 	}
 }
 
-func (c *cognitoGroupAuthorizer) isAuthorized(group string) bool {
+func (c *cognitoGroupAuthorizer) IsAuthorized(group string) bool {
 	authorizedLevel := convertGroupToLevel(group)
+	log.Printf("[INFO] Checking group (%s) and level (%d) against authorizer level %d", group, authorizedLevel, c.level)
 	return authorizedLevel >= c.level
 }
 
