@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { Shift, TimesheetData } from "../Timesheet/TimesheetController";
+import { Shift, TimesheetData } from "@/components/Timesheet/helpers/hooks";
 
 interface UpcomingShiftsWidgetProps {
   isLoading: boolean;

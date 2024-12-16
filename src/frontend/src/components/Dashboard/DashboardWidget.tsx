@@ -1,4 +1,5 @@
 import Availability from "../AvailabilityForm";
+import Schedule from "../Schedule";
 import Timesheet from "../Timesheet";
 import UpcomingShifts from "../UpcomingShifts";
 import Header from "./components/Header";
@@ -11,6 +12,7 @@ export const DashboardWidget = () => {
         <Availability />
         <UpcomingShifts />
         <Timesheet />
+        <Schedule />
       </div>
     </div>
   );

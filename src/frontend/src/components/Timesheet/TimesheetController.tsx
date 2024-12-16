@@ -7,21 +7,9 @@ import { useContext, useState } from "react";
 import { toast } from "sonner";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { ERROR_MESSAGES, TOAST } from "../common/constants";
-import { useTimesheetData } from "./helpers/hooks";
+import { TimesheetData, useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
 
-export interface Shift {
-  date: string;
-  shiftTitle: string;
-  startTime: string;
-  endTime: string;
-  breakDuration: string;
-  netHours: number;
-}
-
-export interface TimesheetData {
-  shifts: Shift[];
-}
 
 const EMPTY_DATA: TimesheetData = { shifts: [] };
 

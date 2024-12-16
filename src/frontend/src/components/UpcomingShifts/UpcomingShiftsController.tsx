@@ -3,17 +3,16 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useContext } from "react";
+import React, { ReactElement, useContext } from "react";
 import { toast } from "sonner";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { ERROR_MESSAGES, TOAST } from "../common/constants";
-import { useTimesheetData } from "../Timesheet/helpers/hooks";
-import { TimesheetData } from "../Timesheet/TimesheetController";
+import { TimesheetData, useTimesheetData } from "../Timesheet/helpers/hooks";
 import { UpcomingShiftsWidget } from "./UpcomingShiftsWidget";
 
 const EMPTY_DATA: TimesheetData = { shifts: [] };
 
-const UpcomingShiftsController = (): JSX.Element => {
+const UpcomingShiftsController = (): ReactElement => {
   const { getAuthSession } = useContext(AuthenticationContext);
 
   try {

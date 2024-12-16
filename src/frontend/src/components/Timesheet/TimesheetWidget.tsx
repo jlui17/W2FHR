@@ -1,4 +1,3 @@
-import { TimesheetData } from "./TimesheetController";
 
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
@@ -7,7 +6,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import React from "react";
+import { TimesheetData } from "@/components/Timesheet/helpers/hooks";
 
 export const TimesheetWidget = (p: {
   open: boolean;
@@ -58,8 +59,12 @@ export const TimesheetWidget = (p: {
         <div className="flex items-center justify-between px-4 py-3">
           <CardTitle className="m-auto">Shift History</CardTitle>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <ChevronDownIcon className="h-5 w-5 transition-transform duration-300 [&[data-state='open']]:rotate-180" />
+            <Button variant="ghost" size="sm" className="w-9 p-0">
+              {p.open ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </Button>
           </CollapsibleTrigger>
         </div>
@@ -76,22 +81,3 @@ export const TimesheetWidget = (p: {
     </Collapsible>
   );
 };
-
-function ChevronDownIcon(p: { className: string }): JSX.Element {
-  return (
-    <svg
-      className={p.className}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}

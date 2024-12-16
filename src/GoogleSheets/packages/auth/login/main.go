@@ -23,6 +23,7 @@ const (
 	availability   string = "availability"
 	upcomingShifts string = "upcomingShifts"
 	shiftHistory   string = "shiftHistory"
+	schedule       string = "schedule"
 )
 
 type AuthSession struct {
@@ -43,7 +44,7 @@ func getFeaturesForUser(idToken string) ([]string, error) {
 	case SharedConstants.SupervisorUserGroup:
 		return []string{availability, upcomingShifts, shiftHistory}, nil
 	case SharedConstants.ManagerUserGroup:
-		return []string{availability, upcomingShifts, shiftHistory}, nil
+		return []string{availability, upcomingShifts, shiftHistory, schedule}, nil
 	default: // default to attendant
 		return []string{availability, upcomingShifts, shiftHistory}, nil
 	}

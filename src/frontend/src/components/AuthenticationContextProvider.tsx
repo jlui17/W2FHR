@@ -16,6 +16,7 @@ const getInitialAuthenticationContext = (): {
   logout: () => void;
   stayLoggedIn: () => boolean;
   setStayLoggedIn: (b: boolean) => void;
+  hasAccessToFeature: (feature: string) => boolean;
 } => {
   return {
     getAuthSession: () => null,
@@ -24,6 +25,7 @@ const getInitialAuthenticationContext = (): {
     logout: () => null,
     stayLoggedIn: () => false,
     setStayLoggedIn: (b: boolean) => null,
+    hasAccessToFeature: (feature: string): boolean => false,
   };
 };
 
@@ -100,6 +102,14 @@ export const AuthenticationContextProvider = ({
     return stayLoggedIn === "yes";
   }
 
+  function hasAccessToFeature(feature: string): boolean {
+    const authSession: AuthSession | null = getAuthSession();
+    if (authSession === null) {
+      return false;
+    }
+    return authSession.features.includes(feature);
+  }
+
   return (
     <AuthenticationContext.Provider
       value={{
@@ -109,6 +119,7 @@ export const AuthenticationContextProvider = ({
         logout,
         stayLoggedIn,
         setStayLoggedIn,
+        hasAccessToFeature,
       }}
     >
       {children}
