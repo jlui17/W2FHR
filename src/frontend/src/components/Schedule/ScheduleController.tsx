@@ -17,14 +17,14 @@ import { endOfWeek, startOfWeek } from "date-fns";
 const EMPTY_DATA: ScheduleData = { shifts: [] };
 
 function sortData(data: ScheduleData, sortOrder: "asc" | "desc"): ScheduleData {
-  const sortedData = [...data.shifts].sort((a, b) => {
+  data.shifts.sort((a, b) => {
     if (sortOrder === "asc") {
       return a.date.getTime() - b.date.getTime();
     } else {
       return b.date.getTime() - a.date.getTime();
     }
   });
-  return { shifts: sortedData };
+  return data;
 }
 
 function ScheduleController(): ReactElement {
@@ -35,6 +35,7 @@ function ScheduleController(): ReactElement {
     return <></>;
   }
 
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [open, setOpen] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date>(
     startOfWeek(new Date(), { weekStartsOn: 1 }),
@@ -55,10 +56,8 @@ function ScheduleController(): ReactElement {
       "schedule",
       startDate.toISOString(),
       endDate.toISOString(),
-      String(open),
     ],
   });
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   function onSortChange(): void {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");

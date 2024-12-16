@@ -164,7 +164,7 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                 </TableHeader>
                 <TableBody>
                   {p.schedule.shifts.map((row) => (
-                    <TableRow key={row.shiftTitle}>
+                    <TableRow key={row.date.toISOString() + row.shiftTitle + row.employeeName}>
                       <TableCell>
                         {row.date.toLocaleDateString("en-US", {
                           weekday: "long",
