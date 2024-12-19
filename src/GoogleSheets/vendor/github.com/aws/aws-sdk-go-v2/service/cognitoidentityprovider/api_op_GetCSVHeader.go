@@ -31,7 +31,7 @@ func (c *Client) GetCSVHeader(ctx context.Context, params *GetCSVHeaderInput, op
 // user import job.
 type GetCSVHeaderInput struct {
 
-	// The user pool ID for the user pool that the users are to be imported into.
+	// The ID of the user pool that the users are to be imported into.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -46,7 +46,7 @@ type GetCSVHeaderOutput struct {
 	// The header information of the CSV file for the user import job.
 	CSVHeader []string
 
-	// The user pool ID for the user pool that the users are to be imported into.
+	// The ID of the user pool that the users are to be imported into.
 	UserPoolId *string
 
 	// Metadata pertaining to the operation's result.
@@ -98,6 +98,9 @@ func (c *Client) addOperationGetCSVHeaderMiddlewares(stack *middleware.Stack, op
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -135,6 +138,18 @@ func (c *Client) addOperationGetCSVHeaderMiddlewares(stack *middleware.Stack, op
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

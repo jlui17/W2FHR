@@ -44,7 +44,7 @@ func (c *Client) ListUserPoolClients(ctx context.Context, params *ListUserPoolCl
 // Represents the request to list the user pool clients.
 type ListUserPoolClientsInput struct {
 
-	// The user pool ID for the user pool where you want to list user pool clients.
+	// The ID of the user pool where you want to list user pool clients.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -119,6 +119,9 @@ func (c *Client) addOperationListUserPoolClientsMiddlewares(stack *middleware.St
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -156,6 +159,18 @@ func (c *Client) addOperationListUserPoolClientsMiddlewares(stack *middleware.St
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

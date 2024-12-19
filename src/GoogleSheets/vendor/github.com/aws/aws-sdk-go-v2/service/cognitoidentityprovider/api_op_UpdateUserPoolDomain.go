@@ -11,34 +11,29 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Updates the Secure Sockets Layer (SSL) certificate for the custom domain for
-// your user pool.
+// A user pool domain hosts managed login, an authorization server and web server
+// for authentication in your application. This operation updates the branding
+// version for user pool domains between 1 for hosted UI (classic) and 2 for
+// managed login. It also updates the SSL certificate for user pool custom domains.
 //
-// You can use this operation to provide the Amazon Resource Name (ARN) of a new
-// certificate to Amazon Cognito. You can't use it to change the domain for a user
-// pool.
+// Changes to the domain branding version take up to one minute to take effect for
+// a prefix domain and up to five minutes for a custom domain.
 //
-// A custom domain is used to host the Amazon Cognito hosted UI, which provides
-// sign-up and sign-in pages for your application. When you set up a custom domain,
-// you provide a certificate that you manage with Certificate Manager (ACM). When
-// necessary, you can use this operation to change the certificate that you applied
-// to your custom domain.
+// This operation doesn't change the name of your user pool domain. To change your
+// domain, delete it with DeleteUserPoolDomain and create a new domain with
+// CreateUserPoolDomain .
 //
-// Usually, this is unnecessary following routine certificate renewal with ACM.
-// When you renew your existing certificate in ACM, the ARN for your certificate
-// remains the same, and your custom domain uses the new certificate automatically.
+// You can pass the ARN of a new Certificate Manager certificate in this request.
+// Typically, ACM certificates automatically renew and you user pool can continue
+// to use the same ARN. But if you generate a new certificate for your custom
+// domain name, replace the original configuration with the new ARN in this
+// request.
 //
-// However, if you replace your existing certificate with a new one, ACM gives the
-// new certificate a new ARN. To apply the new certificate to your custom domain,
-// you must provide this ARN to Amazon Cognito.
+// ACM certificates for custom domains must be in the US East (N. Virginia) Amazon
+// Web Services Region. After you submit your request, Amazon Cognito requires up
+// to 1 hour to distribute your new certificate to your custom domain.
 //
-// When you add your new certificate in ACM, you must choose US East (N. Virginia)
-// as the Amazon Web Services Region.
-//
-// After you submit your request, Amazon Cognito requires up to 1 hour to
-// distribute your new certificate to your custom domain.
-//
-// For more information about adding a custom domain to your user pool, see [Using Your Own Domain for the Hosted UI].
+// For more information about adding a custom domain to your user pool, see [Configuring a user pool domain].
 //
 // Amazon Cognito evaluates Identity and Access Management (IAM) policies in
 // requests for this API operation. For this operation, you must use IAM
@@ -52,7 +47,7 @@ import (
 // [Using the Amazon Cognito user pools API and user pool endpoints]
 //
 // [Using the Amazon Cognito user pools API and user pool endpoints]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pools-API-operations.html
-// [Using Your Own Domain for the Hosted UI]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-add-custom-domain.html
+// [Configuring a user pool domain]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-add-custom-domain.html
 // [Signing Amazon Web Services API Requests]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
 func (c *Client) UpdateUserPoolDomain(ctx context.Context, params *UpdateUserPoolDomainInput, optFns ...func(*Options)) (*UpdateUserPoolDomainOutput, error) {
 	if params == nil {
@@ -72,13 +67,6 @@ func (c *Client) UpdateUserPoolDomain(ctx context.Context, params *UpdateUserPoo
 // The UpdateUserPoolDomain request input.
 type UpdateUserPoolDomainInput struct {
 
-	// The configuration for a custom domain that hosts the sign-up and sign-in pages
-	// for your application. Use this object to specify an SSL certificate that is
-	// managed by ACM.
-	//
-	// This member is required.
-	CustomDomainConfig *types.CustomDomainConfigType
-
 	// The domain name for the custom domain that hosts the sign-up and sign-in pages
 	// for your application. One example might be auth.example.com .
 	//
@@ -95,6 +83,26 @@ type UpdateUserPoolDomainInput struct {
 	// This member is required.
 	UserPoolId *string
 
+	// The configuration for a custom domain that hosts the sign-up and sign-in pages
+	// for your application. Use this object to specify an SSL certificate that is
+	// managed by ACM.
+	//
+	// When you create a custom domain, the passkey RP ID defaults to the custom
+	// domain. If you had a prefix domain active, this will cause passkey integration
+	// for your prefix domain to stop working due to a mismatch in RP ID. To keep the
+	// prefix domain passkey integration working, you can explicitly set RP ID to the
+	// prefix domain. Update the RP ID in a [SetUserPoolMfaConfig]request.
+	//
+	// [SetUserPoolMfaConfig]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_SetUserPoolMfaConfig.html
+	CustomDomainConfig *types.CustomDomainConfigType
+
+	// A version number that indicates the state of managed login for your domain.
+	// Version 1 is hosted UI (classic). Version 2 is the newer managed login with the
+	// branding designer. For more information, see [Managed login].
+	//
+	// [Managed login]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-managed-login.html
+	ManagedLoginVersion *int32
+
 	noSmithyDocumentSerde
 }
 
@@ -104,6 +112,13 @@ type UpdateUserPoolDomainOutput struct {
 	// The Amazon CloudFront endpoint that Amazon Cognito set up when you added the
 	// custom domain to your user pool.
 	CloudFrontDomain *string
+
+	// A version number that indicates the state of managed login for your domain.
+	// Version 1 is hosted UI (classic). Version 2 is the newer managed login with the
+	// branding designer. For more information, see [Managed login].
+	//
+	// [Managed login]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-managed-login.html
+	ManagedLoginVersion *int32
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -154,6 +169,9 @@ func (c *Client) addOperationUpdateUserPoolDomainMiddlewares(stack *middleware.S
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -191,6 +209,18 @@ func (c *Client) addOperationUpdateUserPoolDomainMiddlewares(stack *middleware.S
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

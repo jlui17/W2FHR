@@ -11,7 +11,8 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Sets up or modifies the detailed activity logging configuration of a user pool.
+// Sets up or modifies the logging configuration of a user pool. User pools can
+// export user notification logs and advanced security features user activity logs.
 func (c *Client) SetLogDeliveryConfiguration(ctx context.Context, params *SetLogDeliveryConfigurationInput, optFns ...func(*Options)) (*SetLogDeliveryConfigurationOutput, error) {
 	if params == nil {
 		params = &SetLogDeliveryConfigurationInput{}
@@ -29,13 +30,12 @@ func (c *Client) SetLogDeliveryConfiguration(ctx context.Context, params *SetLog
 
 type SetLogDeliveryConfigurationInput struct {
 
-	// A collection of all of the detailed activity logging configurations for a user
-	// pool.
+	// A collection of the logging configurations for a user pool.
 	//
 	// This member is required.
 	LogConfigurations []types.LogConfigurationType
 
-	// The ID of the user pool where you want to configure detailed activity logging .
+	// The ID of the user pool where you want to configure logging.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -98,6 +98,9 @@ func (c *Client) addOperationSetLogDeliveryConfigurationMiddlewares(stack *middl
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -135,6 +138,18 @@ func (c *Client) addOperationSetLogDeliveryConfigurationMiddlewares(stack *middl
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

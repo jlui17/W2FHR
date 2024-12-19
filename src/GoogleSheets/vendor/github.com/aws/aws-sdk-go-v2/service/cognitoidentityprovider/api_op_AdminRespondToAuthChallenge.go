@@ -29,10 +29,10 @@ import (
 // sign in.
 //
 // If you have never used SMS text messages with Amazon Cognito or any other
-// Amazon Web Service, Amazon Simple Notification Service might place your account
-// in the SMS sandbox. In [sandbox mode], you can send messages only to verified phone numbers.
-// After you test your app while in the sandbox environment, you can move out of
-// the sandbox and into production. For more information, see [SMS message settings for Amazon Cognito user pools]in the Amazon
+// Amazon Web Services service, Amazon Simple Notification Service might place your
+// account in the SMS sandbox. In [sandbox mode], you can send messages only to verified phone
+// numbers. After you test your app while in the sandbox environment, you can move
+// out of the sandbox and into production. For more information, see [SMS message settings for Amazon Cognito user pools]in the Amazon
 // Cognito Developer Guide.
 //
 // Amazon Cognito evaluates Identity and Access Management (IAM) policies in
@@ -70,19 +70,21 @@ func (c *Client) AdminRespondToAuthChallenge(ctx context.Context, params *AdminR
 // The request to respond to the authentication challenge, as an administrator.
 type AdminRespondToAuthChallengeInput struct {
 
-	// The challenge name. For more information, see [AdminInitiateAuth].
+	// The name of the challenge that you are responding to. You can find more
+	// information about values for ChallengeName in the response parameters of [AdminInitiateAuth].
 	//
-	// [AdminInitiateAuth]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html
+	// [AdminInitiateAuth]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html#CognitoUserPools-AdminInitiateAuth-response-ChallengeName
 	//
 	// This member is required.
 	ChallengeName types.ChallengeNameType
 
-	// The app client ID.
+	// The ID of the app client where you initiated sign-in.
 	//
 	// This member is required.
 	ClientId *string
 
-	// The ID of the Amazon Cognito user pool.
+	// The ID of the user pool where you want to respond to an authentication
+	// challenge.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -96,14 +98,55 @@ type AdminRespondToAuthChallengeInput struct {
 	// partial JSON request bodies that highlight challenge-response parameters.
 	//
 	// You must provide a SECRET_HASH parameter in all challenge responses to an app
-	// client that has a client secret.
+	// client that has a client secret. Include a DEVICE_KEY for device authentication.
+	//
+	// SELECT_CHALLENGE "ChallengeName": "SELECT_CHALLENGE", "ChallengeResponses": {
+	// "USERNAME": "[username]", "ANSWER": "[Challenge name]"}
+	//
+	// Available challenges are PASSWORD , PASSWORD_SRP , EMAIL_OTP , SMS_OTP , and
+	// WEB_AUTHN .
+	//
+	// Complete authentication in the SELECT_CHALLENGE response for PASSWORD ,
+	// PASSWORD_SRP , and WEB_AUTHN :
+	//
+	//   - "ChallengeName": "SELECT_CHALLENGE", "ChallengeResponses": { "ANSWER":
+	//   "WEB_AUTHN", "USERNAME": "[username]", "CREDENTIAL":
+	//   "[AuthenticationResponseJSON]"}
+	//
+	// See [AuthenticationResponseJSON].
+	//
+	//   - "ChallengeName": "SELECT_CHALLENGE", "ChallengeResponses": { "ANSWER":
+	//   "PASSWORD", "USERNAME": "[username]", "PASSWORD": "[password]"}
+	//
+	//   - "ChallengeName": "SELECT_CHALLENGE", "ChallengeResponses": { "ANSWER":
+	//   "PASSWORD_SRP", "USERNAME": "[username]", "SRP_A": "[SRP_A]"}
+	//
+	// For SMS_OTP and EMAIL_OTP , respond with the username and answer. Your user pool
+	// will send a code for the user to submit in the next challenge response.
+	//
+	//   - "ChallengeName": "SELECT_CHALLENGE", "ChallengeResponses": { "ANSWER":
+	//   "SMS_OTP", "USERNAME": "[username]"}
+	//
+	//   - "ChallengeName": "SELECT_CHALLENGE", "ChallengeResponses": { "ANSWER":
+	//   "EMAIL_OTP", "USERNAME": "[username]"}
+	//
+	// SMS_OTP "ChallengeName": "SMS_OTP", "ChallengeResponses": {"SMS_OTP_CODE":
+	// "[code]", "USERNAME": "[username]"}
+	//
+	// EMAIL_OTP "ChallengeName": "EMAIL_OTP", "ChallengeResponses":
+	// {"EMAIL_OTP_CODE": "[code]", "USERNAME": "[username]"}
 	//
 	// SMS_MFA "ChallengeName": "SMS_MFA", "ChallengeResponses": {"SMS_MFA_CODE":
-	// "[SMS_code]", "USERNAME": "[username]"}
+	// "[code]", "USERNAME": "[username]"}
 	//
-	// PASSWORD_VERIFIER "ChallengeName": "PASSWORD_VERIFIER", "ChallengeResponses":
-	// {"PASSWORD_CLAIM_SIGNATURE": "[claim_signature]", "PASSWORD_CLAIM_SECRET_BLOCK":
-	// "[secret_block]", "TIMESTAMP": [timestamp], "USERNAME": "[username]"}
+	// PASSWORD_VERIFIER This challenge response is part of the SRP flow. Amazon
+	// Cognito requires that your application respond to this challenge within a few
+	// seconds. When the response time exceeds this period, your user pool returns a
+	// NotAuthorizedException error.
+	//
+	//     "ChallengeName": "PASSWORD_VERIFIER", "ChallengeResponses":
+	//     {"PASSWORD_CLAIM_SIGNATURE": "[claim_signature]", "PASSWORD_CLAIM_SECRET_BLOCK":
+	//     "[secret_block]", "TIMESTAMP": [timestamp], "USERNAME": "[username]"}
 	//
 	// Add "DEVICE_KEY" when you sign in with a remembered device.
 	//
@@ -148,6 +191,7 @@ type AdminRespondToAuthChallengeInput struct {
 	// , see [Working with user devices in your user pool].
 	//
 	// [Computing secret hash values]: https://docs.aws.amazon.com/cognito/latest/developerguide/signing-up-users-in-your-app.html#cognito-user-pools-computing-secret-hash
+	// [AuthenticationResponseJSON]: https://www.w3.org/TR/webauthn-3/#dictdef-authenticationresponsejson
 	// [Working with user devices in your user pool]: https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-device-tracking.html
 	ChallengeResponses map[string]string
 
@@ -158,21 +202,21 @@ type AdminRespondToAuthChallengeInput struct {
 	// triggers. When you use the AdminRespondToAuthChallenge API action, Amazon
 	// Cognito invokes any functions that you have assigned to the following triggers:
 	//
-	//   - pre sign-up
+	//   - Pre sign-up
 	//
 	//   - custom message
 	//
-	//   - post authentication
+	//   - Post authentication
 	//
-	//   - user migration
+	//   - User migration
 	//
-	//   - pre token generation
+	//   - Pre token generation
 	//
-	//   - define auth challenge
+	//   - Define auth challenge
 	//
-	//   - create auth challenge
+	//   - Create auth challenge
 	//
-	//   - verify auth challenge response
+	//   - Verify auth challenge response
 	//
 	// When Amazon Cognito invokes any of these functions, it passes a JSON payload,
 	// which the function receives as input. This payload contains a clientMetadata
@@ -183,8 +227,8 @@ type AdminRespondToAuthChallengeInput struct {
 	//
 	// For more information, see [Customizing user pool Workflows with Lambda Triggers] in the Amazon Cognito Developer Guide.
 	//
-	// When you use the ClientMetadata parameter, remember that Amazon Cognito won't
-	// do the following:
+	// When you use the ClientMetadata parameter, note that Amazon Cognito won't do
+	// the following:
 	//
 	//   - Store the ClientMetadata value. This data is available only to Lambda
 	//   triggers that are assigned to a user pool to support custom workflows. If your
@@ -193,8 +237,8 @@ type AdminRespondToAuthChallengeInput struct {
 	//
 	//   - Validate the ClientMetadata value.
 	//
-	//   - Encrypt the ClientMetadata value. Don't use Amazon Cognito to provide
-	//   sensitive information.
+	//   - Encrypt the ClientMetadata value. Don't send sensitive information in this
+	//   parameter.
 	//
 	// [Customizing user pool Workflows with Lambda Triggers]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html
 	ClientMetadata map[string]string
@@ -203,13 +247,18 @@ type AdminRespondToAuthChallengeInput struct {
 	// address, or location. Amazon Cognito advanced security evaluates the risk of an
 	// authentication event based on the context that your app generates and passes to
 	// Amazon Cognito when it makes API requests.
+	//
+	// For more information, see [Collecting data for threat protection in applications].
+	//
+	// [Collecting data for threat protection in applications]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-viewing-threat-protection-app.html
 	ContextData *types.ContextDataType
 
-	// The session that should be passed both ways in challenge-response calls to the
-	// service. If an InitiateAuth or RespondToAuthChallenge API call determines that
-	// the caller must pass another challenge, it returns a session with other
-	// challenge parameters. This session should be passed as it is to the next
-	// RespondToAuthChallenge API call.
+	// The session identifier that maintains the state of authentication requests and
+	// challenge responses. If an AdminInitiateAuth or AdminRespondToAuthChallenge API
+	// request results in a determination that your application must pass another
+	// challenge, Amazon Cognito returns a session with other challenge parameters.
+	// Send this session identifier, unmodified, to the next
+	// AdminRespondToAuthChallenge request.
 	Session *string
 
 	noSmithyDocumentSerde
@@ -218,23 +267,30 @@ type AdminRespondToAuthChallengeInput struct {
 // Responds to the authentication challenge, as an administrator.
 type AdminRespondToAuthChallengeOutput struct {
 
-	// The result returned by the server in response to the authentication request.
+	// The outcome of a successful authentication process. After your application has
+	// passed all challenges, Amazon Cognito returns an AuthenticationResult with the
+	// JSON web tokens (JWTs) that indicate successful sign-in.
 	AuthenticationResult *types.AuthenticationResultType
 
-	// The name of the challenge. For more information, see [AdminInitiateAuth].
+	// The name of the challenge that you must next respond to. You can find more
+	// information about values for ChallengeName in the response parameters of [AdminInitiateAuth].
 	//
-	// [AdminInitiateAuth]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html
+	// [AdminInitiateAuth]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html#CognitoUserPools-AdminInitiateAuth-response-ChallengeName
 	ChallengeName types.ChallengeNameType
 
-	// The challenge parameters. For more information, see [AdminInitiateAuth].
+	// The parameters that define your response to the next challenge. Take the values
+	// in ChallengeParameters and provide values for them in the [ChallengeResponses] of the next
+	// AdminRespondToAuthChallenge request.
 	//
-	// [AdminInitiateAuth]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html
+	// [ChallengeResponses]: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminRespondToAuthChallenge.html#CognitoUserPools-AdminRespondToAuthChallenge-request-ChallengeResponses
 	ChallengeParameters map[string]string
 
-	// The session that should be passed both ways in challenge-response calls to the
-	// service. If the caller must pass another challenge, they return a session with
-	// other challenge parameters. This session should be passed as it is to the next
-	// RespondToAuthChallenge API call.
+	// The session identifier that maintains the state of authentication requests and
+	// challenge responses. If an AdminInitiateAuth or AdminRespondToAuthChallenge API
+	// request results in a determination that your application must pass another
+	// challenge, Amazon Cognito returns a session with other challenge parameters.
+	// Send this session identifier, unmodified, to the next
+	// AdminRespondToAuthChallenge request.
 	Session *string
 
 	// Metadata pertaining to the operation's result.
@@ -286,6 +342,9 @@ func (c *Client) addOperationAdminRespondToAuthChallengeMiddlewares(stack *middl
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -323,6 +382,18 @@ func (c *Client) addOperationAdminRespondToAuthChallengeMiddlewares(stack *middl
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

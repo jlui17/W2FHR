@@ -71,12 +71,12 @@ func (c *Client) AdminDisableProviderForUser(ctx context.Context, params *AdminD
 
 type AdminDisableProviderForUserInput struct {
 
-	// The user to be disabled.
+	// The user profile that you want to delete a linked identity from.
 	//
 	// This member is required.
 	User *types.ProviderUserIdentifierType
 
-	// The user pool ID for the user pool.
+	// The ID of the user pool where you want to delete the user's linked identities.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -134,6 +134,9 @@ func (c *Client) addOperationAdminDisableProviderForUserMiddlewares(stack *middl
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -171,6 +174,18 @@ func (c *Client) addOperationAdminDisableProviderForUserMiddlewares(stack *middl
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

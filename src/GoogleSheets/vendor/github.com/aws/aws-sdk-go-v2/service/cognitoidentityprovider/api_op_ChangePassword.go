@@ -46,15 +46,15 @@ type ChangePasswordInput struct {
 	// This member is required.
 	AccessToken *string
 
-	// The old password.
-	//
-	// This member is required.
-	PreviousPassword *string
-
-	// The new password.
+	// A new password that you prompted the user to enter in your application.
 	//
 	// This member is required.
 	ProposedPassword *string
+
+	// The user's previous password. Required if the user has a password. If the user
+	// has no password and only signs in with passwordless authentication options, you
+	// can omit this parameter.
+	PreviousPassword *string
 
 	noSmithyDocumentSerde
 }
@@ -107,6 +107,9 @@ func (c *Client) addOperationChangePasswordMiddlewares(stack *middleware.Stack, 
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -144,6 +147,18 @@ func (c *Client) addOperationChangePasswordMiddlewares(stack *middleware.Stack, 
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

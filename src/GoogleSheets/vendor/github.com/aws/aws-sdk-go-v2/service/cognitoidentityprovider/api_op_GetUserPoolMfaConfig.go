@@ -39,6 +39,13 @@ type GetUserPoolMfaConfigInput struct {
 
 type GetUserPoolMfaConfigOutput struct {
 
+	// Shows user pool email message configuration for MFA. Includes the subject and
+	// body of the email message template for MFA messages. To activate this setting, [advanced security features]
+	// must be active in your user pool.
+	//
+	// [advanced security features]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-settings-advanced-security.html
+	EmailMfaConfiguration *types.EmailMfaConfigType
+
 	// The multi-factor authentication (MFA) configuration. Valid values include:
 	//
 	//   - OFF MFA won't be used for any users.
@@ -49,11 +56,17 @@ type GetUserPoolMfaConfigOutput struct {
 	//   factor activated.
 	MfaConfiguration types.UserPoolMfaType
 
-	// The SMS text message multi-factor authentication (MFA) configuration.
+	// Shows user pool SMS message configuration for MFA. Includes the message
+	// template and the SMS message sending configuration for Amazon SNS.
 	SmsMfaConfiguration *types.SmsMfaConfigType
 
-	// The software token multi-factor authentication (MFA) configuration.
+	// Shows user pool configuration for time-based one-time password (TOTP) MFA.
+	// Includes TOTP enabled or disabled state.
 	SoftwareTokenMfaConfiguration *types.SoftwareTokenMfaConfigType
+
+	// Shows user pool configuration for MFA with passkeys from biometric devices and
+	// security keys.
+	WebAuthnConfiguration *types.WebAuthnConfigurationType
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -104,6 +117,9 @@ func (c *Client) addOperationGetUserPoolMfaConfigMiddlewares(stack *middleware.S
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -141,6 +157,18 @@ func (c *Client) addOperationGetUserPoolMfaConfigMiddlewares(stack *middleware.S
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

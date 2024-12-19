@@ -77,7 +77,7 @@ type GetUserOutput struct {
 	PreferredMfaSetting *string
 
 	// The MFA options that are activated for the user. The possible values in this
-	// list are SMS_MFA and SOFTWARE_TOKEN_MFA .
+	// list are SMS_MFA , EMAIL_OTP , and SOFTWARE_TOKEN_MFA .
 	UserMFASettingList []string
 
 	// Metadata pertaining to the operation's result.
@@ -126,6 +126,9 @@ func (c *Client) addOperationGetUserMiddlewares(stack *middleware.Stack, options
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -163,6 +166,18 @@ func (c *Client) addOperationGetUserMiddlewares(stack *middleware.Stack, options
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

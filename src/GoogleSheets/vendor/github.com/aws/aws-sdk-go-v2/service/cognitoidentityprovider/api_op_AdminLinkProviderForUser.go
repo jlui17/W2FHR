@@ -91,26 +91,25 @@ type AdminLinkProviderForUserInput struct {
 	// ProviderAttributeValue for the user must be the same value as the id , sub , or
 	// user_id value found in the social IdP token.
 	//
-	// For OIDC, the ProviderAttributeName can be any value that matches a claim in
-	// the ID token, or that your app retrieves from the userInfo endpoint. You must
-	// map the claim to a user pool attribute in your IdP configuration, and set the
-	// user pool attribute name as the value of ProviderAttributeName in your
-	// AdminLinkProviderForUser request.
+	// For OIDC, the ProviderAttributeName can be any mapped value from a claim in the
+	// ID token, or that your app retrieves from the userInfo endpoint. For SAML, the
+	// ProviderAttributeName can be any mapped value from a claim in the SAML assertion.
 	//
-	// For SAML, the ProviderAttributeName can be any value that matches a claim in
-	// the SAML assertion. To link SAML users based on the subject of the SAML
-	// assertion, map the subject to a claim through the SAML IdP and set that claim
-	// name as the value of ProviderAttributeName in your AdminLinkProviderForUser
-	// request.
+	// The following additional considerations apply to SourceUser for OIDC and SAML
+	// providers.
 	//
-	// For both OIDC and SAML users, when you set ProviderAttributeName to
-	// Cognito_Subject , Amazon Cognito will automatically parse the default unique
-	// identifier found in the subject from the IdP token.
+	//   - You must map the claim to a user pool attribute in your IdP configuration,
+	//   and set the user pool attribute name as the value of ProviderAttributeName in
+	//   your AdminLinkProviderForUser request. For example, email .
+	//
+	//   - When you set ProviderAttributeName to Cognito_Subject , Amazon Cognito will
+	//   automatically parse the default unique identifier found in the subject from the
+	//   IdP token.
 	//
 	// This member is required.
 	SourceUser *types.ProviderUserIdentifierType
 
-	// The user pool ID for the user pool.
+	// The ID of the user pool where you want to link a federated identity.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -168,6 +167,9 @@ func (c *Client) addOperationAdminLinkProviderForUserMiddlewares(stack *middlewa
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -205,6 +207,18 @@ func (c *Client) addOperationAdminLinkProviderForUserMiddlewares(stack *middlewa
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

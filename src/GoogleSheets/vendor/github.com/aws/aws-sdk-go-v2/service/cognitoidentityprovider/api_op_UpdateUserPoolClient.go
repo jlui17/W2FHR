@@ -58,8 +58,7 @@ type UpdateUserPoolClientInput struct {
 	// This member is required.
 	ClientId *string
 
-	// The user pool ID for the user pool where you want to update the user pool
-	// client.
+	// The ID of the user pool where you want to update the user pool client.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -185,7 +184,7 @@ type UpdateUserPoolClientInput struct {
 	// EnablePropagateAdditionalUserContextData in an app client that has a client
 	// secret.
 	//
-	// [Adding advanced security to a user pool]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-settings-advanced-security.html
+	// [Adding advanced security to a user pool]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-settings-threat-protection.html
 	EnablePropagateAdditionalUserContextData *bool
 
 	// Activates or deactivates token revocation. For more information about revoking
@@ -204,6 +203,14 @@ type UpdateUserPoolClientInput struct {
 	// ALLOW_REFRESH_TOKEN_AUTH , ALLOW_USER_SRP_AUTH , and ALLOW_CUSTOM_AUTH .
 	//
 	// Valid values include:
+	//
+	//   - ALLOW_USER_AUTH : Enable selection-based sign-in with USER_AUTH . This
+	//   setting covers username-password, secure remote password (SRP), passwordless,
+	//   and passkey authentication. This authentiation flow can do username-password and
+	//   SRP authentication without other ExplicitAuthFlows permitting them. For
+	//   example users can complete an SRP challenge through USER_AUTH without the flow
+	//   USER_SRP_AUTH being active for the app client. This flow doesn't include
+	//   CUSTOM_AUTH .
 	//
 	//   - ALLOW_ADMIN_USER_PASSWORD_AUTH : Enable admin based user password
 	//   authentication flow ADMIN_USER_PASSWORD_AUTH . This setting replaces the
@@ -259,19 +266,21 @@ type UpdateUserPoolClientInput struct {
 	//
 	//   - LEGACY - This represents the early behavior of Amazon Cognito where user
 	//   existence related errors aren't prevented.
+	//
+	// Defaults to LEGACY when you don't provide a value.
 	PreventUserExistenceErrors types.PreventUserExistenceErrorTypes
 
-	// The list of user attributes that you want your app client to have read-only
-	// access to. After your user authenticates in your app, their access token
-	// authorizes them to read their own attribute value for any attribute in this
-	// list. An example of this kind of activity is when your user selects a link to
-	// view their profile information. Your app makes a [GetUser]API request to retrieve and
-	// display your user's profile data.
+	// The list of user attributes that you want your app client to have read access
+	// to. After your user authenticates in your app, their access token authorizes
+	// them to read their own attribute value for any attribute in this list. An
+	// example of this kind of activity is when your user selects a link to view their
+	// profile information. Your app makes a [GetUser]API request to retrieve and display your
+	// user's profile data.
 	//
 	// When you don't specify the ReadAttributes for your app client, your app can
 	// read the values of email_verified , phone_number_verified , and the Standard
-	// attributes of your user pool. When your user pool has read access to these
-	// default attributes, ReadAttributes doesn't return any information. Amazon
+	// attributes of your user pool. When your user pool app client has read access to
+	// these default attributes, ReadAttributes doesn't return any information. Amazon
 	// Cognito only populates ReadAttributes in the API response if you have specified
 	// your own custom set of read attributes.
 	//
@@ -296,9 +305,19 @@ type UpdateUserPoolClientInput struct {
 	// refresh tokens are valid for 30 days.
 	RefreshTokenValidity int32
 
-	// A list of provider names for the IdPs that this client supports. The following
-	// are supported: COGNITO , Facebook , Google , SignInWithApple , LoginWithAmazon ,
-	// and the names of your own SAML and OIDC providers.
+	// A list of provider names for the identity providers (IdPs) that are supported
+	// on this client. The following are supported: COGNITO , Facebook , Google ,
+	// SignInWithApple , and LoginWithAmazon . You can also specify the names that you
+	// configured for the SAML and OIDC IdPs in your user pool, for example MySAMLIdP
+	// or MyOIDCIdP .
+	//
+	// This setting applies to providers that you can access with [managed login]. The removal of
+	// COGNITO from this list doesn't prevent authentication operations for local users
+	// with the user pools API in an Amazon Web Services SDK. The only way to prevent
+	// API-based authentication is to block access with a [WAF rule].
+	//
+	// [WAF rule]: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-waf.html
+	// [managed login]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-managed-login.html
 	SupportedIdentityProviders []string
 
 	// The time units you use when you set the duration of ID, access, and refresh
@@ -390,6 +409,9 @@ func (c *Client) addOperationUpdateUserPoolClientMiddlewares(stack *middleware.S
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -427,6 +449,18 @@ func (c *Client) addOperationUpdateUserPoolClientMiddlewares(stack *middleware.S
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

@@ -20,21 +20,22 @@ import (
 // sign in.
 //
 // If you have never used SMS text messages with Amazon Cognito or any other
-// Amazon Web Service, Amazon Simple Notification Service might place your account
-// in the SMS sandbox. In [sandbox mode], you can send messages only to verified phone numbers.
-// After you test your app while in the sandbox environment, you can move out of
-// the sandbox and into production. For more information, see [SMS message settings for Amazon Cognito user pools]in the Amazon
+// Amazon Web Services service, Amazon Simple Notification Service might place your
+// account in the SMS sandbox. In [sandbox mode], you can send messages only to verified phone
+// numbers. After you test your app while in the sandbox environment, you can move
+// out of the sandbox and into production. For more information, see [SMS message settings for Amazon Cognito user pools]in the Amazon
 // Cognito Developer Guide.
 //
-// Updates the specified user's attributes, including developer attributes, as an
-// administrator. Works on any user. To delete an attribute from your user, submit
-// the attribute in your API request with a blank value.
+// Updates the specified user's attributes. To delete an attribute from your user,
+// submit the attribute in your API request with a blank value.
 //
 // For custom attributes, you must prepend the custom: prefix to the attribute
 // name.
 //
-// In addition to updating user attributes, this API can also be used to mark
-// phone and email as verified.
+// This operation can set a user's email address or phone number as verified and
+// permit immediate sign-in in user pools that require verification of these
+// attributes. To do this, set the email_verified or phone_number_verified
+// attribute to true .
 //
 // Amazon Cognito evaluates Identity and Access Management (IAM) policies in
 // requests for this API operation. For this operation, you must use IAM
@@ -82,16 +83,17 @@ type AdminUpdateUserAttributesInput struct {
 	// updates the attribute value. Your user can sign in and receive messages with the
 	// original attribute value until they verify the new value.
 	//
-	// To update the value of an attribute that requires verification in the same API
-	// request, include the email_verified or phone_number_verified attribute, with a
-	// value of true . If you set the email_verified or phone_number_verified value
-	// for an email or phone_number attribute that requires verification to true ,
-	// Amazon Cognito doesn’t send a verification message to your user.
+	// To skip the verification message and update the value of an attribute that
+	// requires verification in the same API request, include the email_verified or
+	// phone_number_verified attribute, with a value of true . If you set the
+	// email_verified or phone_number_verified value for an email or phone_number
+	// attribute that requires verification to true , Amazon Cognito doesn’t send a
+	// verification message to your user.
 	//
 	// This member is required.
 	UserAttributes []types.AttributeType
 
-	// The user pool ID for the user pool where you want to update user attributes.
+	// The ID of the user pool where you want to update user attributes.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -120,8 +122,8 @@ type AdminUpdateUserAttributesInput struct {
 	//
 	// For more information, see [Customizing user pool Workflows with Lambda Triggers] in the Amazon Cognito Developer Guide.
 	//
-	// When you use the ClientMetadata parameter, remember that Amazon Cognito won't
-	// do the following:
+	// When you use the ClientMetadata parameter, note that Amazon Cognito won't do
+	// the following:
 	//
 	//   - Store the ClientMetadata value. This data is available only to Lambda
 	//   triggers that are assigned to a user pool to support custom workflows. If your
@@ -130,8 +132,8 @@ type AdminUpdateUserAttributesInput struct {
 	//
 	//   - Validate the ClientMetadata value.
 	//
-	//   - Encrypt the ClientMetadata value. Don't use Amazon Cognito to provide
-	//   sensitive information.
+	//   - Encrypt the ClientMetadata value. Don't send sensitive information in this
+	//   parameter.
 	//
 	// [Customizing user pool Workflows with Lambda Triggers]: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html
 	ClientMetadata map[string]string
@@ -191,6 +193,9 @@ func (c *Client) addOperationAdminUpdateUserAttributesMiddlewares(stack *middlew
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -228,6 +233,18 @@ func (c *Client) addOperationAdminUpdateUserAttributesMiddlewares(stack *middlew
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

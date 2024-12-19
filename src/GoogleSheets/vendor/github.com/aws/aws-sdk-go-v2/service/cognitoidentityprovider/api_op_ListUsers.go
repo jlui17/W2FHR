@@ -44,7 +44,7 @@ func (c *Client) ListUsers(ctx context.Context, params *ListUsersInput, optFns .
 // Represents the request to list users.
 type ListUsersInput struct {
 
-	// The user pool ID for the user pool on which the search should be performed.
+	// The ID of the user pool on which the search should be performed.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -61,7 +61,7 @@ type ListUsersInput struct {
 	// user profile before an AttributesToGet parameter returns results.
 	AttributesToGet []string
 
-	// A filter string of the form "AttributeName Filter-Type "AttributeValue"".
+	// A filter string of the form "AttributeName Filter-Type "AttributeValue" .
 	// Quotation marks within the filter string must be escaped using the backslash ( \
 	// ) character. For example, "family_name = \"Reddy\"" .
 	//
@@ -202,6 +202,9 @@ func (c *Client) addOperationListUsersMiddlewares(stack *middleware.Stack, optio
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -239,6 +242,18 @@ func (c *Client) addOperationListUsersMiddlewares(stack *middleware.Stack, optio
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil

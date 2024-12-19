@@ -49,7 +49,8 @@ type AdminAddUserToGroupInput struct {
 	// This member is required.
 	GroupName *string
 
-	// The user pool ID for the user pool.
+	// The ID of the user pool that contains the group that you want to add the user
+	// to.
 	//
 	// This member is required.
 	UserPoolId *string
@@ -116,6 +117,9 @@ func (c *Client) addOperationAdminAddUserToGroupMiddlewares(stack *middleware.St
 	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
+	if err = addSpanRetryLoop(stack, options); err != nil {
+		return err
+	}
 	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
@@ -153,6 +157,18 @@ func (c *Client) addOperationAdminAddUserToGroupMiddlewares(stack *middleware.St
 		return err
 	}
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
+		return err
+	}
+	if err = addSpanInitializeStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanInitializeEnd(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestStart(stack); err != nil {
+		return err
+	}
+	if err = addSpanBuildRequestEnd(stack); err != nil {
 		return err
 	}
 	return nil
