@@ -48,11 +48,11 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
     <Collapsible
       open={p.open}
       onOpenChange={p.onOpenChange}
-      className="col-span-2 w-full"
+      className="col-span-2 w-11/12 lg:w-auto"
     >
       <Card>
         <CollapsibleTrigger asChild>
-          <CardHeader className="hover:bg-gray-100 transition-colors duration-200">
+          <CardHeader className="transition-colors duration-200 hover:bg-gray-100">
             <div className="flex items-center justify-between">
               <CardTitle className="m-auto">Schedule</CardTitle>
               <CollapsibleTrigger asChild>

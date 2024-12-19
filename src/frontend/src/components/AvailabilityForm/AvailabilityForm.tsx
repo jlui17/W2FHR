@@ -26,7 +26,7 @@ const AvailabilitySchema = z.object({
 
 export function LoadingAvailabilityForm() {
   return (
-    <Card className="w-11/12 md:w-auto">
+    <Card className="w-11/12 lg:w-auto">
       <CardHeader>
         <CardTitle className="m-auto">Availability</CardTitle>
       </CardHeader>
@@ -129,7 +129,7 @@ export const AvailabilityForm = (p: {
   return (
     <Form {...form}>
       <form
-        className="w-11/12 md:w-auto"
+        className="w-11/12 lg:w-auto"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <Card>

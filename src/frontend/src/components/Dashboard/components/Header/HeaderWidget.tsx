@@ -10,9 +10,9 @@ export const HeaderWidget = ({ onLogout }: HeaderWidgetProps) => {
       <img
         src="wun2free_logo.png"
         alt="logo"
-        className="aspect-auto h-8 md:h-12"
+        className="aspect-auto h-8 lg:h-12"
       />
-      <Button className="ml-auto text-xs md:text-sm" onClick={onLogout}>
+      <Button className="ml-auto text-xs lg:text-sm" onClick={onLogout}>
         Logout
       </Button>
     </Card>

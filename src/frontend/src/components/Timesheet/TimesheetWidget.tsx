@@ -49,7 +49,11 @@ export const TimesheetWidget = (p: {
   }
 
   return (
-    <Collapsible open={p.open} onOpenChange={p.onOpenChange}>
+    <Collapsible
+      open={p.open}
+      onOpenChange={p.onOpenChange}
+      className="col-span-2 w-11/12 lg:w-auto"
+    >
       <Card>
         <CollapsibleTrigger asChild>
           <CardHeader className="transition-colors duration-200 hover:bg-gray-100">
