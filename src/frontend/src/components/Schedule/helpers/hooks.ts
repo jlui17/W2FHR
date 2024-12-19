@@ -25,7 +25,6 @@ export function useScheduleData(p: {
   idToken: string;
   start: Date;
   end: Date;
-  enabled: boolean;
   queryKey: string[];
 }): UseQueryResult<ScheduleData, Error> {
   async function getScheduleData(): Promise<ScheduleData> {
@@ -58,7 +57,7 @@ export function useScheduleData(p: {
   return useQuery({
     queryKey: p.queryKey,
     queryFn: getScheduleData,
-    enabled: p.enabled,
+    refetchOnMount: false,
   });
 }
 

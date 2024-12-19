@@ -66,8 +66,7 @@ function ScheduleController(): ReactElement {
     idToken: getAuthSession()?.idToken || "",
     start: startDate,
     end: endDate,
-    enabled: open,
-    queryKey: ["schedule", startDate.toISOString(), endDate.toISOString()],
+    queryKey: [startDate.toISOString(), endDate.toISOString()],
   });
 
   function onSortChange(): void {

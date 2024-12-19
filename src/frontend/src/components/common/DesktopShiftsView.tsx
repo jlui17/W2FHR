@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 export default function DesktopShiftsView(p: {
   shifts: Shift[];
   isLoading: boolean;
+  noShiftsMessage: string;
   className?: string;
   showNames?: boolean;
 }): ReactElement {
@@ -57,7 +58,7 @@ export default function DesktopShiftsView(p: {
         ) : (
           <TableRow>
             <TableCell colSpan={7} className="text-center">
-              You haven't worked any shifts yet.
+              {p.noShiftsMessage}
             </TableCell>
           </TableRow>
         )}

@@ -12,6 +12,8 @@ import MobileShiftsView from "@/components/common/MobileShiftsView";
 import { useIsDesktopView } from "@/components/common/ScreenSizeHelpers";
 import DesktopShiftsView from "@/components/common/DesktopShiftsView";
 
+const NO_SHIFTS_MESSAGE: string = "You haven't worked any shifts yet.";
+
 export const TimesheetWidget = (p: {
   open: boolean;
   onOpenChange: () => void;
@@ -50,13 +52,14 @@ export const TimesheetWidget = (p: {
                 <DesktopShiftsView
                   shifts={p.timesheetData.shifts}
                   isLoading={p.isLoading}
+                  noShiftsMessage={NO_SHIFTS_MESSAGE}
                 />
               )}
               {!isDesktopView && (
                 <MobileShiftsView
                   shifts={p.timesheetData.shifts}
                   isLoading={p.isLoading}
-                  noShiftsMessage={"You haven't worked any shifts yet."}
+                  noShiftsMessage={NO_SHIFTS_MESSAGE}
                 />
               )}
             </>

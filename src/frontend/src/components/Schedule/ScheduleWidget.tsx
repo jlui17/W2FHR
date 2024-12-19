@@ -37,6 +37,8 @@ interface ScheduleWidgetProps {
   onSortChange: () => void;
 }
 
+const NO_SHIFTS_MESSAGE: string = "No shift data available.";
+
 export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
   const isDesktopView: boolean = useIsDesktopView();
   return (
@@ -132,12 +134,13 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                 shifts={p.shifts}
                 isLoading={p.isLoading}
                 showNames
+                noShiftsMessage={NO_SHIFTS_MESSAGE}
               />
             ) : (
               <MobileShiftsView
                 shifts={p.shifts}
                 isLoading={p.isLoading}
-                noShiftsMessage={"No shifts scheduled."}
+                noShiftsMessage={NO_SHIFTS_MESSAGE}
               />
             )}
           </CardContent>
