@@ -12,7 +12,6 @@ import {
   ScheduleData,
   useScheduleData,
 } from "@/components/Schedule/helpers/hooks";
-import { endOfWeek, startOfWeek } from "date-fns";
 
 const EMPTY_DATA: ScheduleData = { shifts: [] };
 
@@ -37,12 +36,8 @@ function ScheduleController(): ReactElement {
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [open, setOpen] = useState<boolean>(false);
-  const [startDate, setStartDate] = useState<Date>(
-    startOfWeek(new Date(), { weekStartsOn: 1 }),
-  );
-  const [endDate, setEndDate] = useState<Date>(
-    endOfWeek(new Date(), { weekStartsOn: 1 }),
-  );
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
   const {
     refetch,
     isFetching,
@@ -52,11 +47,7 @@ function ScheduleController(): ReactElement {
     start: startDate,
     end: endDate,
     enabled: open,
-    queryKey: [
-      "schedule",
-      startDate.toISOString(),
-      endDate.toISOString(),
-    ],
+    queryKey: ["schedule", startDate.toISOString(), endDate.toISOString()],
   });
 
   function onSortChange(): void {

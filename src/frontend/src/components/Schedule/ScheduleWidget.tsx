@@ -31,20 +31,6 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScheduleData } from "@/components/Schedule/helpers/hooks";
 
-// Define the type for our shift data
-type ShiftData = {
-  id: string;
-  date: Date;
-  name: string;
-  shift: string;
-  start: string;
-  end: string;
-  break: string;
-  hours: number;
-};
-
-// Sample data
-
 interface ScheduleWidgetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -66,9 +52,9 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
     >
       <Card>
         <CollapsibleTrigger asChild>
-          <CardHeader>
+          <CardHeader className="hover:bg-gray-100 transition-colors duration-200">
             <div className="flex items-center justify-between">
-              <CardTitle className="m-auto">Shift Data</CardTitle>
+              <CardTitle className="m-auto">Schedule</CardTitle>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="w-9 p-0">
                   {p.open ? (
@@ -83,88 +69,102 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          {p.isLoading ? (
-            <Loader2 className="m-auto h-16 w-16 animate-spin" />
-          ) : (
-            <CardContent>
-              <div className="mb-4 flex space-x-4">
-                <Popover>
-                  <PopoverTrigger asChild>
+          <CardContent>
+            <div className="mb-4 flex space-x-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !p.startDate && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {p.startDate ? (
+                      format(p.startDate, "PPP")
+                    ) : (
+                      <span>Pick a start date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={p.startDate}
+                    onSelect={(date) => p.setStartDate(date || p.startDate)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !p.endDate && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {p.endDate ? (
+                      format(p.endDate, "PPP")
+                    ) : (
+                      <span>Pick an end date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={p.endDate}
+                    onSelect={(date) => p.setEndDate(date || p.endDate)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
                     <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] justify-start text-left font-normal",
-                        !p.startDate && "text-muted-foreground",
-                      )}
+                      variant="ghost"
+                      onClick={p.onSortChange}
+                      className="h-auto p-0 font-bold"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {p.startDate ? (
-                        format(p.startDate, "PPP")
-                      ) : (
-                        <span>Pick a start date</span>
-                      )}
+                      Date
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={p.startDate}
-                      onSelect={(date) => p.setStartDate(date || p.startDate)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] justify-start text-left font-normal",
-                        !p.endDate && "text-muted-foreground",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {p.endDate ? (
-                        format(p.endDate, "PPP")
-                      ) : (
-                        <span>Pick an end date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={p.endDate}
-                      onSelect={(date) => p.setEndDate(date || p.endDate)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Table>
-                <TableHeader>
+                  </TableHead>
+                  <TableHead className="font-bold">Name</TableHead>
+                  <TableHead className="font-bold">Shift</TableHead>
+                  <TableHead className="font-bold">Start</TableHead>
+                  <TableHead className="font-bold">End</TableHead>
+                  <TableHead className="font-bold">Break</TableHead>
+                  <TableHead className="font-bold">Hours</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {p.isLoading ? (
                   <TableRow>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={p.onSortChange}
-                        className="h-auto p-0 font-bold"
-                      >
-                        Date
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </TableHead>
-                    <TableHead className="font-bold">Name</TableHead>
-                    <TableHead className="font-bold">Shift</TableHead>
-                    <TableHead className="font-bold">Start</TableHead>
-                    <TableHead className="font-bold">End</TableHead>
-                    <TableHead className="font-bold">Break</TableHead>
-                    <TableHead className="font-bold">Hours</TableHead>
+                    {Array.from({ length: 7 }).map((_, index) => (
+                      <TableCell key={index}>
+                        <div className="flex justify-center">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        </div>
+                      </TableCell>
+                    ))}
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {p.schedule.shifts.map((row) => (
-                    <TableRow key={row.date.toISOString() + row.shiftTitle + row.employeeName}>
+                ) : (
+                  p.schedule.shifts.map((row) => (
+                    <TableRow
+                      key={
+                        row.date.toISOString() +
+                        row.shiftTitle +
+                        row.employeeName
+                      }
+                    >
                       <TableCell>
                         {row.date.toLocaleDateString("en-US", {
                           weekday: "long",
@@ -180,11 +180,11 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                       <TableCell>{row.breakDuration}</TableCell>
                       <TableCell>{row.netHours}</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          )}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
         </CollapsibleContent>
       </Card>
     </Collapsible>
