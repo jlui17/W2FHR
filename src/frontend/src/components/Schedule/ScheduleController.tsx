@@ -12,8 +12,9 @@ import {
   ScheduleData,
   useScheduleData,
 } from "@/components/Schedule/helpers/hooks";
+import { Shift } from "@/components/Timesheet/helpers/hooks";
 
-const EMPTY_DATA: ScheduleData = { shifts: [] };
+const EMPTY_DATA: Shift[] = [];
 
 function sortData(data: ScheduleData, sortOrder: "asc" | "desc"): ScheduleData {
   data.shifts.sort((a, b) => {
@@ -24,6 +25,25 @@ function sortData(data: ScheduleData, sortOrder: "asc" | "desc"): ScheduleData {
     }
   });
   return data;
+}
+
+function convertToShifts(data: ScheduleData): Shift[] {
+  return data.shifts.map((shift): Shift => {
+    return {
+      date: shift.date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      startTime: shift.startTime,
+      endTime: shift.endTime,
+      breakDuration: shift.breakDuration,
+      shiftTitle: shift.shiftTitle,
+      netHours: shift.netHours,
+      employeeName: shift.employeeName,
+    };
+  });
 }
 
 function ScheduleController(): ReactElement {
@@ -62,6 +82,20 @@ function ScheduleController(): ReactElement {
     setOpen(!open);
   }
 
+  function onSetStartDate(date: Date): void {
+    if (date > endDate) {
+      setEndDate(date);
+    }
+    setStartDate(date);
+  }
+
+  function onSetEndDate(date: Date): void {
+    if (date < startDate) {
+      setStartDate(date);
+    }
+    setEndDate(date);
+  }
+
   if (scheduleData === undefined) {
     return (
       <ScheduleWidget
@@ -69,25 +103,25 @@ function ScheduleController(): ReactElement {
         onOpenChange={onOpenChange}
         isLoading={isFetching}
         startDate={startDate}
-        setStartDate={setStartDate}
+        onSetStartDate={onSetStartDate}
         endDate={endDate}
-        setEndDate={setEndDate}
-        schedule={EMPTY_DATA}
+        onSetEndDate={onSetEndDate}
+        shifts={EMPTY_DATA}
         onSortChange={onSortChange}
       />
     );
   }
-
+  sortData(scheduleData, sortOrder);
   return (
     <ScheduleWidget
       open={open}
       onOpenChange={onOpenChange}
       isLoading={isFetching}
       startDate={startDate}
-      setStartDate={setStartDate}
+      onSetStartDate={onSetStartDate}
       endDate={endDate}
-      setEndDate={setEndDate}
-      schedule={sortData(scheduleData, sortOrder)}
+      onSetEndDate={onSetEndDate}
+      shifts={convertToShifts(scheduleData)}
       onSortChange={onSortChange}
     />
   );

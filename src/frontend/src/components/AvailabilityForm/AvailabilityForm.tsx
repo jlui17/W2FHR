@@ -19,6 +19,7 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { UserAvailability } from "./helpers/hooks";
+import { ReactElement } from "react";
 
 const AvailabilitySchema = z.object({
   days: z.array(z.string()).optional(),
@@ -54,7 +55,7 @@ export const AvailabilityForm = (p: {
   updateIsPending: boolean;
   availability: UserAvailability;
   updateAvailability: (days: string[] | undefined) => void;
-}): JSX.Element => {
+}): ReactElement => {
   const form = useForm<z.infer<typeof AvailabilitySchema>>({
     resolver: zodResolver(AvailabilitySchema),
     defaultValues: {
@@ -73,7 +74,7 @@ export const AvailabilityForm = (p: {
     { id: "day4", date: p.availability.day4.date },
   ];
 
-  function checkboxes(): JSX.Element {
+  function checkboxes(): ReactElement {
     return (
       <FormField
         control={form.control}
@@ -129,7 +130,7 @@ export const AvailabilityForm = (p: {
   return (
     <Form {...form}>
       <form
-        className="w-11/12 lg:w-auto"
+        className="w-11/12 lg:mx-auto lg:w-3/4"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <Card>

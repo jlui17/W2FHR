@@ -1,19 +1,10 @@
 import React, { ReactElement } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpDown,
   CalendarIcon,
   ChevronDown,
   ChevronUp,
-  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -29,21 +20,25 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { ScheduleData } from "@/components/Schedule/helpers/hooks";
+import DesktopShiftsView from "@/components/common/DesktopShiftsView";
+import { Shift } from "@/components/Timesheet/helpers/hooks";
+import MobileShiftsView from "@/components/common/MobileShiftsView";
+import { useIsDesktopView } from "@/components/common/ScreenSizeHelpers";
 
 interface ScheduleWidgetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isLoading: boolean;
-  schedule: ScheduleData;
+  shifts: Shift[];
   startDate: Date;
-  setStartDate: (date: Date) => void;
+  onSetStartDate: (date: Date) => void;
   endDate: Date;
-  setEndDate: (date: Date) => void;
+  onSetEndDate: (date: Date) => void;
   onSortChange: () => void;
 }
 
 export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
+  const isDesktopView: boolean = useIsDesktopView();
   return (
     <Collapsible
       open={p.open}
@@ -70,7 +65,7 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent>
-            <div className="mb-4 flex space-x-4">
+            <div className="mb-4 flex flex-col items-center justify-center gap-4 lg:flex-row lg:justify-start">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -92,7 +87,7 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                   <Calendar
                     mode="single"
                     selected={p.startDate}
-                    onSelect={(date) => p.setStartDate(date || p.startDate)}
+                    onSelect={(date) => p.onSetStartDate(date || p.startDate)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -118,72 +113,29 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                   <Calendar
                     mode="single"
                     selected={p.endDate}
-                    onSelect={(date) => p.setEndDate(date || p.endDate)}
+                    onSelect={(date) => p.onSetEndDate(date || p.endDate)}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
+              <Button
+                variant="outline"
+                onClick={p.onSortChange}
+                className="h-auto font-normal"
+              >
+                Sort
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={p.onSortChange}
-                      className="h-auto p-0 font-bold"
-                    >
-                      Date
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="font-bold">Name</TableHead>
-                  <TableHead className="font-bold">Shift</TableHead>
-                  <TableHead className="font-bold">Start</TableHead>
-                  <TableHead className="font-bold">End</TableHead>
-                  <TableHead className="font-bold">Break</TableHead>
-                  <TableHead className="font-bold">Hours</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {p.isLoading ? (
-                  <TableRow>
-                    {Array.from({ length: 7 }).map((_, index) => (
-                      <TableCell key={index}>
-                        <div className="flex justify-center">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        </div>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ) : (
-                  p.schedule.shifts.map((row) => (
-                    <TableRow
-                      key={
-                        row.date.toISOString() +
-                        row.shiftTitle +
-                        row.employeeName
-                      }
-                    >
-                      <TableCell>
-                        {row.date.toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </TableCell>
-                      <TableCell>{row.employeeName}</TableCell>
-                      <TableCell>{row.shiftTitle}</TableCell>
-                      <TableCell>{row.startTime}</TableCell>
-                      <TableCell>{row.endTime}</TableCell>
-                      <TableCell>{row.breakDuration}</TableCell>
-                      <TableCell>{row.netHours}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            {isDesktopView ? (
+              <DesktopShiftsView
+                shifts={p.shifts}
+                isLoading={p.isLoading}
+                showNames
+              />
+            ) : (
+              <MobileShiftsView shifts={p.shifts} isLoading={p.isLoading} />
+            )}
           </CardContent>
         </CollapsibleContent>
       </Card>
