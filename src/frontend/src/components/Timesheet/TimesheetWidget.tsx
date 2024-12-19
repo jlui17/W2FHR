@@ -53,7 +53,11 @@ export const TimesheetWidget = (p: {
                 />
               )}
               {!isDesktopView && (
-                <MobileShiftsView shifts={p.timesheetData.shifts} isLoading={p.isLoading} />
+                <MobileShiftsView
+                  shifts={p.timesheetData.shifts}
+                  isLoading={p.isLoading}
+                  noShiftsMessage={"You haven't worked any shifts yet."}
+                />
               )}
             </>
           </CardContent>

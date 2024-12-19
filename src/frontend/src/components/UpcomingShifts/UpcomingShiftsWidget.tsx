@@ -30,6 +30,7 @@ export function UpcomingShiftsWidget(
           <MobileShiftsView
             shifts={p.upcomingShiftsData.shifts}
             isLoading={p.isLoading}
+            noShiftsMessage="You have no upcoming shifts."
           />
         )}
       </CardContent>

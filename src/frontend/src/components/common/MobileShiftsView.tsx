@@ -6,15 +6,16 @@ export default function MobileShiftsView(p: {
   className?: string;
   shifts: Shift[];
   isLoading: boolean;
+  noShiftsMessage: string;
 }): ReactElement {
   const hasShifts: boolean = p.shifts.length > 0;
   return p.isLoading ? (
     <div className="flex justify-center">
-      <Loader2 className="h-4 w-4 animate-spin" />
+      <Loader2 className="h-16 w-16 animate-spin" />
     </div>
   ) : !hasShifts ? (
     <p className="m-auto text-center text-sm text-gray-600">
-      You haven't worked any shifts yet
+      {p.noShiftsMessage}
     </p>
   ) : (
     <div className={`mt-2 flex flex-col ${p.className || ""}`}>

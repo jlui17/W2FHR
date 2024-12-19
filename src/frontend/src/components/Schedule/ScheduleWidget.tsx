@@ -134,7 +134,11 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                 showNames
               />
             ) : (
-              <MobileShiftsView shifts={p.shifts} isLoading={p.isLoading} />
+              <MobileShiftsView
+                shifts={p.shifts}
+                isLoading={p.isLoading}
+                noShiftsMessage={"No shifts scheduled."}
+              />
             )}
           </CardContent>
         </CollapsibleContent>
