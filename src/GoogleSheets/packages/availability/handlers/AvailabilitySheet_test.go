@@ -5,29 +5,9 @@ import (
 	"testing"
 )
 
-func TestTransformDatesIfNecessaryAddsDay4(t *testing.T) {
-	dates := []interface{}{"d1", "d2", "d3"}
-	transformDatesIfNecessary(&dates)
-
-	expectedDates := []interface{}{"d1", "d2", "d3", ""}
-	if !reflect.DeepEqual(dates, expectedDates) {
-		t.Errorf("Expected %v, but got %v", expectedDates, dates)
-	}
-}
-
-func TestTransformDatesIfNecessaryDoesntAddDay4IfPresent(t *testing.T) {
-	dates := []interface{}{"d1", "d2", "d3", "d4"}
-	transformDatesIfNecessary(&dates)
-
-	expectedDates := []interface{}{"d1", "d2", "d3", "d4"}
-	if !reflect.DeepEqual(dates, expectedDates) {
-		t.Errorf("Expected %v, but got %v", expectedDates, dates)
-	}
-}
-
 func TestCreateAvailability(t *testing.T) {
 	daysAvailable := []interface{}{"TRUE", "FALSE", "TRUE", "FALSE"}
-	dates := []interface{}{"d1", "d2", "d3"}
+	dates := []interface{}{"d1", "d2", "d3", "d4"}
 
 	expected := &EmployeeAvailability{
 		Day1: EmployeeAvailabilityDay{
@@ -44,17 +24,19 @@ func TestCreateAvailability(t *testing.T) {
 		},
 		Day4: EmployeeAvailabilityDay{
 			IsAvailable: false,
-			Date:        "",
+			Date:        dates[3].(string),
 		},
-		CanUpdate: false,
+		CanUpdate:  false,
+		ShowMonday: false,
 	}
 
-	if ans := createAvailability(daysAvailable, dates, "TRUE"); !reflect.DeepEqual(ans, expected) {
+	if ans := createAvailability(daysAvailable, dates, "TRUE", false); !reflect.DeepEqual(ans, expected) {
 		t.Errorf("Expected %v, but got %v", expected, ans)
 	}
 
 	expected.CanUpdate = true
-	if ans := createAvailability(daysAvailable, dates, "FALSE"); !reflect.DeepEqual(ans, expected) {
+	expected.ShowMonday = true
+	if ans := createAvailability(daysAvailable, dates, "FALSE", true); !reflect.DeepEqual(ans, expected) {
 		t.Errorf("Expected %v, but got %v", expected, ans)
 	}
 }

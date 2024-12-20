@@ -71,8 +71,10 @@ export const AvailabilityForm = (p: {
     { id: "day1", date: p.availability.day1.date },
     { id: "day2", date: p.availability.day2.date },
     { id: "day3", date: p.availability.day3.date },
-    { id: "day4", date: p.availability.day4.date },
   ];
+  if (p.availability.showMonday) {
+    items.push({ id: "day4", date: p.availability.day4.date });
+  }
 
   function checkboxes(): ReactElement {
     return (
@@ -90,7 +92,7 @@ export const AvailabilityForm = (p: {
                   render={({ field }) => (
                     <FormItem
                       key={d.id}
-                      className="flex h-11 w-auto flex-row items-center space-y-0 rounded transition-colors duration-200 ease-in-out hover:bg-slate-100"
+                      className="flex h-11 w-auto flex-row items-center space-y-0 rounded transition-colors duration-100 ease-in-out hover:bg-slate-100"
                     >
                       <FormControl>
                         <Checkbox

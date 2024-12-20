@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useContext } from "react";
+import { ReactElement, useContext } from "react";
 import { toast } from "sonner";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { ERROR_MESSAGES, TOAST } from "../common/constants";
@@ -17,11 +17,12 @@ const defaultAvailability: UserAvailability = {
   day2: { isAvailable: false, date: "" },
   day3: { isAvailable: false, date: "" },
   day4: { isAvailable: false, date: "" },
+  showMonday: false,
 };
 
 const queryClient = new QueryClient();
 
-function AvailabilityController(): JSX.Element {
+function AvailabilityController(): ReactElement {
   const { getAuthSession } = useContext(AuthenticationContext);
 
   const { isFetching, isError, data, error } = useUserAvailability({
@@ -51,7 +52,7 @@ function AvailabilityController(): JSX.Element {
     });
 
   function doUpdate(days: string[] | undefined): void {
-    // shouldn never happen, (update is disabled and data is only undefined) when loading or error
+    // should never happen, (update is disabled and data is only undefined) when loading or error
     if (data === undefined) {
       toast.error(TOAST.HEADERS.ERROR, {
         description:
@@ -79,6 +80,7 @@ function AvailabilityController(): JSX.Element {
         date: data.day4.date,
       },
       canUpdate: true,
+      showMonday: data.showMonday,
     };
 
     updateAvailability({
@@ -108,7 +110,7 @@ function AvailabilityController(): JSX.Element {
   );
 }
 
-export const Availability = (): JSX.Element => {
+export const Availability = (): ReactElement => {
   return (
     <QueryClientProvider client={queryClient}>
       <AvailabilityController />

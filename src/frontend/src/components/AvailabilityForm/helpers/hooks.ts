@@ -12,16 +12,27 @@ export interface Day {
   isAvailable: boolean;
   date: string;
 }
+
 function isDay(data: unknown): data is Day {
-  return data instanceof Object && "date" in data && "isAvailable" in data;
+  return (
+    data !== null &&
+    typeof data === "object" &&
+    "date" in data &&
+    "isAvailable" in data &&
+    typeof data.date === "string" &&
+    typeof data.isAvailable === "boolean"
+  );
 }
+
 export interface UserAvailability {
   day1: Day;
   day2: Day;
   day3: Day;
   day4: Day;
   canUpdate: boolean;
+  showMonday: boolean;
 }
+
 function isAvailabilityData(data: unknown): data is UserAvailability {
   return (
     data instanceof Object &&
@@ -33,7 +44,10 @@ function isAvailabilityData(data: unknown): data is UserAvailability {
     isDay(data.day3) &&
     "day4" in data &&
     isDay(data.day4) &&
-    "canUpdate" in data
+    "canUpdate" in data &&
+    typeof data.canUpdate === "boolean" &&
+    "showMonday" in data &&
+    typeof data.showMonday === "boolean"
   );
 }
 
@@ -74,6 +88,7 @@ interface UpdateAvailabilityParams {
   availabilityData: UserAvailability;
   idToken: string;
 }
+
 export function useUpdateAvailability(p: {
   onSuccess: (data: UserAvailability) => void;
   onError: (err: Error) => void;

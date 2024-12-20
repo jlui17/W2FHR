@@ -13,16 +13,16 @@ import (
 const (
 	availabilitySheetId   string = "1qZKKoJNXHuo8pymDbGZuBV8WxD6tkgeKnao_H0OfrPk"
 	availabilitySheetName string = "Availability"
-	availabilityViewName  string = "View - Availability"
 	availabilityDay1Col   string = "E"
 	availabilityDay4Col   string = "H"
 )
 
 var (
-	availabilityCanUpdateCell = fmt.Sprintf("'%s'!G4", availabilityViewName)
-	availabilityViewingDates  = fmt.Sprintf("'%s'!B4:E4", availabilityViewName)
+	availabilityCanUpdateCell = fmt.Sprintf("'%s'!J3", availabilitySheetName)
+	availabilityDates         = fmt.Sprintf("'%s'!E2:H2", availabilitySheetName)
 	availabilityEmployeeIds   = fmt.Sprintf("'%s'!A3:A", availabilitySheetName)
 	availabilityData          = fmt.Sprintf("'%s'!D3:H", availabilitySheetName)
+	availabilityShowMonday    = fmt.Sprintf("'%s'!I3", availabilitySheetName)
 
 	ErrUpdateAvailabilityDisabled = errors.New("Updating availability is currently disabled.")
 )
@@ -33,11 +33,12 @@ type EmployeeAvailabilityDay struct {
 }
 
 type EmployeeAvailability struct {
-	Day1      EmployeeAvailabilityDay `json:"day1"`
-	Day2      EmployeeAvailabilityDay `json:"day2"`
-	Day3      EmployeeAvailabilityDay `json:"day3"`
-	Day4      EmployeeAvailabilityDay `json:"day4"`
-	CanUpdate bool                    `json:"canUpdate"`
+	Day1       EmployeeAvailabilityDay `json:"day1"`
+	Day2       EmployeeAvailabilityDay `json:"day2"`
+	Day3       EmployeeAvailabilityDay `json:"day3"`
+	Day4       EmployeeAvailabilityDay `json:"day4"`
+	CanUpdate  bool                    `json:"canUpdate"`
+	ShowMonday bool                    `json:"showMonday"`
 }
 
 type availabilitySheet struct {
@@ -57,8 +58,9 @@ func (a *availabilitySheet) Get(info EmployeeInfo.EmployeeInfo) (*EmployeeAvaila
 	res, err := a.service.Spreadsheets.Values.BatchGet(availabilitySheetId).
 		Ranges(
 			availabilityRange(info.AvailabilityRow),
-			availabilityViewingDates,
+			availabilityDates,
 			availabilityCanUpdateCell,
+			availabilityShowMonday,
 		).
 		MajorDimension("ROWS").
 		Do()
@@ -69,8 +71,9 @@ func (a *availabilitySheet) Get(info EmployeeInfo.EmployeeInfo) (*EmployeeAvaila
 	daysAvailable := res.ValueRanges[0].Values[0]
 	dates := res.ValueRanges[1].Values[0]
 	canUpdate := res.ValueRanges[2].Values[0][0]
+	showMonday := res.ValueRanges[3].Values[0][0].(string) == "TRUE"
 
-	return createAvailability(daysAvailable, dates, canUpdate), nil
+	return createAvailability(daysAvailable, dates, canUpdate, showMonday), nil
 }
 
 func (a *availabilitySheet) GetIds() (*[]interface{}, error) {
@@ -87,26 +90,19 @@ func (a *availabilitySheet) GetIds() (*[]interface{}, error) {
 	return &res.Values[0], nil
 }
 
-func createAvailability(daysAvailable []interface{}, dates []interface{}, canUpdate interface{}) *EmployeeAvailability {
+func createAvailability(daysAvailable []interface{}, dates []interface{}, canUpdate interface{}, showMonday bool) *EmployeeAvailability {
 	day1 := daysAvailable[0] == "TRUE"
 	day2 := daysAvailable[1] == "TRUE"
 	day3 := daysAvailable[2] == "TRUE"
 	day4 := daysAvailable[3] == "TRUE"
 
-	transformDatesIfNecessary(&dates)
-
 	return &EmployeeAvailability{
-		Day1:      EmployeeAvailabilityDay{IsAvailable: day1, Date: dates[0].(string)},
-		Day2:      EmployeeAvailabilityDay{IsAvailable: day2, Date: dates[1].(string)},
-		Day3:      EmployeeAvailabilityDay{IsAvailable: day3, Date: dates[2].(string)},
-		Day4:      EmployeeAvailabilityDay{IsAvailable: day4, Date: dates[3].(string)},
-		CanUpdate: canUpdate == "FALSE",
-	}
-}
-
-func transformDatesIfNecessary(dates *[]interface{}) {
-	if len(*dates) == 3 {
-		*dates = append(*dates, "")
+		Day1:       EmployeeAvailabilityDay{IsAvailable: day1, Date: dates[0].(string)},
+		Day2:       EmployeeAvailabilityDay{IsAvailable: day2, Date: dates[1].(string)},
+		Day3:       EmployeeAvailabilityDay{IsAvailable: day3, Date: dates[2].(string)},
+		Day4:       EmployeeAvailabilityDay{IsAvailable: day4, Date: dates[3].(string)},
+		CanUpdate:  canUpdate == "FALSE",
+		ShowMonday: showMonday,
 	}
 }
 
@@ -164,7 +160,7 @@ func (a *availabilitySheet) canUpdateAvailability() (bool, error) {
 func (a *availabilitySheet) GetAvailabilityForTheWeek() (AvailabilityForTheWeek, error) {
 	res, err := a.service.Spreadsheets.Values.BatchGet(availabilitySheetId).
 		Ranges(
-			availabilityViewingDates,
+			availabilityDates,
 			availabilityData,
 		).
 		MajorDimension("ROWS").
