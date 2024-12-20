@@ -46,6 +46,7 @@ var (
 	scheduleEmployeeNames = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
 		scheduleEmployeeNameCol,
 		scheduleEmployeeNameCol)
+	scheduleMetadata = "'Data Validation'!AE2:AG"
 )
 
 type Timesheet struct {
@@ -107,6 +108,26 @@ func (t *timesheet) GetByTimeRange(start time.Time, end time.Time) (*Timesheet, 
 	}
 
 	return t.getShiftsByTimeRange(start, end, all), nil
+}
+
+func (t *timesheet) GetScheduleMetadata() (ScheduleMetadata, error) {
+	response, err := t.service.Spreadsheets.Values.
+		Get(scheduleSheetId, scheduleMetadata).
+		MajorDimension("COLUMNS").
+		Do()
+	log.Printf("[DEBUG] Response from Google Sheets: %v", response)
+	if err != nil {
+		log.Printf("[ERROR] Trying to get schedule metadata: %s", err.Error())
+		return ScheduleMetadata{}, err
+	}
+
+	res := ScheduleMetadata{
+		ShiftTitles:    SharedConstants.DToStrArr(response.Values[0]),
+		ShiftTimes:     SharedConstants.DToStrArr(response.Values[1]),
+		BreakDurations: SharedConstants.DToStrArr(response.Values[2]),
+	}
+	log.Printf("[DEBUG] Formatted schedule: %v", res)
+	return res, nil
 }
 
 func (t *timesheet) getSchedule() (*schedule, error) {
