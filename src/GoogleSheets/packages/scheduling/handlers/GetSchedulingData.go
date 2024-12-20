@@ -6,29 +6,29 @@ import (
 	"log"
 )
 
-func Get() (SchedulingData, error) {
+func Get() (Data, error) {
 	availabilitySheet, err := Availability.Connect()
 	if err != nil {
-		return SchedulingData{}, err
+		return Data{}, err
 	}
 	scheduleSheet, err := Schedule.Connect()
 	if err != nil {
-		return SchedulingData{}, err
+		return Data{}, err
 	}
 
 	availability, err := availabilitySheet.GetAvailabilityForTheWeek()
 	if err != nil {
-		return SchedulingData{}, err
+		return Data{}, err
 	}
 	log.Printf("[INFO] Scheduling - found availability for the week: %v", availability)
 
 	scheduleMetadata, err := scheduleSheet.GetScheduleMetadata()
 	if err != nil {
-		return SchedulingData{}, err
+		return Data{}, err
 	}
 	log.Printf("[INFO] Scheduling - found schedule metadata: %v", availability)
 
-	return SchedulingData{
+	return Data{
 		Availability:     availability,
 		ScheduleMetadata: scheduleMetadata,
 	}, nil

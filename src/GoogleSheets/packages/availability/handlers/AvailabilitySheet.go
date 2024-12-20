@@ -220,6 +220,55 @@ func (a *availabilitySheet) UpdateStartOfWeek(date time.Time) error {
 		ValueInputOption("RAW").
 		Do()
 	if err != nil {
+		log.Printf("[ERROR] Google Sheets - Failed to update StartOfWeek: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *availabilitySheet) UpdateShowMonday(showMonday bool) error {
+	updateValueRange := &sheets.ValueRange{
+		Values: [][]interface{}{
+			{
+				showMonday,
+			},
+		},
+	}
+
+	_, err := a.service.Spreadsheets.Values.Update(
+		availabilitySheetId,
+		availabilityShowMonday,
+		updateValueRange,
+	).
+		ValueInputOption("RAW").
+		Do()
+	if err != nil {
+		log.Printf("[ERROR] Google Sheets - Failed to update ShowMonday: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *availabilitySheet) UpdateCanUpdate(canUpdate bool) error {
+	updateValueRange := &sheets.ValueRange{
+		Values: [][]interface{}{
+			{
+				canUpdate,
+			},
+		},
+	}
+
+	_, err := a.service.Spreadsheets.Values.Update(
+		availabilitySheetId,
+		availabilityCanUpdateCell,
+		updateValueRange,
+	).
+		ValueInputOption("RAW").
+		Do()
+	if err != nil {
+		log.Printf("[ERROR] Google Sheets - Failed to update DisableUpdates: %v", err)
 		return err
 	}
 
