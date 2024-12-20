@@ -9,7 +9,7 @@ import (
 )
 
 func Get(employeeId string, upcoming bool) (*Timesheet, error) {
-	timesheet, err := getTimesheet()
+	timesheet, err := Connect()
 	if err != nil {
 		log.Printf("[ERROR] Failed to connect to Google Sheets: %s", err.Error())
 		return &Timesheet{}, nil
@@ -40,7 +40,7 @@ func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 }
 
 func GetByTimeRange(start string, end string) (*Timesheet, error) {
-	timesheet, err := getTimesheet()
+	timesheet, err := Connect()
 	if err != nil {
 		log.Printf("[ERROR] Failed to connect to Google Sheets: %s", err.Error())
 		return &Timesheet{}, nil

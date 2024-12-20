@@ -58,3 +58,45 @@ func TestCreateAvailability(t *testing.T) {
 		t.Errorf("Expected %v, but got %v", expected, ans)
 	}
 }
+
+func TestGetEmployeesAvailablePerDay(t *testing.T) {
+	input := [][]string{
+		{"John Doe", "TRUE", "FALSE", "TRUE", "TRUE"},
+		{"Jane Smith", "FALSE", "TRUE", "TRUE", "FALSE"},
+		{"Bob Wilson", "TRUE", "TRUE", "FALSE", "TRUE"},
+		{"Alice Brown", "FALSE", "FALSE", "TRUE", "FALSE"},
+		{"Mike Johnson", "TRUE", "FALSE", "FALSE", "TRUE"},
+	}
+	expected := [][]string{
+		{"John Doe", "Bob Wilson", "Mike Johnson"},
+		{"Jane Smith", "Bob Wilson"},
+		{"John Doe", "Jane Smith", "Alice Brown"},
+		{"John Doe", "Bob Wilson", "Mike Johnson"},
+	}
+
+	actual := getEmployeesAvailablePerDay(input)
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Expected %v, but got %v", expected, actual)
+	}
+}
+
+func TestCreateAvailabilityForTheWeek(t *testing.T) {
+	dates := []string{"d1", "d2", "d3", "d4"}
+	employeesAvailablePerDay := [][]string{
+		{"John Doe", "Bob Wilson", "Mike Johnson"},
+		{"Jane Smith", "Bob Wilson"},
+		{"John Doe", "Jane Smith", "Alice Brown"},
+		{"John Doe", "Bob Wilson", "Mike Johnson"},
+	}
+	expected := AvailabilityForTheWeek{
+		"d1": employeesAvailablePerDay[0],
+		"d2": employeesAvailablePerDay[1],
+		"d3": employeesAvailablePerDay[2],
+		"d4": employeesAvailablePerDay[3],
+	}
+
+	actual := createAvailabilityForTheWeek(dates, employeesAvailablePerDay)
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Expected %v, but got %v", expected, actual)
+	}
+}

@@ -1,30 +1,30 @@
 package Availability
 
 import (
+	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
 	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"errors"
 	"fmt"
-
 	"google.golang.org/api/sheets/v4"
+	"log"
 )
 
 const (
-	availabilitySheetId      string = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
-	availabilitySheetName    string = "Availability"
-	availabilityViewName     string = "View - Availability"
-	availabilityDay1Col      string = "E"
-	availabilityDay4Col      string = "H"
-	availabilityUpdateOffset int    = 3
+	availabilitySheetId   string = "1qZKKoJNXHuo8pymDbGZuBV8WxD6tkgeKnao_H0OfrPk"
+	availabilitySheetName string = "Availability"
+	availabilityViewName  string = "View - Availability"
+	availabilityDay1Col   string = "E"
+	availabilityDay4Col   string = "H"
 )
 
 var (
 	availabilityCanUpdateCell = fmt.Sprintf("'%s'!G4", availabilityViewName)
 	availabilityViewingDates  = fmt.Sprintf("'%s'!B4:E4", availabilityViewName)
 	availabilityEmployeeIds   = fmt.Sprintf("'%s'!A3:A", availabilitySheetName)
-	availabilityCells         = fmt.Sprintf("'%s'!%s3:%s", availabilitySheetName, availabilityDay1Col, availabilityDay4Col)
+	availabilityData          = fmt.Sprintf("'%s'!D3:H", availabilitySheetName)
 
-	ErrUpdateAvailabilityDisabled error = errors.New("Updating availability is currently disabled.")
+	ErrUpdateAvailabilityDisabled = errors.New("Updating availability is currently disabled.")
 )
 
 type EmployeeAvailabilityDay struct {
@@ -159,4 +159,47 @@ func (a *availabilitySheet) canUpdateAvailability() (bool, error) {
 	}
 
 	return res.Values[0][0] == "FALSE", nil
+}
+
+func (a *availabilitySheet) GetAvailabilityForTheWeek() (AvailabilityForTheWeek, error) {
+	res, err := a.service.Spreadsheets.Values.BatchGet(availabilitySheetId).
+		Ranges(
+			availabilityViewingDates,
+			availabilityData,
+		).
+		MajorDimension("ROWS").
+		Do()
+	if err != nil {
+		return AvailabilityForTheWeek{}, err
+	}
+
+	rawDates := res.ValueRanges[0].Values[0]
+	log.Printf("[DEBUG] Dates from google sheets: %v", rawDates)
+	rawAvailability := res.ValueRanges[1].Values
+	log.Printf("[DEBUG] Availability data from google sheets: %v", rawAvailability)
+
+	return createAvailabilityForTheWeek(SharedConstants.DToStrArr(rawDates), getEmployeesAvailablePerDay(SharedConstants.DDToStrArr(rawAvailability))), nil
+}
+
+func createAvailabilityForTheWeek(dates []string, employeesAvailablePerDay [][]string) AvailabilityForTheWeek {
+	res := AvailabilityForTheWeek{}
+	for i, _ := range dates {
+		res[dates[i]] = employeesAvailablePerDay[i]
+	}
+
+	return res
+}
+
+func getEmployeesAvailablePerDay(availability [][]string) [][]string {
+	var res = make([][]string, 4)
+
+	for i, _ := range availability {
+		for d := 1; d < 5; d++ {
+			if availability[i][d] == "TRUE" {
+				res[d-1] = append(res[d-1], availability[i][0])
+			}
+		}
+	}
+
+	return res
 }

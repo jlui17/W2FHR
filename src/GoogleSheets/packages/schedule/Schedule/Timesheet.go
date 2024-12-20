@@ -5,15 +5,14 @@ import (
 	"GoogleSheets/packages/common/GoogleClient"
 	TimeUtil "GoogleSheets/packages/schedule/time"
 	"fmt"
+	"google.golang.org/api/sheets/v4"
 	"log"
 	"strconv"
 	"time"
-
-	"google.golang.org/api/sheets/v4"
 )
 
 const (
-	scheduleSheetId               = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
+	scheduleSheetId               = "1qZKKoJNXHuo8pymDbGZuBV8WxD6tkgeKnao_H0OfrPk"
 	upcomingScheduleRangeTemplate = "%s!%s2:%s200"
 	scheduleRangeTemplate         = "%s!%s2:%s"
 	scheduleUpcomingSheetName     = "Upcoming Shifts"
@@ -74,7 +73,7 @@ type timesheet struct {
 	service *sheets.Service
 }
 
-func getTimesheet() (*timesheet, error) {
+func Connect() (*timesheet, error) {
 	service, err := GoogleClient.New()
 	if err != nil {
 		return &timesheet{}, err

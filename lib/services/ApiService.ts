@@ -86,6 +86,25 @@ export class ApiService extends Stack {
     );
     props.authService.grantAuthHandlerRequiredPermissions(authHandler);
 
+    const schedulingHandler: GoFunction = new GoFunction(
+        this,
+        "GoogleSheetsSchedulingHandler",
+        {
+          entry: `${SOURCE_PACKAGES_DIR}/scheduling`,
+          moduleDir: MODULE_DIR,
+          timeout: Duration.seconds(10),
+          environment: {
+            G_SERVICE_CONFIG_JSON: G_CLOUD_CONFIG.secretValue.unsafeUnwrap(),
+            COGNITO_ATTENDANTS_GROUP_NAME:
+              props.authService.attendantGroup.groupName || "",
+            COGNITO_SUPERVISORS_GROUP_NAME:
+              props.authService.supervisorGroup.groupName || "",
+            COGNITO_MANAGERS_GROUP_NAME:
+              props.authService.managerGroup.groupName || "",
+          },
+        }
+    );
+
     const api = new RestApi(this, "RestApi", {
       defaultCorsPreflightOptions: {
         allowHeaders: [
@@ -135,6 +154,12 @@ export class ApiService extends Stack {
 
     const timesheetRoute = api.root.addResource("timesheet");
     timesheetRoute.addMethod("GET", new LambdaIntegration(timesheetHandler), {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+
+    const schedulingRoute = api.root.addResource("scheduling");
+    schedulingRoute.addMethod("GET", new LambdaIntegration(schedulingHandler), {
       authorizer,
       authorizationType: AuthorizationType.COGNITO,
     });

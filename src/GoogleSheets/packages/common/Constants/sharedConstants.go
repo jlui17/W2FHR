@@ -24,6 +24,7 @@ var (
 	ErrInvalidIdToken   = errors.New("invalid idToken")
 	ErrEmployeeNotFound = errors.New("Employee not found.")
 	ErrInternal         = errors.New("Something went wrong. Please try again later or contact a manager.")
+	ErrInvalidMethod    = errors.New("Invalid method.")
 
 	AttendantUserGroup  = os.Getenv(COGNITO_ATTENDANTS_GROUP_ENV_KEY)
 	SupervisorUserGroup = os.Getenv(COGNITO_SUPERVISORS_GROUP_ENV_KEY)
