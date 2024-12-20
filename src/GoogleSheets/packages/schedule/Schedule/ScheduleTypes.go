@@ -1,6 +1,6 @@
 package Schedule
 
-type ScheduleMetadata struct {
+type Metadata struct {
 	ShiftTitles    []string `json:"shiftTitles"`
 	ShiftTimes     []string `json:"shiftTimes"`
 	BreakDurations []string `json:"breakDurations"`

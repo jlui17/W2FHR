@@ -110,7 +110,7 @@ func createAvailability(daysAvailable []interface{}, dates []interface{}, canUpd
 }
 
 func (a *availabilitySheet) Update(employee EmployeeInfo.EmployeeInfo, newAvailability *EmployeeAvailability) error {
-	canUpdate, err := a.canUpdateAvailability()
+	canUpdate, err := a.CanUpdateAvailability()
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func availabilityRange(row int) string {
 	return fmt.Sprintf("%s!%s%d:%s%d", availabilitySheetName, availabilityDay1Col, row, availabilityDay4Col, row)
 }
 
-func (a *availabilitySheet) canUpdateAvailability() (bool, error) {
+func (a *availabilitySheet) CanUpdateAvailability() (bool, error) {
 	res, err := a.service.Spreadsheets.Values.Get(
 		availabilitySheetId,
 		availabilityCanUpdateCell,
@@ -203,6 +203,19 @@ func getEmployeesAvailablePerDay(availability [][]string) [][]string {
 	return res
 }
 
+func (a *availabilitySheet) GetStartOfWeek() (time.Time, error) {
+	res, err := a.service.Spreadsheets.Values.Get(
+		availabilitySheetId,
+		availabilityStartOfWeek,
+	).Do()
+	if err != nil {
+		log.Printf("[ERROR] Google Sheets - Failed to get StartOfWeek: %v", err)
+		return time.Time{}, err
+	}
+
+	return TimeUtil.ConvertDateToTime(res.Values[0][0].(string), TimeUtil.ScheduleDateFormat), nil
+}
+
 func (a *availabilitySheet) UpdateStartOfWeek(date time.Time) error {
 	updateValueRange := &sheets.ValueRange{
 		Values: [][]interface{}{
@@ -225,6 +238,19 @@ func (a *availabilitySheet) UpdateStartOfWeek(date time.Time) error {
 	}
 
 	return nil
+}
+
+func (a *availabilitySheet) GetShowMonday() (bool, error) {
+	res, err := a.service.Spreadsheets.Values.Get(
+		availabilitySheetId,
+		availabilityShowMonday,
+	).Do()
+	if err != nil {
+		log.Printf("[ERROR] Google Sheets - Failed to get ShowMonday: %v", err)
+		return false, err
+	}
+
+	return res.Values[0][0] == "TRUE", nil
 }
 
 func (a *availabilitySheet) UpdateShowMonday(showMonday bool) error {

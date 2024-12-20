@@ -110,7 +110,7 @@ func (t *timesheet) GetByTimeRange(start time.Time, end time.Time) (*Timesheet, 
 	return t.getShiftsByTimeRange(start, end, all), nil
 }
 
-func (t *timesheet) GetScheduleMetadata() (ScheduleMetadata, error) {
+func (t *timesheet) GetScheduleMetadata() (Metadata, error) {
 	response, err := t.service.Spreadsheets.Values.
 		Get(scheduleSheetId, scheduleMetadata).
 		MajorDimension("COLUMNS").
@@ -118,10 +118,10 @@ func (t *timesheet) GetScheduleMetadata() (ScheduleMetadata, error) {
 	log.Printf("[DEBUG] Response from Google Sheets: %v", response)
 	if err != nil {
 		log.Printf("[ERROR] Trying to get schedule metadata: %s", err.Error())
-		return ScheduleMetadata{}, err
+		return Metadata{}, err
 	}
 
-	res := ScheduleMetadata{
+	res := Metadata{
 		ShiftTitles:    SharedConstants.DToStrArr(response.Values[0]),
 		ShiftTimes:     SharedConstants.DToStrArr(response.Values[1]),
 		BreakDurations: SharedConstants.DToStrArr(response.Values[2]),

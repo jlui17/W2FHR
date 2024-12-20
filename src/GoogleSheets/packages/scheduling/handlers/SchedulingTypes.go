@@ -6,8 +6,11 @@ import (
 )
 
 type Data struct {
-	Availability     Availability.AvailabilityForTheWeek `json:"availability"`
-	ScheduleMetadata Schedule.ScheduleMetadata           `json:"scheduleMetadata"`
+	Availability   Availability.AvailabilityForTheWeek `json:"availability"`
+	Metadata       Schedule.Metadata                   `json:"metadata"`
+	ShowMonday     bool                                `json:"showMonday"`
+	StartOfWeek    string                              `json:"startOfWeek"`
+	DisableUpdates bool                                `json:"disableUpdates"`
 }
 
 type UpdateSchedulingRequest struct {
