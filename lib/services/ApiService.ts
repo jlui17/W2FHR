@@ -163,6 +163,10 @@ export class ApiService extends Stack {
       authorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    schedulingRoute.addMethod("PUT", new LambdaIntegration(schedulingHandler), {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const baseAuthRoute = api.root.addResource("auth");
     const employeeRoute = baseAuthRoute.addResource("employee");

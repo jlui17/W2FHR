@@ -66,6 +66,32 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
 			Body:       string(res),
 		}, nil
+	case "PUT":
+		var req scheduling.UpdateSchedulingRequest
+		err := json.Unmarshal([]byte(event.Body), &req)
+		if err != nil {
+			log.Printf("[ERROR] Scheduling - failed to unmarshal request body: %v", err)
+			return events.APIGatewayProxyResponse{
+				StatusCode: 400,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       SharedConstants.ErrInvalidRequest.Error(),
+			}, nil
+		}
+
+		err = scheduling.Update(req)
+		if err != nil {
+			log.Printf("[ERROR] Scheduling - failed to update scheduling data: %v", err)
+			return events.APIGatewayProxyResponse{
+				StatusCode: 500,
+				Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+				Body:       SharedConstants.ErrInternal.Error(),
+			}, nil
+		}
+
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{

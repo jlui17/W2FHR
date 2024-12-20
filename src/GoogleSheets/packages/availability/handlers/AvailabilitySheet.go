@@ -3,11 +3,13 @@ package Availability
 import (
 	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
+	"GoogleSheets/packages/common/TimeUtil"
 	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"errors"
 	"fmt"
 	"google.golang.org/api/sheets/v4"
 	"log"
+	"time"
 )
 
 const (
@@ -23,6 +25,7 @@ var (
 	availabilityEmployeeIds   = fmt.Sprintf("'%s'!A3:A", availabilitySheetName)
 	availabilityData          = fmt.Sprintf("'%s'!D3:H", availabilitySheetName)
 	availabilityShowMonday    = fmt.Sprintf("'%s'!I3", availabilitySheetName)
+	availabilityStartOfWeek   = fmt.Sprintf("'%s'!E2", availabilitySheetName)
 
 	ErrUpdateAvailabilityDisabled = errors.New("Updating availability is currently disabled.")
 )
@@ -198,4 +201,27 @@ func getEmployeesAvailablePerDay(availability [][]string) [][]string {
 	}
 
 	return res
+}
+
+func (a *availabilitySheet) UpdateStartOfWeek(date time.Time) error {
+	updateValueRange := &sheets.ValueRange{
+		Values: [][]interface{}{
+			{
+				date.Format(TimeUtil.ScheduleDateFormat),
+			},
+		},
+	}
+
+	_, err := a.service.Spreadsheets.Values.Update(
+		availabilitySheetId,
+		availabilityStartOfWeek,
+		updateValueRange,
+	).
+		ValueInputOption("RAW").
+		Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

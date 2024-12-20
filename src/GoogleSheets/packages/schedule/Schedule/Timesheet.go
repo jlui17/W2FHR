@@ -3,7 +3,7 @@ package Schedule
 import (
 	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/GoogleClient"
-	TimeUtil "GoogleSheets/packages/schedule/time"
+	"GoogleSheets/packages/common/TimeUtil"
 	"fmt"
 	"google.golang.org/api/sheets/v4"
 	"log"

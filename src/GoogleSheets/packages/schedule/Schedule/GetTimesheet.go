@@ -1,7 +1,7 @@
 package Schedule
 
 import (
-	TimeUtil "GoogleSheets/packages/schedule/time"
+	"GoogleSheets/packages/common/TimeUtil"
 	"errors"
 	"fmt"
 	"log"
