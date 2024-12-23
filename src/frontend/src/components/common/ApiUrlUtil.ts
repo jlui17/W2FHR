@@ -1,4 +1,4 @@
-import { API_URLS } from "./constants";
+import { API_URLS, dateToFormatForApi } from "./constants";
 
 export function getTimesheetApiUrlForEmployee(getUpcoming: boolean): string {
   return `${API_URLS.TIMESHEET}?upcoming=${getUpcoming}`;
@@ -14,5 +14,9 @@ export const getAuthApiUrlForResetPassword = (email: string) => {
 };
 
 export function getScheduleForTimeRangeApiUrl(start: Date, end: Date): string {
-  return `${API_URLS.TIMESHEET}?start=${start.toISOString().split('T')[0]}&end=${end.toISOString().split('T')[0]}`;
+  return `${API_URLS.TIMESHEET}?start=${dateToFormatForApi(start)}&end=${dateToFormatForApi(end)}`;
+}
+
+export function getSchedulingApiUrl(): string {
+  return `${API_URLS.SCHEDULING}`;
 }

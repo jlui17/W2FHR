@@ -78,7 +78,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			}, nil
 		}
 
-		err = scheduling.Update(req)
+		updatedData, err := scheduling.Update(req)
 		if err != nil {
 			log.Printf("[ERROR] Scheduling - failed to update scheduling data: %v", err)
 			return events.APIGatewayProxyResponse{
@@ -88,9 +88,11 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			}, nil
 		}
 
+		res, _ := json.Marshal(updatedData)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 200,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
+			Body:       string(res),
 		}, nil
 	}
 

@@ -3,7 +3,11 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { ERROR_MESSAGES, TOAST } from "@/components/common/constants";
+import {
+  dateToFormatForUser,
+  ERROR_MESSAGES,
+  TOAST,
+} from "@/components/common/constants";
 import { toast } from "sonner";
 import { ScheduleWidget } from "./ScheduleWidget";
 import { ReactElement, useContext, useState } from "react";
@@ -16,7 +20,10 @@ import { Shift } from "@/components/Timesheet/helpers/hooks";
 
 const EMPTY_DATA: Shift[] = [];
 
-function sortData(data: ScheduleData, sortOrder: "asc" | "desc"): ScheduleData {
+export function sortData(
+  data: ScheduleData,
+  sortOrder: "asc" | "desc",
+): ScheduleData {
   data.shifts.sort((a, b) => {
     if (sortOrder === "asc") {
       return a.date.getTime() - b.date.getTime();
@@ -27,15 +34,10 @@ function sortData(data: ScheduleData, sortOrder: "asc" | "desc"): ScheduleData {
   return data;
 }
 
-function convertToShifts(data: ScheduleData): Shift[] {
+export function convertToShifts(data: ScheduleData): Shift[] {
   return data.shifts.map((shift): Shift => {
     return {
-      date: shift.date.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
+      date: dateToFormatForUser(shift.date),
       startTime: shift.startTime,
       endTime: shift.endTime,
       breakDuration: shift.breakDuration,
@@ -47,12 +49,7 @@ function convertToShifts(data: ScheduleData): Shift[] {
 }
 
 function ScheduleController(): ReactElement {
-  const { getAuthSession, hasAccessToFeature } = useContext(
-    AuthenticationContext,
-  );
-  if (!hasAccessToFeature("schedule")) {
-    return <></>;
-  }
+  const { getAuthSession } = useContext(AuthenticationContext);
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [open, setOpen] = useState<boolean>(false);

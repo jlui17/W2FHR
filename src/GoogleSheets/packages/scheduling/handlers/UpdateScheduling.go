@@ -6,11 +6,11 @@ import (
 	"log"
 )
 
-func Update(req UpdateSchedulingRequest) error {
+func Update(req UpdateSchedulingRequest) (Data, error) {
 	availabilitySheet, err := Availability.Connect()
 	if err != nil {
 		log.Printf("[ERROR] Error connecting to availability sheet: %v", err)
-		return err
+		return Data{}, err
 	}
 
 	if req.StartOfWeek != nil {
@@ -18,7 +18,7 @@ func Update(req UpdateSchedulingRequest) error {
 		newStart := TimeUtil.ConvertDateToTime(*req.StartOfWeek, TimeUtil.ApiDateFormat)
 		if err := availabilitySheet.UpdateStartOfWeek(newStart); err != nil {
 			log.Printf("[ERROR] Failed to update StartOfWeek: %v", err)
-			return err
+			return Data{}, err
 		}
 		log.Print("[INFO] Successfully updated StartOfWeek")
 	}
@@ -27,7 +27,7 @@ func Update(req UpdateSchedulingRequest) error {
 		log.Printf("[INFO] Updating ShowMonday to %t", *req.ShowMonday)
 		if err := availabilitySheet.UpdateShowMonday(*req.ShowMonday); err != nil {
 			log.Printf("[ERROR] Failed to update showMonday: %v", err)
-			return err
+			return Data{}, err
 		}
 		log.Print("[INFO] Successfully updated ShowMonday")
 	}
@@ -36,10 +36,16 @@ func Update(req UpdateSchedulingRequest) error {
 		log.Printf("[INFO] Updating DisableUpdates to %t", *req.DisableUpdates)
 		if err := availabilitySheet.UpdateCanUpdate(*req.DisableUpdates); err != nil {
 			log.Printf("[ERROR] Failed to update DisableUpdates: %v", err)
-			return err
+			return Data{}, err
 		}
 		log.Print("[INFO] Successfully updated DisableUpdates")
 	}
 
-	return nil
+	data, err := Get()
+	if err != nil {
+		log.Printf("[ERROR] Failed to get updated scheduling data: %v", err)
+		return Data{}, err
+	}
+
+	return data, nil
 }

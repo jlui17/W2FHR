@@ -7,6 +7,7 @@ export const API_URLS = {
   VERIFY: `${BASE_URL}/auth/verify`,
   LOGIN: `${BASE_URL}/auth/login`,
   PASSWORD: `${BASE_URL}/auth/password`,
+  SCHEDULING: `${BASE_URL}/scheduling`,
 };
 
 const PLEASE_CONTACT_JUSTIN =
@@ -69,3 +70,16 @@ export const TOAST = {
       "Succesfully verified your account. You may now log in.",
   },
 } as const;
+
+export function dateToFormatForUser(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+export function dateToFormatForApi(date: Date): string {
+  return date.toISOString().split("T")[0];
+}

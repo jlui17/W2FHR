@@ -1,3 +1,3 @@
-import { Dashboard } from "./DashboardController";
+import { Dashboard } from "./Dashboard";
 
 export default Dashboard;
