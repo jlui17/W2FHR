@@ -19,6 +19,7 @@ import {
 export function Combobox(p: {
   value: string;
   values: string[];
+  remainingValues: string[];
   onChange: (...event: any[]) => void;
   name: string;
 }): ReactElement {
@@ -45,7 +46,7 @@ export function Combobox(p: {
           <CommandList>
             <CommandEmpty>{`No ${p.name}s found.`}</CommandEmpty>
             <CommandGroup>
-              {p.values.map((item) => (
+              {p.remainingValues.map((item) => (
                 <CommandItem key={item} value={item} onSelect={p.onChange}>
                   <Check
                     className={cn(

@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  UseFormReturn,
+  useWatch,
+} from "react-hook-form";
 import {
   QueryClient,
   QueryClientProvider,
@@ -13,7 +18,6 @@ import {
   fetchData,
   getBlankTemplate,
   getGamesTemplate,
-  getRemainingEmployees,
   getWWTemplate,
   NewScheduleSchemaFormData,
 } from "@/components/EditableDataTable/helpers/hooks";
@@ -49,6 +53,11 @@ export function EditableDataTableController() {
     name: "rows",
   });
 
+  const watchedRows = useWatch({
+    control: form.control,
+    name: "rows",
+  });
+
   const onSubmit = (data: any) => {
     console.log(data);
   };
@@ -75,12 +84,17 @@ export function EditableDataTableController() {
     form.setValue("rows", getWWTemplate().rows);
   }
 
-  const availableEmployees = useMemo(() => {
-    return getRemainingEmployees(
-      form.getValues(),
-      data.availability[dateToFormatForUser(date)] || [],
+  const availableEmployees: string[] =
+    data.availability[dateToFormatForUser(date)] || [];
+  const remainingAvailableEmployees: string[] = useMemo(() => {
+    const formValues = form.getValues();
+    const selectedEmployees =
+      formValues.rows?.map((row) => row.employeeName).filter(Boolean) || [];
+
+    return availableEmployees.filter(
+      (employee) => !selectedEmployees.includes(employee),
     );
-  }, [form.watch("rows"), date, data]);
+  }, [watchedRows, date]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -90,6 +104,7 @@ export function EditableDataTableController() {
       control={form.control}
       fields={fields}
       availableEmployees={availableEmployees}
+      remainingAvailableEmployees={remainingAvailableEmployees}
       shiftTitles={Array.from(data.metadata.shiftTitles)}
       shiftTimes={data.metadata.shiftTimes}
       breakDurations={data.metadata.breakDurations}

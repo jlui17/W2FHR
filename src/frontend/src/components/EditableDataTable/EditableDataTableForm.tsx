@@ -40,6 +40,7 @@ interface EditableDataTableFormProps {
   control: Control<any>;
   fields: FieldArrayWithId[];
   availableEmployees: string[];
+  remainingAvailableEmployees: string[];
   shiftTitles: string[];
   shiftTimes: string[];
   breakDurations: string[];
@@ -97,6 +98,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                 className="font-normal"
                 variant="outline"
                 onClick={p.useBlankTemplate}
+                type="button"
               >
                 Blank
               </Button>
@@ -104,6 +106,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                 className="font-normal"
                 variant="outline"
                 onClick={p.useGamesTemplate}
+                type="button"
               >
                 Games
               </Button>
@@ -111,6 +114,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                 className="font-normal"
                 variant="outline"
                 onClick={p.useWWTemplate}
+                type="button"
               >
                 WW
               </Button>
@@ -147,6 +151,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                           <Combobox
                             value={field.value}
                             values={p.availableEmployees}
+                            remainingValues={p.remainingAvailableEmployees}
                             onChange={field.onChange}
                             name="employee"
                           />
@@ -161,6 +166,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                           <Combobox
                             value={field.value}
                             values={p.shiftTitles}
+                            remainingValues={p.shiftTitles}
                             onChange={field.onChange}
                             name="shift"
                           />
@@ -175,6 +181,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                           <Combobox
                             value={field.value}
                             values={p.shiftTimes}
+                            remainingValues={p.shiftTimes}
                             onChange={field.onChange}
                             name="start time"
                           />
@@ -189,6 +196,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                           <Combobox
                             value={field.value}
                             values={p.shiftTimes}
+                            remainingValues={p.shiftTimes}
                             onChange={field.onChange}
                             name="end time"
                           />
@@ -203,6 +211,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                           <Combobox
                             value={field.value}
                             values={p.breakDurations}
+                            remainingValues={p.breakDurations}
                             onChange={field.onChange}
                             name="break duration"
                           />

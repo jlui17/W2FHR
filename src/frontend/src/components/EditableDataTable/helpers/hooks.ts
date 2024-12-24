@@ -12,16 +12,6 @@ export async function fetchData(): Promise<SchedulingData> {
   return Promise.resolve(convertSchedulingDataFromAPI(mockData));
 }
 
-export function getRemainingEmployees(
-  scheduled: NewScheduleSchemaFormData,
-  available: string[],
-): string[] {
-  const scheduledEmployees: Set<string> = new Set<string>(
-    scheduled.rows.map((row) => row.employeeName).filter((name) => name !== ""),
-  );
-  return available.filter((name) => !scheduledEmployees.has(name));
-}
-
 const NewScheduleSchema = z.object({
   rows: z.array(
     z.object({
