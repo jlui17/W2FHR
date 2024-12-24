@@ -46,7 +46,8 @@ var (
 	scheduleEmployeeNames = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
 		scheduleEmployeeNameCol,
 		scheduleEmployeeNameCol)
-	scheduleMetadata = "'Data Validation'!AE2:AG"
+	scheduleMetadata              = "'Data Validation'!AE2:AG"
+	scheduleMetadataEmployeeNames = "'Data Validation'!H2:H"
 )
 
 type Timesheet struct {
@@ -111,8 +112,11 @@ func (t *timesheet) GetByTimeRange(start time.Time, end time.Time) (*Timesheet, 
 }
 
 func (t *timesheet) GetScheduleMetadata() (Metadata, error) {
-	response, err := t.service.Spreadsheets.Values.
-		Get(scheduleSheetId, scheduleMetadata).
+	response, err := t.service.Spreadsheets.Values.BatchGet(scheduleSheetId).
+		Ranges(
+			scheduleMetadata,
+			scheduleMetadataEmployeeNames,
+		).
 		MajorDimension("COLUMNS").
 		Do()
 	log.Printf("[DEBUG] Response from Google Sheets: %v", response)
@@ -122,9 +126,10 @@ func (t *timesheet) GetScheduleMetadata() (Metadata, error) {
 	}
 
 	res := Metadata{
-		ShiftTitles:    SharedConstants.DToStrArr(response.Values[0]),
-		ShiftTimes:     SharedConstants.DToStrArr(response.Values[1]),
-		BreakDurations: SharedConstants.DToStrArr(response.Values[2]),
+		ShiftTitles:         SharedConstants.DToStrArr(response.ValueRanges[0].Values[0]),
+		ShiftTimes:          SharedConstants.DToStrArr(response.ValueRanges[0].Values[1]),
+		BreakDurations:      SharedConstants.DToStrArr(response.ValueRanges[0].Values[2]),
+		EmployeeNamesAndIds: SharedConstants.DToStrArr(response.ValueRanges[1].Values[0]),
 	}
 	log.Printf("[DEBUG] Formatted schedule: %v", res)
 	return res, nil
