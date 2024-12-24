@@ -39,7 +39,7 @@ import { dateToFormatForUser } from "@/components/common/constants";
 interface EditableDataTableFormProps {
   control: Control<any>;
   fields: FieldArrayWithId[];
-  employeeNames: string[];
+  availableEmployees: string[];
   shiftTitles: string[];
   shiftTimes: string[];
   breakDurations: string[];
@@ -49,6 +49,9 @@ interface EditableDataTableFormProps {
   isSubmitting: boolean;
   date: Date;
   setDate: (date: Date) => void;
+  useBlankTemplate: () => void;
+  useGamesTemplate: () => void;
+  useWWTemplate: () => void;
 }
 
 export function EditableDataTableForm(p: EditableDataTableFormProps) {
@@ -61,34 +64,57 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
             <CardDescription>Manage employee shifts and breaks</CardDescription>
           </CardHeader>
           <CardContent>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    !p.date && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {p.date ? (
-                    dateToFormatForUser(p.date)
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={p.date}
-                  onSelect={(date: Date | undefined) =>
-                    p.setDate(date || p.date)
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-x-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "mr-6 w-[240px] justify-start text-left font-normal",
+                      !p.date && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {p.date ? (
+                      dateToFormatForUser(p.date)
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={p.date}
+                    onSelect={(date: Date | undefined) =>
+                      p.setDate(date || p.date)
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                className="font-normal"
+                variant="outline"
+                onClick={p.useBlankTemplate}
+              >
+                Blank
+              </Button>
+              <Button
+                className="font-normal"
+                variant="outline"
+                onClick={p.useGamesTemplate}
+              >
+                Games
+              </Button>
+              <Button
+                className="font-normal"
+                variant="outline"
+                onClick={p.useWWTemplate}
+              >
+                WW
+              </Button>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -115,26 +141,28 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                     </TableCell>
                     <TableCell>
                       <Controller
-                        name={`rows.${index}.employee`}
+                        name={`rows.${index}.employeeName`}
                         control={p.control}
                         render={({ field }) => (
                           <Combobox
                             value={field.value}
-                            values={p.employeeNames}
+                            values={p.availableEmployees}
                             onChange={field.onChange}
+                            name="employee"
                           />
                         )}
                       />
                     </TableCell>
                     <TableCell>
                       <Controller
-                        name={`rows.${index}.shift`}
+                        name={`rows.${index}.shiftTitle`}
                         control={p.control}
                         render={({ field }) => (
                           <Combobox
                             value={field.value}
                             values={p.shiftTitles}
                             onChange={field.onChange}
+                            name="shift"
                           />
                         )}
                       />
@@ -148,6 +176,7 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                             value={field.value}
                             values={p.shiftTimes}
                             onChange={field.onChange}
+                            name="start time"
                           />
                         )}
                       />
@@ -161,19 +190,21 @@ export function EditableDataTableForm(p: EditableDataTableFormProps) {
                             value={field.value}
                             values={p.shiftTimes}
                             onChange={field.onChange}
+                            name="end time"
                           />
                         )}
                       />
                     </TableCell>
                     <TableCell>
                       <Controller
-                        name={`rows.${index}.break`}
+                        name={`rows.${index}.breakDuration`}
                         control={p.control}
                         render={({ field }) => (
                           <Combobox
                             value={field.value}
                             values={p.breakDurations}
                             onChange={field.onChange}
+                            name="break duration"
                           />
                         )}
                       />

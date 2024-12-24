@@ -20,6 +20,7 @@ export function Combobox(p: {
   value: string;
   values: string[];
   onChange: (...event: any[]) => void;
+  name: string;
 }): ReactElement {
   return (
     <Popover>
@@ -34,15 +35,15 @@ export function Combobox(p: {
         >
           {p.value
             ? p.values.find((item) => item === p.value)
-            : "Select shift"}
+            : `Select a ${p.name}`}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search shift..." />
+          <CommandInput placeholder={`Search for a ${p.name}...`} />
           <CommandList>
-            <CommandEmpty>No shift found.</CommandEmpty>
+            <CommandEmpty>{`No ${p.name}s found.`}</CommandEmpty>
             <CommandGroup>
               {p.values.map((item) => (
                 <CommandItem key={item} value={item} onSelect={p.onChange}>

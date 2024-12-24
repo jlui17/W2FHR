@@ -7,13 +7,9 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-interface ScheduleMetadata {
-  shiftTitles: Set<string>;
-  shiftTimes: string[];
-  breakDurations: string[];
-}
-
-function isScheduleMetadata(data: unknown): data is ScheduleMetadata {
+function isSchedulingMetadata(
+  data: unknown,
+): data is SchedulingMetadataFromAPI {
   if (
     !(
       data !== null &&
@@ -25,32 +21,27 @@ function isScheduleMetadata(data: unknown): data is ScheduleMetadata {
   ) {
     return false;
   }
-  if (
-    !(
-      Array.isArray(data.shiftTitles) &&
-      Array.isArray(data.shiftTimes) &&
-      Array.isArray(data.breakDurations) &&
-      data.shiftTitles.every((shiftTitle) => typeof shiftTitle === "string") &&
-      data.shiftTimes.every((shiftTime) => typeof shiftTime === "string") &&
-      data.breakDurations.every(
-        (breakDuration) => typeof breakDuration === "string",
-      )
+  return (
+    Array.isArray(data.shiftTitles) &&
+    Array.isArray(data.shiftTimes) &&
+    Array.isArray(data.breakDurations) &&
+    data.shiftTitles.every((shiftTitle) => typeof shiftTitle === "string") &&
+    data.shiftTimes.every((shiftTime) => typeof shiftTime === "string") &&
+    data.breakDurations.every(
+      (breakDuration) => typeof breakDuration === "string",
     )
-  ) {
-    return false;
-  }
-
-  data.shiftTitles = new Set<string>(data.shiftTitles);
-  return true;
+  );
 }
 
-export function isSchedulingData(data: unknown): data is SchedulingData {
+export function isSchedulingDataFromAPI(
+  data: unknown,
+): data is SchedulingDataFromAPI {
   if (
     data === null ||
     typeof data !== "object" ||
     !("availability" in data) ||
     !("metadata" in data) ||
-    !isScheduleMetadata(data.metadata) ||
+    !isSchedulingMetadata(data.metadata) ||
     !("showMonday" in data) ||
     typeof data.showMonday !== "boolean" ||
     !("disableUpdates" in data) ||
@@ -76,12 +67,52 @@ export function isSchedulingData(data: unknown): data is SchedulingData {
   });
 }
 
+interface SchedulingMetadataFromAPI {
+  shiftTitles: string[];
+  shiftTimes: string[];
+  breakDurations: string[];
+}
+
+interface SchedulingDataFromAPI {
+  availability: { [key: string]: string[] };
+  metadata: SchedulingMetadataFromAPI;
+  showMonday: boolean;
+  disableUpdates: boolean;
+  startOfWeek: string;
+}
+
+interface SchedulingMetadata {
+  shiftTitles: Set<string>;
+  shiftTimes: string[];
+  breakDurations: string[];
+}
+
 export interface SchedulingData {
   availability: { [key: string]: string[] };
-  metadata: ScheduleMetadata;
+  metadata: SchedulingMetadata;
   showMonday: boolean;
   disableUpdates: boolean;
   startOfWeek: Date;
+}
+
+export function convertSchedulingDataFromAPI(
+  data: SchedulingDataFromAPI,
+): SchedulingData {
+  const availabilitySets: { [key: string]: Set<string> } = {};
+  Object.entries(data.availability).forEach(([key, value]) => {
+    availabilitySets[key] = new Set(value);
+  });
+  return {
+    availability: data.availability,
+    metadata: {
+      shiftTitles: new Set(data.metadata.shiftTitles),
+      shiftTimes: data.metadata.shiftTimes,
+      breakDurations: data.metadata.breakDurations,
+    },
+    showMonday: data.showMonday,
+    disableUpdates: data.disableUpdates,
+    startOfWeek: new Date(data.startOfWeek),
+  };
 }
 
 export function useSchedulingData(p: {
@@ -99,12 +130,12 @@ export function useSchedulingData(p: {
     switch (response.status) {
       case 200:
         const data = await response.json();
-        if (!isSchedulingData(data)) {
+        if (!isSchedulingDataFromAPI(data)) {
           return Promise.reject(
             new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
           );
         }
-        return Promise.resolve(data);
+        return Promise.resolve(convertSchedulingDataFromAPI(data));
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
       default:
@@ -147,12 +178,12 @@ export function useUpdateSchedulingData(p: {
     switch (response.status) {
       case 200:
         const data = await response.json();
-        if (!isSchedulingData(data)) {
+        if (!isSchedulingDataFromAPI(data)) {
           return Promise.reject(
             new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
           );
         }
-        return Promise.resolve(data);
+        return Promise.resolve(convertSchedulingDataFromAPI(data));
       case 403:
         return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
       case 404:

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import {
   QueryClient,
@@ -11,13 +11,18 @@ import { EditableDataTableForm } from "./EditableDataTableForm";
 import { SchedulingData } from "@/components/Scheduling/helpers/hooks";
 import {
   fetchData,
+  getBlankTemplate,
+  getGamesTemplate,
+  getRemainingEmployees,
+  getWWTemplate,
   NewScheduleSchemaFormData,
 } from "@/components/EditableDataTable/helpers/hooks";
+import { dateToFormatForUser } from "@/components/common/constants";
 
 const queryClient = new QueryClient();
 
 export function EditableDataTableController() {
-  const [date, setDate] = React.useState<Date>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
   const { data, isLoading, error } = useQuery<SchedulingData>({
     queryKey: ["data"],
     queryFn: fetchData,
@@ -36,17 +41,7 @@ export function EditableDataTableController() {
 
   const form: UseFormReturn<NewScheduleSchemaFormData> =
     useForm<NewScheduleSchemaFormData>({
-      defaultValues: {
-        rows: [
-          {
-            employeeName: "",
-            shiftTitle: "",
-            start: "",
-            end: "",
-            breakDuration: "",
-          },
-        ],
-      },
+      defaultValues: getBlankTemplate(),
     });
 
   const { fields, append, remove } = useFieldArray({
@@ -68,15 +63,33 @@ export function EditableDataTableController() {
     });
   };
 
+  function useBlankTemplate(): void {
+    form.setValue("rows", getBlankTemplate().rows);
+  }
+
+  function useGamesTemplate(): void {
+    form.setValue("rows", getGamesTemplate().rows);
+  }
+
+  function useWWTemplate(): void {
+    form.setValue("rows", getWWTemplate().rows);
+  }
+
+  const availableEmployees = useMemo(() => {
+    return getRemainingEmployees(
+      form.getValues(),
+      data.availability[dateToFormatForUser(date)] || [],
+    );
+  }, [form.watch("rows"), date, data]);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  console.log(data);
   return (
     <EditableDataTableForm
       control={form.control}
       fields={fields}
-      employeeNames={["Jon Doe", "Baker Field", "Hello World"]}
+      availableEmployees={availableEmployees}
       shiftTitles={Array.from(data.metadata.shiftTitles)}
       shiftTimes={data.metadata.shiftTimes}
       breakDurations={data.metadata.breakDurations}
@@ -86,6 +99,9 @@ export function EditableDataTableController() {
       isSubmitting={false}
       date={date}
       setDate={setDate}
+      useBlankTemplate={useBlankTemplate}
+      useGamesTemplate={useGamesTemplate}
+      useWWTemplate={useWWTemplate}
     />
   );
 }
