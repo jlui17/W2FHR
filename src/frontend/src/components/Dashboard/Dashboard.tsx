@@ -8,6 +8,7 @@ import UpcomingShifts from "@/components/UpcomingShifts";
 import Timesheet from "@/components/Timesheet";
 import Scheduling from "@/components/Scheduling";
 import Schedule from "@/components/Schedule";
+import EditableDataTable from "@/components/EditableDataTable";
 
 export const Dashboard = () => {
   const { isLoggedIn, hasAccessToFeature } = useContext(AuthenticationContext);
@@ -19,12 +20,13 @@ export const Dashboard = () => {
     <div className="h-full w-screen bg-slate-50">
       <Header />
       <div className="mx-auto flex h-full min-h-screen max-w-screen-md flex-col content-start items-center justify-start gap-x-10 gap-y-6 p-6 lg:grid lg:max-w-screen-lg lg:grid-cols-2 lg:items-start lg:justify-center">
-        <Availability />
-        <UpcomingShifts />
-        <Timesheet />
+        {/*<Availability />*/}
+        {/*<UpcomingShifts />*/}
+        {/*<Timesheet />*/}
         {hasAccessToFeature("scheduling") && <Scheduling />}
-        {!hasAccessToFeature("scheduling") &&
-          hasAccessToFeature("schedule") && <Schedule />}
+        {/*{!hasAccessToFeature("scheduling") &&*/}
+        {/*  hasAccessToFeature("schedule") && <Schedule />}*/}
+        <EditableDataTable />
       </div>
     </div>
   );

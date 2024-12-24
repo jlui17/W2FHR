@@ -8,25 +8,43 @@ import {
 } from "@tanstack/react-query";
 
 interface ScheduleMetadata {
-  shiftTitles: string[];
+  shiftTitles: Set<string>;
   shiftTimes: string[];
   breakDurations: string[];
 }
 
 function isScheduleMetadata(data: unknown): data is ScheduleMetadata {
-  return (
-    data !== null &&
-    typeof data === "object" &&
-    "shiftTitles" in data &&
-    "shiftTimes" in data &&
-    "breakDurations" in data &&
-    Array.isArray(data.shiftTitles) &&
-    Array.isArray(data.shiftTimes) &&
-    Array.isArray(data.breakDurations)
-  );
+  if (
+    !(
+      data !== null &&
+      typeof data === "object" &&
+      "shiftTitles" in data &&
+      "shiftTimes" in data &&
+      "breakDurations" in data
+    )
+  ) {
+    return false;
+  }
+  if (
+    !(
+      Array.isArray(data.shiftTitles) &&
+      Array.isArray(data.shiftTimes) &&
+      Array.isArray(data.breakDurations) &&
+      data.shiftTitles.every((shiftTitle) => typeof shiftTitle === "string") &&
+      data.shiftTimes.every((shiftTime) => typeof shiftTime === "string") &&
+      data.breakDurations.every(
+        (breakDuration) => typeof breakDuration === "string",
+      )
+    )
+  ) {
+    return false;
+  }
+
+  data.shiftTitles = new Set<string>(data.shiftTitles);
+  return true;
 }
 
-function isSchedulingData(data: unknown): data is SchedulingData {
+export function isSchedulingData(data: unknown): data is SchedulingData {
   if (
     data === null ||
     typeof data !== "object" ||
