@@ -1,10 +1,10 @@
 import { getSchedulingApiUrl } from "@/components/common/ApiUrlUtil";
 import { API_URLS, ERROR_MESSAGES } from "@/components/common/constants";
 import {
+  DefinedUseQueryResult,
   useMutation,
   UseMutationResult,
   useQuery,
-  UseQueryResult,
 } from "@tanstack/react-query";
 
 function isSchedulingMetadata(
@@ -53,7 +53,7 @@ export function isSchedulingDataFromAPI(
   }
   data.startOfWeek = new Date(data.startOfWeek);
 
-  const availability = (data as SchedulingData).availability;
+  const availability = (data as SchedulingDataFromAPI).availability;
   if (typeof availability !== "object") {
     return false;
   }
@@ -115,10 +115,11 @@ export function convertSchedulingDataFromAPI(
   };
 }
 
+export const SCHEDULING_DATA_QUERY_KEY: string[] = ["scheduling"];
+
 export function useSchedulingData(p: {
   idToken: string;
-  queryKey: string[];
-}): UseQueryResult<SchedulingData, Error> {
+}): DefinedUseQueryResult<SchedulingData, Error> {
   async function getSchedulingData(): Promise<SchedulingData> {
     const response = await fetch(getSchedulingApiUrl(), {
       headers: {
@@ -144,9 +145,19 @@ export function useSchedulingData(p: {
   }
 
   return useQuery({
-    queryKey: p.queryKey,
+    queryKey: SCHEDULING_DATA_QUERY_KEY,
     queryFn: getSchedulingData,
-    refetchOnMount: false,
+    initialData: {
+      availability: {},
+      metadata: {
+        shiftTitles: new Set<string>(),
+        shiftTimes: [],
+        breakDurations: [],
+      },
+      showMonday: false,
+      disableUpdates: false,
+      startOfWeek: new Date(),
+    },
   });
 }
 

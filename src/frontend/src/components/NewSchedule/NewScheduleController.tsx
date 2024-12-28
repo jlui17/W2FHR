@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   useFieldArray,
   useForm,
@@ -12,7 +12,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { EditableDataTableForm } from "./EditableDataTableForm";
+import { NewScheduleForm } from "./NewScheduleForm";
 import { SchedulingData } from "@/components/Scheduling/helpers/hooks";
 import {
   fetchData,
@@ -20,13 +20,18 @@ import {
   getGamesTemplate,
   getWWTemplate,
   NewScheduleSchemaFormData,
-} from "@/components/EditableDataTable/helpers/hooks";
+} from "@/components/NewSchedule/helpers/hooks";
 import { dateToFormatForUser } from "@/components/common/constants";
+import { AuthenticationContext } from "@/components/AuthenticationContextProvider";
 
 const queryClient = new QueryClient();
 
-export function EditableDataTableController() {
+function NewScheduleController() {
+  const { getAuthSession } = useContext(AuthenticationContext);
   const [date, setDate] = useState<Date>(new Date());
+  // const { isLoading, error, data } = useSchedulingData({
+  //   idToken: getAuthSession()?.idToken || "",
+  // });
   const { data, isLoading, error } = useQuery<SchedulingData>({
     queryKey: ["data"],
     queryFn: fetchData,
@@ -99,8 +104,12 @@ export function EditableDataTableController() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
+  useEffect(() => {
+    setDate(data.startOfWeek);
+  }, [data.startOfWeek]);
+
   return (
-    <EditableDataTableForm
+    <NewScheduleForm
       control={form.control}
       fields={fields}
       availableEmployees={availableEmployees}
@@ -121,10 +130,10 @@ export function EditableDataTableController() {
   );
 }
 
-export function EditableDataTable() {
+export function NewSchedule() {
   return (
     <QueryClientProvider client={queryClient}>
-      <EditableDataTableController />
+      <NewScheduleController />
     </QueryClientProvider>
   );
 }

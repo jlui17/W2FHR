@@ -55,7 +55,7 @@ interface EditableDataTableFormProps {
   useWWTemplate: () => void;
 }
 
-export function EditableDataTableForm(p: EditableDataTableFormProps) {
+export function NewScheduleForm(p: EditableDataTableFormProps) {
   return (
     <div className="col-span-2 w-full">
       <form onSubmit={p.onSubmit}>

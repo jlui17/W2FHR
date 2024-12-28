@@ -1,12 +1,5 @@
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
 import React, { ReactElement, useContext } from "react";
-import { toast } from "sonner";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
-import { ERROR_MESSAGES, TOAST } from "../common/constants";
 import { TimesheetData, useTimesheetData } from "../Timesheet/helpers/hooks";
 import { UpcomingShiftsWidget } from "./UpcomingShiftsWidget";
 
@@ -48,25 +41,6 @@ const UpcomingShiftsController = (): ReactElement => {
   }
 };
 
-export const UpcomingShifts = (): JSX.Element => {
-  const queryClient = new QueryClient({
-    queryCache: new QueryCache({
-      onError: (error) => {
-        console.error(`Error in UpcomingShifts:\n${error}`);
-        let errMsg: string = ERROR_MESSAGES.UNKNOWN_ERROR;
-        if (error instanceof Error) {
-          errMsg = error.message;
-        }
-        toast.error(TOAST.HEADERS.ERROR, {
-          description: errMsg,
-          duration: TOAST.DURATIONS.ERROR,
-        });
-      },
-    }),
-  });
-  return (
-    <QueryClientProvider client={queryClient}>
-      <UpcomingShiftsController />
-    </QueryClientProvider>
-  );
+export const UpcomingShifts = (): ReactElement => {
+  return <UpcomingShiftsController />;
 };

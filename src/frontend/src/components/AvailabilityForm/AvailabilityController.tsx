@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactElement, useContext } from "react";
 import { toast } from "sonner";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
@@ -10,6 +9,7 @@ import {
   useUpdateAvailability,
   useUserAvailability,
 } from "./helpers/hooks";
+import { DashboardQueryClient } from "@/components/Dashboard/Dashboard";
 
 const defaultAvailability: UserAvailability = {
   canUpdate: false,
@@ -19,8 +19,6 @@ const defaultAvailability: UserAvailability = {
   day4: { isAvailable: false, date: "" },
   showMonday: false,
 };
-
-const queryClient = new QueryClient();
 
 function AvailabilityController(): ReactElement {
   const { getAuthSession } = useContext(AuthenticationContext);
@@ -32,7 +30,10 @@ function AvailabilityController(): ReactElement {
   const { mutate: updateAvailability, isPending: updateIsPending } =
     useUpdateAvailability({
       onSuccess: async (updated: UserAvailability) => {
-        queryClient.setQueryData(AVAIALBILITY_QUERY_KEY, () => updated);
+        DashboardQueryClient.setQueryData(
+          AVAIALBILITY_QUERY_KEY,
+          () => updated,
+        );
         toast.success(TOAST.HEADERS.SUCCESS, {
           description: "Your availability has been updated.",
           duration: TOAST.DURATIONS.SUCCESS,
@@ -111,9 +112,5 @@ function AvailabilityController(): ReactElement {
 }
 
 export const Availability = (): ReactElement => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AvailabilityController />
-    </QueryClientProvider>
-  );
+  return <AvailabilityController />;
 };
