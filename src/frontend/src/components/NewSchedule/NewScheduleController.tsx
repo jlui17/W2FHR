@@ -1,17 +1,8 @@
 "use client";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import {
-  useFieldArray,
-  useForm,
-  UseFormReturn,
-  useWatch,
-} from "react-hook-form";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { useFieldArray, useForm, UseFormReturn, useWatch } from "react-hook-form";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { NewScheduleForm } from "./NewScheduleForm";
 import { SchedulingData } from "@/components/Scheduling/helpers/hooks";
 import {
@@ -48,10 +39,9 @@ function NewScheduleController() {
     },
   });
 
-  const form: UseFormReturn<NewScheduleSchemaFormData> =
-    useForm<NewScheduleSchemaFormData>({
-      defaultValues: getBlankTemplate(),
-    });
+  const form: UseFormReturn<NewScheduleSchemaFormData> = useForm<NewScheduleSchemaFormData>({
+    defaultValues: getBlankTemplate(),
+  });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -89,16 +79,10 @@ function NewScheduleController() {
     form.setValue("rows", getWWTemplate().rows);
   }
 
-  const availableEmployees: string[] =
-    data.availability[dateToFormatForUser(date)] || [];
-  const remainingAvailableEmployees: string[] = useMemo(() => {
+  const availableEmployees: string[] = data.availability[dateToFormatForUser(date)] || [];
+  const remainingAvailableEmployees: Set<string> = useMemo(() => {
     const formValues = form.getValues();
-    const selectedEmployees =
-      formValues.rows?.map((row) => row.employeeName).filter(Boolean) || [];
-
-    return availableEmployees.filter(
-      (employee) => !selectedEmployees.includes(employee),
-    );
+    return new Set(formValues.rows?.map((row) => row.employeeName).filter(Boolean) || []);
   }, [watchedRows, date]);
 
   if (isLoading) return <div>Loading...</div>;
@@ -113,7 +97,7 @@ function NewScheduleController() {
       control={form.control}
       fields={fields}
       availableEmployees={availableEmployees}
-      remainingAvailableEmployees={remainingAvailableEmployees}
+      selectedEmployees={remainingAvailableEmployees}
       shiftTitles={Array.from(data.metadata.shiftTitles)}
       shiftTimes={data.metadata.shiftTimes}
       breakDurations={data.metadata.breakDurations}
