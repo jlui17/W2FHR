@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
-const DEFAULT_WIDTH: string = "w-[125px]";
+const DEFAULT_WIDTH: string = "w-[175px]";
 const SELECTED_OPACITY: string = "opacity-65";
 
 export function Combobox(p: {

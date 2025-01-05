@@ -1,41 +1,46 @@
-"use client";
-
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, UseFormReturn, useWatch } from "react-hook-form";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NewScheduleForm } from "./NewScheduleForm";
-import { SchedulingData } from "@/components/Scheduling/helpers/hooks";
+import { useSchedulingData } from "@/components/Scheduling/helpers/hooks";
 import {
-  fetchData,
   getBlankTemplate,
   getGamesTemplate,
   getWWTemplate,
   NewScheduleSchemaFormData,
+  usePostNewSchedule,
 } from "@/components/NewSchedule/helpers/hooks";
-import { dateToFormatForUser } from "@/components/common/constants";
+import { dateToFormatForUser, TOAST } from "@/components/common/constants";
 import { AuthenticationContext } from "@/components/AuthenticationContextProvider";
+import { toast } from "sonner";
 
 const queryClient = new QueryClient();
 
 function NewScheduleController() {
   const { getAuthSession } = useContext(AuthenticationContext);
   const [date, setDate] = useState<Date>(new Date());
-  // const { isLoading, error, data } = useSchedulingData({
-  //   idToken: getAuthSession()?.idToken || "",
-  // });
-  const { data, isLoading, error } = useQuery<SchedulingData>({
-    queryKey: ["data"],
-    queryFn: fetchData,
-    initialData: {
-      availability: {},
-      metadata: {
-        shiftTitles: new Set<string>(),
-        shiftTimes: [],
-        breakDurations: [],
-      },
-      showMonday: false,
-      disableUpdates: false,
-      startOfWeek: new Date(),
+  const [open, setOpen] = useState<boolean>(false);
+  const {
+    isFetching,
+    data: schedulingData,
+    refetch: refetchSchedulingData,
+  } = useSchedulingData({
+    idToken: getAuthSession()?.idToken || "",
+  });
+
+  const { mutate: postNewSchedule, isPending: isSubmitting } = usePostNewSchedule({
+    onSuccess: () => {
+      toast.success(TOAST.HEADERS.SUCCESS, {
+        description: "The new schedule has been posted.",
+        duration: TOAST.DURATIONS.SUCCESS,
+      });
+    },
+    onError: (err: Error) => {
+      console.error(`Error while posting new schedule:\n${err}`);
+      toast.error(TOAST.HEADERS.ERROR, {
+        description: err.message,
+        duration: TOAST.DURATIONS.ERROR,
+      });
     },
   });
 
@@ -45,52 +50,57 @@ function NewScheduleController() {
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "rows",
+    name: "shifts",
   });
 
   const watchedRows = useWatch({
     control: form.control,
-    name: "rows",
+    name: "shifts",
   });
 
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const onSubmit = (data: NewScheduleSchemaFormData) => {
+    postNewSchedule({
+      idToken: getAuthSession()?.idToken || "",
+      newSchedule: data,
+      date: date,
+    });
   };
 
   const addRow = () => {
     append({
-      employeeName: "",
+      employee: "",
       shiftTitle: "",
-      start: "",
-      end: "",
+      startTime: "",
+      endTime: "",
       breakDuration: "",
     });
   };
 
   function useBlankTemplate(): void {
-    form.setValue("rows", getBlankTemplate().rows);
+    form.setValue("shifts", getBlankTemplate().shifts);
   }
 
   function useGamesTemplate(): void {
-    form.setValue("rows", getGamesTemplate().rows);
+    form.setValue("shifts", getGamesTemplate().shifts);
   }
 
   function useWWTemplate(): void {
-    form.setValue("rows", getWWTemplate().rows);
+    form.setValue("shifts", getWWTemplate().shifts);
   }
 
-  const availableEmployees: string[] = data.availability[dateToFormatForUser(date)] || [];
+  function onOpenChange(): void {
+    setOpen(!open);
+  }
+
+  const availableEmployees: string[] = schedulingData.availability[dateToFormatForUser(date)] || [];
   const remainingAvailableEmployees: Set<string> = useMemo(() => {
     const formValues = form.getValues();
-    return new Set(formValues.rows?.map((row) => row.employeeName).filter(Boolean) || []);
+    return new Set(formValues.shifts?.map((row) => row.employee).filter(Boolean) || []);
   }, [watchedRows, date]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
   useEffect(() => {
-    setDate(data.startOfWeek);
-  }, [data.startOfWeek]);
+    setDate(schedulingData.startOfWeek);
+  }, [schedulingData.startOfWeek]);
 
   return (
     <NewScheduleForm
@@ -98,18 +108,20 @@ function NewScheduleController() {
       fields={fields}
       availableEmployees={availableEmployees}
       selectedEmployees={remainingAvailableEmployees}
-      shiftTitles={Array.from(data.metadata.shiftTitles)}
-      shiftTimes={data.metadata.shiftTimes}
-      breakDurations={data.metadata.breakDurations}
+      shiftTitles={Array.from(schedulingData.metadata.shiftTitles)}
+      shiftTimes={schedulingData.metadata.shiftTimes}
+      breakDurations={schedulingData.metadata.breakDurations}
       onSubmit={form.handleSubmit(onSubmit)}
       addRow={addRow}
       removeRow={remove}
-      isSubmitting={false}
+      isSubmitting={isFetching || isSubmitting}
       date={date}
       setDate={setDate}
       useBlankTemplate={useBlankTemplate}
       useGamesTemplate={useGamesTemplate}
       useWWTemplate={useWWTemplate}
+      open={open}
+      onOpenChange={onOpenChange}
     />
   );
 }

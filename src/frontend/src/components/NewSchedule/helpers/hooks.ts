@@ -4,6 +4,74 @@ import {
   SchedulingData,
 } from "@/components/Scheduling/helpers/hooks";
 import { z } from "zod";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
+import { API_URLS, dateToFormatForApi, ERROR_MESSAGES } from "@/components/common/constants";
+
+interface NewScheduleRequest {
+  idToken: string;
+  newSchedule: NewScheduleSchemaFormData;
+  date: Date;
+}
+
+interface ShiftForScheduling {
+  date: string;
+  employee: string;
+  shiftTitle: string;
+  startTime: string;
+  endTime: string;
+  breakDuration: string;
+}
+
+function createPostNewScheduleRequestBody(
+  shifts: NewScheduleSchemaFormData,
+  date: Date,
+): {
+  shifts: ShiftForScheduling[];
+} {
+  return {
+    shifts: shifts.shifts.map((shift) => ({
+      date: dateToFormatForApi(date),
+      employee: shift.employee,
+      shiftTitle: shift.shiftTitle,
+      startTime: shift.startTime,
+      endTime: shift.endTime,
+      breakDuration: shift.breakDuration,
+    })),
+  };
+}
+
+export function usePostNewSchedule(p: {
+  onSuccess: () => void;
+  onError: (err: Error) => void;
+}): UseMutationResult<void, Error, NewScheduleRequest, unknown> {
+  async function postNewSchedule(p: NewScheduleRequest): Promise<void> {
+    const response = await fetch(API_URLS.SCHEDULING, {
+      headers: {
+        Authorization: `Bearer ${p.idToken}`,
+      },
+      method: "POST",
+      mode: "cors",
+      body: JSON.stringify(createPostNewScheduleRequestBody(p.newSchedule, p.date)),
+    });
+
+    switch (response.status) {
+      case 200:
+        return Promise.resolve();
+      case 403:
+        return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
+      case 404:
+        return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
+      default:
+        return Promise.reject(new Error(ERROR_MESSAGES.SERVER.GENERAL_ERROR));
+    }
+  }
+
+  return useMutation({
+    mutationFn: (v: NewScheduleRequest) => postNewSchedule(v),
+    onSuccess: p.onSuccess,
+    onError: p.onError,
+  });
+}
 
 export async function fetchData(): Promise<SchedulingData> {
   if (!isSchedulingDataFromAPI(mockData)) {
@@ -13,12 +81,12 @@ export async function fetchData(): Promise<SchedulingData> {
 }
 
 const NewScheduleSchema = z.object({
-  rows: z.array(
+  shifts: z.array(
     z.object({
-      employeeName: z.string(),
+      employee: z.string(),
       shiftTitle: z.string(),
-      start: z.string(),
-      end: z.string(),
+      startTime: z.string(),
+      endTime: z.string(),
       breakDuration: z.string(),
     }),
   ),
@@ -27,7 +95,7 @@ export type NewScheduleSchemaFormData = z.infer<typeof NewScheduleSchema>;
 
 export function getGamesTemplate(): NewScheduleSchemaFormData {
   return {
-    rows: [
+    shifts: [
       ...Array.from(
         [
           "1. High Striker",
@@ -68,24 +136,21 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
           "General Manager",
           "Operations Manager",
         ].map((shiftTitle) => {
-          if (
-            shiftTitle.endsWith("Supervisor") ||
-            shiftTitle.endsWith("Manager")
-          ) {
+          if (shiftTitle.endsWith("Supervisor") || shiftTitle.endsWith("Manager")) {
             return {
-              employeeName: "",
+              employee: "",
               shiftTitle: shiftTitle,
-              start: "6:00 pm",
-              end: "12:15 am",
+              startTime: "6:00 pm",
+              endTime: "12:15 am",
               breakDuration: "00:30:00",
             };
           }
 
           return {
-            employeeName: "",
+            employee: "",
             shiftTitle: shiftTitle,
-            start: "6:45 pm",
-            end: "12:15 am",
+            startTime: "6:45 pm",
+            endTime: "12:15 am",
             breakDuration: "00:30:00",
           };
         }),
@@ -96,12 +161,12 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
 
 export function getBlankTemplate(): NewScheduleSchemaFormData {
   return {
-    rows: [
+    shifts: [
       {
-        employeeName: "",
+        employee: "",
         shiftTitle: "",
-        start: "",
-        end: "",
+        startTime: "",
+        endTime: "",
         breakDuration: "",
       },
     ],
@@ -110,7 +175,7 @@ export function getBlankTemplate(): NewScheduleSchemaFormData {
 
 export function getWWTemplate(): NewScheduleSchemaFormData {
   return {
-    rows: [
+    shifts: [
       ...Array.from(
         [
           "Water Walkers Attendant",
@@ -122,19 +187,19 @@ export function getWWTemplate(): NewScheduleSchemaFormData {
         ].map((shiftTitle) => {
           if (shiftTitle.endsWith("Breaker")) {
             return {
-              employeeName: "",
+              employee: "",
               shiftTitle,
-              start: "7:30 pm",
-              end: "12:15 am",
+              startTime: "7:30 pm",
+              endTime: "12:15 am",
               breakDuration: "00:00:00",
             };
           }
 
           return {
-            employeeName: "",
+            employee: "",
             shiftTitle,
-            start: "6:45 pm",
-            end: "12:15 am",
+            startTime: "6:45 pm",
+            endTime: "12:15 am",
             breakDuration: "00:30:00",
           };
         }),
