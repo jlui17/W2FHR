@@ -69,7 +69,7 @@ export function NewScheduleForm(p: EditableDataTableFormProps) {
             <CollapsibleTrigger asChild>
               <CardHeader className="flex flex-row items-center justify-between transition-colors duration-200 hover:bg-gray-100">
                 <CardTitle className="m-auto">New Schedule</CardTitle>
-                <Button variant="ghost" size="sm" className="w-9 p-0">
+                <Button variant="ghost" size="sm" className="w-9 p-0" type="button">
                   {p.open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   <span className="sr-only">Toggle table</span>
                 </Button>
