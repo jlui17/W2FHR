@@ -14,10 +14,14 @@ type Timesheet struct {
 }
 
 type schedule struct {
-	EmployeeIds   []string
-	EmployeeNames []string
-	ShiftNames    [][]string
-	ShiftInfo     [][]string
+	Dates          []string
+	EmployeeIds    []string
+	EmployeeNames  []string
+	ShiftTitles    []string
+	StartTimes     []string
+	EndTimes       []string
+	BreakDurations []string
+	NetHours       []string
 }
 
 type ExternalShift struct {
@@ -37,6 +41,8 @@ type InternalShift struct {
 	StartTime     string
 	EndTime       string
 	BreakDuration string
+	LastUpdated   string
+	Designation   string
 }
 
 type InternalShifts []InternalShift

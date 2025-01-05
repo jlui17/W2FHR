@@ -23,6 +23,7 @@ interface EditableDataTableFormProps {
   shiftTitles: string[];
   shiftTimes: string[];
   breakDurations: string[];
+  designations: string[];
   onSubmit: () => void;
   addRow: () => void;
   removeRow: UseFieldArrayRemove;
@@ -138,6 +139,7 @@ export function NewScheduleForm(p: EditableDataTableFormProps) {
                       <TableHead>Start</TableHead>
                       <TableHead>End</TableHead>
                       <TableHead>Break</TableHead>
+                      <TableHead>Designation</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -225,6 +227,20 @@ export function NewScheduleForm(p: EditableDataTableFormProps) {
                                 onChange={field.onChange}
                                 name="break duration"
                                 className="w-[200px]"
+                              />
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Controller
+                            name={`shifts.${index}.designation`}
+                            control={p.control}
+                            render={({ field }) => (
+                              <Combobox
+                                value={field.value}
+                                values={p.designations}
+                                onChange={field.onChange}
+                                name="designation"
                               />
                             )}
                           />

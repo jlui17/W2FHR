@@ -32,6 +32,7 @@ type NewScheduleShift struct {
 	StartTime     string `json:"startTime"`
 	EndTime       string `json:"endTime"`
 	BreakDuration string `json:"breakDuration"`
+	Designation   string `json:"designation"`
 }
 
 func validateNewScheduleRequest(request NewScheduleRequest) error {
@@ -59,6 +60,10 @@ func validateNewScheduleRequest(request NewScheduleRequest) error {
 
 		if !breakPattern.MatchString(shift.BreakDuration) {
 			return fmt.Errorf("shift %d: break duration format invalid. Must be 'xx:xx:xx', got: %s", i+1, shift.BreakDuration)
+		}
+
+		if shift.Designation != "Games" && shift.Designation != "Water Walkers" {
+			return fmt.Errorf("shift %d: designation must be 'Games' or 'Water Walkers', got: %s", i+1, shift.Designation)
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"GoogleSheets/packages/schedule/Schedule"
 	"log"
 	"sort"
+	"time"
 )
 
 func New(req NewScheduleRequest) error {
@@ -20,7 +21,8 @@ func New(req NewScheduleRequest) error {
 		return err
 	}
 
-	newSchedule := convertNewScheduleRequestToInternal(req)
+	now := time.Now()
+	newSchedule := convertNewScheduleRequestToInternal(req, now.Format(TimeUtil.ScheduleDateFormat))
 	sort.Sort(newSchedule)
 	err = client.PostNewSchedule(newSchedule)
 	if err != nil {
@@ -32,7 +34,7 @@ func New(req NewScheduleRequest) error {
 	return nil
 }
 
-func convertNewScheduleRequestToInternal(req NewScheduleRequest) Schedule.InternalShifts {
+func convertNewScheduleRequestToInternal(req NewScheduleRequest, currentTimeAsStr string) Schedule.InternalShifts {
 	var res = make(Schedule.InternalShifts, len(req.Shifts))
 	for i, shift := range req.Shifts {
 		res[i] = Schedule.InternalShift{
@@ -42,6 +44,8 @@ func convertNewScheduleRequestToInternal(req NewScheduleRequest) Schedule.Intern
 			StartTime:     shift.StartTime,
 			EndTime:       shift.EndTime,
 			BreakDuration: shift.BreakDuration,
+			LastUpdated:   currentTimeAsStr,
+			Designation:   shift.Designation,
 		}
 	}
 

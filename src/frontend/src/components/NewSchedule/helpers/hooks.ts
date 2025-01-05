@@ -1,8 +1,3 @@
-import {
-  convertSchedulingDataFromAPI,
-  isSchedulingDataFromAPI,
-  SchedulingData,
-} from "@/components/Scheduling/helpers/hooks";
 import { z } from "zod";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { API_URLS, dateToFormatForApi, ERROR_MESSAGES } from "@/components/common/constants";
@@ -13,20 +8,15 @@ interface NewScheduleRequest {
   date: Date;
 }
 
-interface ShiftForScheduling {
+interface ShiftForApi extends ShiftSchemaFormData {
   date: string;
-  employee: string;
-  shiftTitle: string;
-  startTime: string;
-  endTime: string;
-  breakDuration: string;
 }
 
 function createPostNewScheduleRequestBody(
   shifts: NewScheduleSchemaFormData,
   date: Date,
 ): {
-  shifts: ShiftForScheduling[];
+  shifts: ShiftForApi[];
 } {
   return {
     shifts: shifts.shifts.map((shift) => ({
@@ -36,6 +26,7 @@ function createPostNewScheduleRequestBody(
       startTime: shift.startTime,
       endTime: shift.endTime,
       breakDuration: shift.breakDuration,
+      designation: shift.designation,
     })),
   };
 }
@@ -73,23 +64,19 @@ export function usePostNewSchedule(p: {
   });
 }
 
-export async function fetchData(): Promise<SchedulingData> {
-  if (!isSchedulingDataFromAPI(mockData)) {
-    throw new Error("Invalid data from API");
-  }
-  return Promise.resolve(convertSchedulingDataFromAPI(mockData));
-}
+export const SHIFT_DESIGNATIONS = ["Games", "Water Walkers"] as const;
+const ShiftSchema = z.object({
+  employee: z.string(),
+  shiftTitle: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  breakDuration: z.string(),
+  designation: z.enum(SHIFT_DESIGNATIONS),
+});
+type ShiftSchemaFormData = z.infer<typeof ShiftSchema>;
 
 const NewScheduleSchema = z.object({
-  shifts: z.array(
-    z.object({
-      employee: z.string(),
-      shiftTitle: z.string(),
-      startTime: z.string(),
-      endTime: z.string(),
-      breakDuration: z.string(),
-    }),
-  ),
+  shifts: z.array(ShiftSchema),
 });
 export type NewScheduleSchemaFormData = z.infer<typeof NewScheduleSchema>;
 
@@ -135,7 +122,7 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
           "Assistant Manager",
           "General Manager",
           "Operations Manager",
-        ].map((shiftTitle) => {
+        ].map((shiftTitle): ShiftSchemaFormData => {
           if (shiftTitle.endsWith("Supervisor") || shiftTitle.endsWith("Manager")) {
             return {
               employee: "",
@@ -143,6 +130,7 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
               startTime: "6:00 pm",
               endTime: "12:15 am",
               breakDuration: "00:30:00",
+              designation: "Games",
             };
           }
 
@@ -152,6 +140,7 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
             startTime: "6:45 pm",
             endTime: "12:15 am",
             breakDuration: "00:30:00",
+            designation: "Games",
           };
         }),
       ),
@@ -168,6 +157,7 @@ export function getBlankTemplate(): NewScheduleSchemaFormData {
         startTime: "",
         endTime: "",
         breakDuration: "",
+        designation: "Games",
       },
     ],
   };
@@ -184,7 +174,7 @@ export function getWWTemplate(): NewScheduleSchemaFormData {
           "Water Walkers Breaker",
           "Water Walkers Supervisor",
           "Water Walkers Supervisor",
-        ].map((shiftTitle) => {
+        ].map((shiftTitle): ShiftSchemaFormData => {
           if (shiftTitle.endsWith("Breaker")) {
             return {
               employee: "",
@@ -192,6 +182,7 @@ export function getWWTemplate(): NewScheduleSchemaFormData {
               startTime: "7:30 pm",
               endTime: "12:15 am",
               breakDuration: "00:00:00",
+              designation: "Water Walkers",
             };
           }
 
@@ -201,6 +192,7 @@ export function getWWTemplate(): NewScheduleSchemaFormData {
             startTime: "6:45 pm",
             endTime: "12:15 am",
             breakDuration: "00:30:00",
+            designation: "Water Walkers",
           };
         }),
       ),

@@ -8,6 +8,7 @@ import {
   getGamesTemplate,
   getWWTemplate,
   NewScheduleSchemaFormData,
+  SHIFT_DESIGNATIONS,
   usePostNewSchedule,
 } from "@/components/NewSchedule/helpers/hooks";
 import { dateToFormatForUser, TOAST } from "@/components/common/constants";
@@ -73,6 +74,7 @@ function NewScheduleController() {
       startTime: "",
       endTime: "",
       breakDuration: "",
+      designation: "Games",
     });
   };
 
@@ -111,6 +113,7 @@ function NewScheduleController() {
       shiftTitles={Array.from(schedulingData.metadata.shiftTitles)}
       shiftTimes={schedulingData.metadata.shiftTimes}
       breakDurations={schedulingData.metadata.breakDurations}
+      designations={[...SHIFT_DESIGNATIONS]}
       onSubmit={form.handleSubmit(onSubmit)}
       addRow={addRow}
       removeRow={remove}

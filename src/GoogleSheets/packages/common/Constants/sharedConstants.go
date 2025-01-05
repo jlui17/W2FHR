@@ -2,6 +2,7 @@ package SharedConstants
 
 import (
 	"errors"
+	"fmt"
 	"os"
 )
 
@@ -60,4 +61,46 @@ func Flatten(arr [][]interface{}) []interface{} {
 		flat = append(flat, subArr...)
 	}
 	return flat
+}
+
+func All2DArraysSameLength[T any](arrs ...*[][]T) error {
+	if len(arrs) == 0 {
+		return nil
+	}
+
+	lens := make([][]int, len(arrs))
+
+	for i, outer := range arrs {
+		if outer == nil {
+			return fmt.Errorf("array %d is nil", i)
+		}
+
+		lens[i] = make([]int, len(*outer))
+		for j, inner := range *outer {
+			lens[i][j] = len(inner)
+		}
+	}
+
+	err := errors.New(fmt.Sprintf("arrays differ in length: %v", lens))
+	// Compare outer lengths
+	outerLen := len(lens[0])
+	for _, lengths := range lens {
+		if len(lengths) != outerLen {
+			return err
+		}
+	}
+
+	// Compare inner lengths (if outer arrays are not empty)
+	if outerLen > 0 {
+		for i := 0; i < outerLen; i++ {
+			innerLen := lens[0][i]
+			for _, lengths := range lens {
+				if lengths[i] != innerLen {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
 }
