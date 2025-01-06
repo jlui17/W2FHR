@@ -24,6 +24,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DashboardQueryClient } from "@/components/Dashboard/Dashboard";
+import { AVAILABILITY_QUERY_KEY } from "@/components/AvailabilityForm/helpers/hooks";
 
 const EMPTY_DATA: Shift[] = [];
 
@@ -64,6 +65,7 @@ function SchedulingController(): ReactElement {
     useUpdateSchedulingData({
       onSuccess: (data: SchedulingData) => {
         DashboardQueryClient.setQueryData(SCHEDULING_DATA_QUERY_KEY, data);
+        DashboardQueryClient.invalidateQueries({queryKey: AVAILABILITY_QUERY_KEY})
         toast.success(TOAST.HEADERS.SUCCESS, {
           description: "The schedule has been updated.",
           duration: TOAST.DURATIONS.SUCCESS,

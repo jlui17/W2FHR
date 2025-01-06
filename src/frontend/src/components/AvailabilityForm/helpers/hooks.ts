@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { API_URLS, ERROR_MESSAGES } from "../../common/constants";
 
-export const AVAIALBILITY_QUERY_KEY = ["availability"] as const;
+export const AVAILABILITY_QUERY_KEY = ["availability"] as const;
 
 export interface Day {
   isAvailable: boolean;
@@ -79,7 +79,7 @@ export function useUserAvailability(p: {
   }
 
   return useQuery({
-    queryKey: AVAIALBILITY_QUERY_KEY,
+    queryKey: AVAILABILITY_QUERY_KEY,
     queryFn: fetchAvailability,
   });
 }

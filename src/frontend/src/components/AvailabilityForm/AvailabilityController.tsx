@@ -4,7 +4,7 @@ import { AuthenticationContext } from "../AuthenticationContextProvider";
 import { ERROR_MESSAGES, TOAST } from "../common/constants";
 import { AvailabilityForm, LoadingAvailabilityForm } from "./AvailabilityForm";
 import {
-  AVAIALBILITY_QUERY_KEY,
+  AVAILABILITY_QUERY_KEY,
   UserAvailability,
   useUpdateAvailability,
   useUserAvailability,
@@ -31,7 +31,7 @@ function AvailabilityController(): ReactElement {
     useUpdateAvailability({
       onSuccess: async (updated: UserAvailability) => {
         DashboardQueryClient.setQueryData(
-          AVAIALBILITY_QUERY_KEY,
+          AVAILABILITY_QUERY_KEY,
           () => updated,
         );
         toast.success(TOAST.HEADERS.SUCCESS, {
