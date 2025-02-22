@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ReactElement } from "react";
 import { Control, Controller, FieldArrayWithId, UseFieldArrayRemove } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { dateToFormatForUser } from "@/components/common/constants";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-interface EditableDataTableFormProps {
+interface NewScheduleFormProps {
   control: Control<any>;
   fields: FieldArrayWithId[];
   availableEmployees: string[];
@@ -35,6 +35,7 @@ interface EditableDataTableFormProps {
   useWWTemplate: () => void;
   open: boolean;
   onOpenChange: () => void;
+  availabilityTable: ReactElement;
 }
 
 function onSelectEmployee(
@@ -61,7 +62,7 @@ function onSelectEmployee(
   onChange(newValue);
 }
 
-export function NewScheduleForm(p: EditableDataTableFormProps) {
+export function NewScheduleForm(p: NewScheduleFormProps) {
   return (
     <div className="col-span-2 w-full">
       <form onSubmit={p.onSubmit}>
@@ -250,13 +251,17 @@ export function NewScheduleForm(p: EditableDataTableFormProps) {
                   </TableBody>
                 </Table>
               </CardContent>
-              <CardFooter className="flex w-full justify-between">
-                <Button type="button" onClick={p.addRow}>
-                  Add Row
-                </Button>
-                <Button type="submit" disabled={p.isSubmitting} onClick={p.onSubmit}>
-                  {p.isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
+              <CardFooter className="flex w-full flex-col">
+                <div className="mb-8 flex w-full justify-between">
+                  <Button type="button" onClick={p.addRow}>
+                    Add Row
+                  </Button>
+                  <Button type="submit" disabled={p.isSubmitting} onClick={p.onSubmit}>
+                    {p.isSubmitting ? "Submitting..." : "Submit"}
+                  </Button>
+                </div>
+                <h1 className="font-bold text-2xl mb-4">Available Employees</h1>
+                {p.availabilityTable}
               </CardFooter>
             </CollapsibleContent>
           </Card>

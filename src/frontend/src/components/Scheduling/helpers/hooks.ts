@@ -1,15 +1,8 @@
 import { getSchedulingApiUrl } from "@/components/common/ApiUrlUtil";
-import { API_URLS, ERROR_MESSAGES } from "@/components/common/constants";
-import {
-  DefinedUseQueryResult,
-  useMutation,
-  UseMutationResult,
-  useQuery,
-} from "@tanstack/react-query";
+import { API_URLS, dateToFormatForUser, ERROR_MESSAGES } from "@/components/common/constants";
+import { DefinedUseQueryResult, useMutation, UseMutationResult, useQuery } from "@tanstack/react-query";
 
-function isSchedulingMetadata(
-  data: unknown,
-): data is SchedulingMetadataFromAPI {
+function isSchedulingMetadata(data: unknown): data is SchedulingMetadataFromAPI {
   if (
     !(
       data !== null &&
@@ -27,15 +20,11 @@ function isSchedulingMetadata(
     Array.isArray(data.breakDurations) &&
     data.shiftTitles.every((shiftTitle) => typeof shiftTitle === "string") &&
     data.shiftTimes.every((shiftTime) => typeof shiftTime === "string") &&
-    data.breakDurations.every(
-      (breakDuration) => typeof breakDuration === "string",
-    )
+    data.breakDurations.every((breakDuration) => typeof breakDuration === "string")
   );
 }
 
-export function isSchedulingDataFromAPI(
-  data: unknown,
-): data is SchedulingDataFromAPI {
+export function isSchedulingDataFromAPI(data: unknown): data is SchedulingDataFromAPI {
   if (
     data === null ||
     typeof data !== "object" ||
@@ -59,11 +48,7 @@ export function isSchedulingDataFromAPI(
   }
 
   return Object.entries(availability).every(([key, value]) => {
-    return (
-      typeof key === "string" &&
-      Array.isArray(value) &&
-      value.every((item) => typeof item === "string")
-    );
+    return typeof key === "string" && Array.isArray(value) && value.every((item) => typeof item === "string");
   });
 }
 
@@ -93,17 +78,23 @@ export interface SchedulingData {
   showMonday: boolean;
   disableUpdates: boolean;
   startOfWeek: Date;
+  days: string[];
 }
 
-export function convertSchedulingDataFromAPI(
-  data: SchedulingDataFromAPI,
-): SchedulingData {
-  const availabilitySets: { [key: string]: Set<string> } = {};
-  Object.entries(data.availability).forEach(([key, value]) => {
-    availabilitySets[key] = new Set(value);
-  });
+export function convertSchedulingDataFromAPI(data: SchedulingDataFromAPI): SchedulingData {
+  // we want to standardize the format of the strings to avoid indexing issues
+  const availability: { [key: string]: string[] } = {};
+  for (const [date, employees] of Object.entries(data.availability)) {
+    availability[dateToFormatForUser(new Date(date))] = employees;
+  }
+
+  const days: string[] = Object.keys(data.availability)
+    .map((day: string): Date => new Date(day))
+    .sort((a: Date, b: Date) => a.getTime() - b.getTime())
+    .map((date: Date): string => dateToFormatForUser(date));
+
   return {
-    availability: data.availability,
+    availability: availability,
     metadata: {
       shiftTitles: new Set(data.metadata.shiftTitles),
       shiftTimes: data.metadata.shiftTimes,
@@ -112,14 +103,13 @@ export function convertSchedulingDataFromAPI(
     showMonday: data.showMonday,
     disableUpdates: data.disableUpdates,
     startOfWeek: new Date(data.startOfWeek),
+    days: days,
   };
 }
 
 export const SCHEDULING_DATA_QUERY_KEY: string[] = ["scheduling"];
 
-export function useSchedulingData(p: {
-  idToken: string;
-}): DefinedUseQueryResult<SchedulingData, Error> {
+export function useSchedulingData(p: { idToken: string }): DefinedUseQueryResult<SchedulingData, Error> {
   async function getSchedulingData(): Promise<SchedulingData> {
     const response = await fetch(getSchedulingApiUrl(), {
       headers: {
@@ -132,9 +122,7 @@ export function useSchedulingData(p: {
       case 200:
         const data = await response.json();
         if (!isSchedulingDataFromAPI(data)) {
-          return Promise.reject(
-            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
-          );
+          return Promise.reject(new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT));
         }
         return Promise.resolve(convertSchedulingDataFromAPI(data));
       case 404:
@@ -157,6 +145,7 @@ export function useSchedulingData(p: {
       showMonday: false,
       disableUpdates: false,
       startOfWeek: new Date(),
+      days: [],
     },
   });
 }
@@ -174,9 +163,7 @@ export function useUpdateSchedulingData(p: {
   onSuccess: (data: SchedulingData) => void;
   onError: (err: Error) => void;
 }): UseMutationResult<SchedulingData, Error, UpdateSchedulingRequest, unknown> {
-  async function updateSchedulingData(
-    p: UpdateSchedulingRequest,
-  ): Promise<SchedulingData> {
+  async function updateSchedulingData(p: UpdateSchedulingRequest): Promise<SchedulingData> {
     const response = await fetch(API_URLS.SCHEDULING, {
       headers: {
         Authorization: `Bearer ${p.idToken}`,
@@ -190,9 +177,7 @@ export function useUpdateSchedulingData(p: {
       case 200:
         const data = await response.json();
         if (!isSchedulingDataFromAPI(data)) {
-          return Promise.reject(
-            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
-          );
+          return Promise.reject(new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT));
         }
         return Promise.resolve(convertSchedulingDataFromAPI(data));
       case 403:

@@ -14,6 +14,7 @@ import {
 import { dateToFormatForUser, TOAST } from "@/components/common/constants";
 import { AuthenticationContext } from "@/components/AuthenticationContextProvider";
 import { toast } from "sonner";
+import { AvailableEmployeesTable } from "@/components/NewSchedule/AvailableEmployeesTable";
 
 const queryClient = new QueryClient();
 
@@ -21,11 +22,7 @@ function NewScheduleController() {
   const { getAuthSession } = useContext(AuthenticationContext);
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
-  const {
-    isFetching,
-    data: schedulingData,
-    refetch: refetchSchedulingData,
-  } = useSchedulingData({
+  const { isFetching, data: schedulingData } = useSchedulingData({
     idToken: getAuthSession()?.idToken || "",
   });
 
@@ -125,6 +122,7 @@ function NewScheduleController() {
       useWWTemplate={useWWTemplate}
       open={open}
       onOpenChange={onOpenChange}
+      availabilityTable={<AvailableEmployeesTable isLoading={isFetching} schedulingData={schedulingData} />}
     />
   );
 }
