@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"google.golang.org/api/sheets/v4"
 	"log"
+	"sort"
 	"time"
 )
 
@@ -183,6 +184,7 @@ func (a *availabilitySheet) GetAvailabilityForTheWeek() (AvailabilityForTheWeek,
 func createAvailabilityForTheWeek(dates []string, employeesAvailablePerDay [][]string) AvailabilityForTheWeek {
 	res := AvailabilityForTheWeek{}
 	for i, _ := range dates {
+		sort.Strings(employeesAvailablePerDay[i])
 		res[dates[i]] = employeesAvailablePerDay[i]
 	}
 

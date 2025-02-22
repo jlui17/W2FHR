@@ -65,10 +65,10 @@ func TestGetEmployeesAvailablePerDay(t *testing.T) {
 func TestCreateAvailabilityForTheWeek(t *testing.T) {
 	dates := []string{"d1", "d2", "d3", "d4"}
 	employeesAvailablePerDay := [][]string{
-		{"John Doe", "Bob Wilson", "Mike Johnson"},
-		{"Jane Smith", "Bob Wilson"},
-		{"John Doe", "Jane Smith", "Alice Brown"},
-		{"John Doe", "Bob Wilson", "Mike Johnson"},
+		{"Bob Wilson", "John Doe", "Mike Johnson"},
+		{"Bob Wilson", "Jane Smith"},
+		{"Alice Brown", "Jane Smith", "John Doe"},
+		{"Bob Wilson", "John Doe", "Mike Johnson"},
 	}
 	expected := AvailabilityForTheWeek{
 		"d1": employeesAvailablePerDay[0],
