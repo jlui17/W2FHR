@@ -1,9 +1,4 @@
 import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import {
   dateToFormatForApi,
   ERROR_MESSAGES,
   TOAST,
@@ -19,6 +14,7 @@ import {
 } from "@/components/Schedule/ScheduleController";
 import { SchedulingForm } from "@/components/Scheduling/SchedulingForm";
 import {
+  SCHEDULING_DATA_QUERY_KEY,
   SchedulingData,
   UpdateSchedulingRequest,
   useSchedulingData,
@@ -27,23 +23,8 @@ import {
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: (error) => {
-      console.error(`Error in Manager Schedule:\n${error}`);
-      let errMsg: string = ERROR_MESSAGES.UNKNOWN_ERROR;
-      if (error instanceof Error) {
-        errMsg = error.message;
-      }
-      toast.error(TOAST.HEADERS.ERROR, {
-        description: errMsg,
-        duration: TOAST.DURATIONS.ERROR,
-      });
-    },
-  }),
-});
-const SCHEDULING_DATA_QUERY_KEY: string[] = ["scheduling"];
+import { DashboardQueryClient } from "@/components/Dashboard/Dashboard";
+import { AVAILABILITY_QUERY_KEY } from "@/components/AvailabilityForm/helpers/hooks";
 
 const EMPTY_DATA: Shift[] = [];
 
@@ -78,13 +59,13 @@ function SchedulingController(): ReactElement {
     data: schedulingData,
   } = useSchedulingData({
     idToken: getAuthSession()?.idToken || "",
-    queryKey: SCHEDULING_DATA_QUERY_KEY,
   });
 
   const { mutate: updateSchedulingData, isPending: isUpdating } =
     useUpdateSchedulingData({
       onSuccess: (data: SchedulingData) => {
-        queryClient.setQueryData(SCHEDULING_DATA_QUERY_KEY, data);
+        DashboardQueryClient.setQueryData(SCHEDULING_DATA_QUERY_KEY, data);
+        DashboardQueryClient.invalidateQueries({queryKey: AVAILABILITY_QUERY_KEY})
         toast.success(TOAST.HEADERS.SUCCESS, {
           description: "The schedule has been updated.",
           duration: TOAST.DURATIONS.SUCCESS,
@@ -113,13 +94,11 @@ function SchedulingController(): ReactElement {
   });
 
   useEffect(() => {
-    if (schedulingData !== undefined) {
-      form.reset({
-        startOfWeek: schedulingData.startOfWeek,
-        showMonday: schedulingData.showMonday,
-        disableUpdates: schedulingData.disableUpdates,
-      });
-    }
+    form.reset({
+      startOfWeek: schedulingData.startOfWeek,
+      showMonday: schedulingData.showMonday,
+      disableUpdates: schedulingData.disableUpdates,
+    });
   }, [schedulingData]);
 
   const isFetching: boolean =
@@ -188,7 +167,7 @@ function SchedulingController(): ReactElement {
     updateSchedulingData(req);
   }
 
-  if (scheduleData === undefined || schedulingData === undefined) {
+  if (scheduleData === undefined) {
     return (
       <SchedulingForm
         open={open}
@@ -225,9 +204,5 @@ function SchedulingController(): ReactElement {
 }
 
 export function Scheduling(): ReactElement {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <SchedulingController />
-    </QueryClientProvider>
-  );
+  return <SchedulingController />;
 }

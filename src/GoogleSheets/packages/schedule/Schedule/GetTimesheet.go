@@ -12,7 +12,7 @@ func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 	timesheet, err := Connect()
 	if err != nil {
 		log.Printf("[ERROR] Failed to connect to Google Sheets: %s", err.Error())
-		return &Timesheet{}, nil
+		return &Timesheet{}, err
 	}
 
 	var employeeShifts *Timesheet
@@ -24,7 +24,7 @@ func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 		employeeShifts, err = timesheet.GetUpcoming(employeeId)
 		if err != nil {
 			log.Printf("[ERROR] Failed to get upcoming timesheet for employee: %s\nError: %s", employeeId, err.Error())
-			return &Timesheet{}, nil
+			return &Timesheet{}, err
 		}
 	case false:
 		log.Printf("[INFO] Getting all shifts for employee: %s", employeeId)
@@ -32,11 +32,11 @@ func Get(employeeId string, upcoming bool) (*Timesheet, error) {
 		employeeShifts, err = timesheet.Get(employeeId)
 		if err != nil {
 			log.Printf("[ERROR] Failed to get timesheet for employee: %s\nError: %s", employeeId, err.Error())
-			return &Timesheet{}, nil
+			return &Timesheet{}, err
 		}
 	}
 
-	return employeeShifts, err
+	return employeeShifts, nil
 }
 
 func GetByTimeRange(start string, end string) (*Timesheet, error) {

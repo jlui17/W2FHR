@@ -12,63 +12,84 @@ import (
 )
 
 const (
-	scheduleSheetId               = "1qZKKoJNXHuo8pymDbGZuBV8WxD6tkgeKnao_H0OfrPk"
-	upcomingScheduleRangeTemplate = "%s!%s2:%s200"
-	scheduleRangeTemplate         = "%s!%s2:%s"
-	scheduleUpcomingSheetName     = "Upcoming Shifts"
-	scheduleSheetName             = "Main Schedule"
-	scheduleEmployeeIdCol         = "C"
-	scheduleTitleCol              = "E"
-	scheduleDataColStart          = "G"
-	scheduleDataColEnd            = "K"
-	scheduleEmployeeNameCol       = "A"
+	scheduleSheetId           = "1qZKKoJNXHuo8pymDbGZuBV8WxD6tkgeKnao_H0OfrPk"
+	rangeTemplate             = "%s!%s2:%s"
+	scheduleUpcomingSheetName = "Upcoming Shifts"
+	scheduleSheetName         = "Main Schedule"
+
+	scheduleEmployeeIdCol    = "K"
+	scheduleTitleCol         = "A"
+	scheduleEmployeeNameCol  = "J"
+	scheduleDateCol          = "C"
+	scheduleStartTimeCol     = "D"
+	scheduleEndTimeCol       = "E"
+	scheduleBreakDurationCol = "F"
+	scheduleDesignationCol   = "G"
+	scheduleNetHoursCol      = "M"
+	schedulePutColStart      = "A"
+	schedulePutColEnd        = "H"
 )
 
 var (
-	upcomingScheduleEmployeeIds = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
-		scheduleEmployeeIdCol,
-		scheduleEmployeeIdCol)
-	upcomingScheduleShiftNames = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
-		scheduleTitleCol,
-		scheduleTitleCol)
-	upcomingScheduleData = fmt.Sprintf(upcomingScheduleRangeTemplate, scheduleUpcomingSheetName,
-		scheduleDataColStart,
-		scheduleDataColEnd)
-	scheduleEmployeeIds = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
-		scheduleEmployeeIdCol,
-		scheduleEmployeeIdCol)
-	scheduleShiftNames = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
-		scheduleTitleCol,
-		scheduleTitleCol)
-	scheduleData = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
-		scheduleDataColStart,
-		scheduleDataColEnd)
-	scheduleEmployeeNames = fmt.Sprintf(scheduleRangeTemplate, scheduleSheetName,
-		scheduleEmployeeNameCol,
-		scheduleEmployeeNameCol)
 	scheduleMetadata              = "'Data Validation'!AE2:AG"
 	scheduleMetadataEmployeeNames = "'Data Validation'!H2:H"
+
+	emptySchedule = schedule{
+		Dates:          []string{},
+		EmployeeIds:    []string{},
+		EmployeeNames:  []string{},
+		ShiftTitles:    []string{},
+		StartTimes:     []string{},
+		EndTimes:       []string{},
+		BreakDurations: []string{},
+		NetHours:       []string{},
+	}
 )
 
-type Timesheet struct {
-	Shifts []EmployeeShift `json:"shifts"`
+func employeeIdsRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleEmployeeIdCol,
+		scheduleEmployeeIdCol)
 }
-
-type EmployeeShift struct {
-	EmployeeName  string  `json:"employeeName"`
-	Date          string  `json:"date"`
-	ShiftTitle    string  `json:"shiftTitle"`
-	StartTime     string  `json:"startTime"`
-	EndTime       string  `json:"endTime"`
-	BreakDuration string  `json:"breakDuration"`
-	NetHours      float64 `json:"netHours"`
+func shiftNamesRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleTitleCol,
+		scheduleTitleCol)
 }
-
-type schedule struct {
-	EmployeeIds   []string
-	EmployeeNames []string
-	ShiftNames    [][]string
-	ShiftInfo     [][]string
+func employeeNamesRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleEmployeeNameCol,
+		scheduleEmployeeNameCol)
+}
+func datesRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleDateCol,
+		scheduleDateCol)
+}
+func startTimesRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleStartTimeCol,
+		scheduleStartTimeCol)
+}
+func endTimesRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleEndTimeCol,
+		scheduleEndTimeCol)
+}
+func breakDurationsRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleBreakDurationCol,
+		scheduleBreakDurationCol)
+}
+func designationsRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleDesignationCol,
+		scheduleDesignationCol)
+}
+func netHoursRange(sheetName string) string {
+	return fmt.Sprintf(rangeTemplate, sheetName,
+		scheduleNetHoursCol,
+		scheduleNetHoursCol)
 }
 
 type timesheet struct {
@@ -135,70 +156,176 @@ func (t *timesheet) GetScheduleMetadata() (Metadata, error) {
 	return res, nil
 }
 
-func (t *timesheet) getSchedule() (*schedule, error) {
-	response, err := t.service.Spreadsheets.Values.
-		BatchGet(scheduleSheetId).
-		Ranges(
-			scheduleEmployeeIds,
-			scheduleEmployeeNames,
-			scheduleShiftNames,
-			scheduleData,
+func (t *timesheet) PostNewSchedule(newSchedule InternalShifts) error {
+	input := translateShiftsToGoogleSheets(newSchedule)
+
+	start, err := t.getNextRowNumForNewSchedule()
+	if err != nil {
+		log.Printf("[ERROR] Trying to get next row for new schedule: %s", err.Error())
+		return err
+	}
+	log.Printf("[DEBUG] Next row for new schedule: %d", start)
+
+	updateRange := putScheduleRange(start, len(input.Values))
+	log.Printf("[DEBUG] Update range for new schedule: %s", updateRange)
+	_, err = t.service.Spreadsheets.Values.
+		Update(
+			scheduleSheetId,
+			updateRange,
+			input,
 		).
-		MajorDimension("ROWS").
+		ValueInputOption("RAW").
 		Do()
+	if err != nil {
+		log.Printf("[ERROR] Trying to post new schedule: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *timesheet) getSchedule() (*schedule, error) {
+	ranges := []string{
+		employeeIdsRange(scheduleSheetName),
+		employeeNamesRange(scheduleSheetName),
+		shiftNamesRange(scheduleSheetName),
+		datesRange(scheduleSheetName),
+		startTimesRange(scheduleSheetName),
+		endTimesRange(scheduleSheetName),
+		breakDurationsRange(scheduleSheetName),
+		netHoursRange(scheduleSheetName),
+	}
+	request := t.service.Spreadsheets.Values.
+		BatchGet(scheduleSheetId).
+		Ranges(ranges...).
+		MajorDimension("COLUMNS")
+	response, err := request.Do()
 	log.Printf("[DEBUG] Response from Google Sheets: %v", response)
 	if err != nil {
 		return &schedule{}, err
 	}
 
-	res := &schedule{
-		EmployeeIds:   SharedConstants.DToStrArr(SharedConstants.Flatten(response.ValueRanges[0].Values)),
-		EmployeeNames: SharedConstants.DToStrArr(SharedConstants.Flatten(response.ValueRanges[1].Values)),
-		ShiftNames:    SharedConstants.DDToStrArr(response.ValueRanges[2].Values),
-		ShiftInfo:     SharedConstants.DDToStrArr(response.ValueRanges[3].Values),
+	if len(response.ValueRanges) != len(ranges) {
+		log.Printf("[ERROR] Trying to get schedule: expected %d value ranges while getting schedule, got %d", len(ranges), len(response.ValueRanges))
+		return &schedule{}, fmt.Errorf("expected %d value ranges while getting schedule, got %d", len(ranges), len(response.ValueRanges))
+	}
+
+	employeeIds := response.ValueRanges[0].Values
+	employeeNames := response.ValueRanges[1].Values
+	shiftTitles := response.ValueRanges[2].Values
+	dates := response.ValueRanges[3].Values
+	startTimes := response.ValueRanges[4].Values
+	endTimes := response.ValueRanges[5].Values
+	breakDurations := response.ValueRanges[6].Values
+	netHours := response.ValueRanges[7].Values
+	if err = SharedConstants.All2DArraysSameLength(
+		&employeeIds,
+		&employeeNames,
+		&shiftTitles,
+		&dates,
+		&startTimes,
+		&endTimes,
+		&breakDurations,
+		&netHours); err != nil {
+		log.Printf("[ERROR] Trying to get schedule: %s", err.Error())
+		return &schedule{}, err
+	}
+	if len(employeeIds[0]) == 0 {
+		return &emptySchedule, nil
+	}
+
+	res := schedule{
+		EmployeeIds:    SharedConstants.DToStrArr(employeeIds[0]),
+		EmployeeNames:  SharedConstants.DToStrArr(employeeNames[0]),
+		ShiftTitles:    SharedConstants.DToStrArr(shiftTitles[0]),
+		Dates:          SharedConstants.DToStrArr(dates[0]),
+		StartTimes:     SharedConstants.DToStrArr(startTimes[0]),
+		EndTimes:       SharedConstants.DToStrArr(endTimes[0]),
+		BreakDurations: SharedConstants.DToStrArr(breakDurations[0]),
+		NetHours:       SharedConstants.DToStrArr(netHours[0]),
 	}
 	log.Printf("[DEBUG] Formatted schedule: %v", res)
-	return res, nil
+	return &res, nil
 }
 
 func (t *timesheet) getUpcomingSchedule() (*schedule, error) {
+	ranges := []string{
+		employeeIdsRange(scheduleUpcomingSheetName),
+		employeeNamesRange(scheduleUpcomingSheetName),
+		shiftNamesRange(scheduleUpcomingSheetName),
+		datesRange(scheduleUpcomingSheetName),
+		startTimesRange(scheduleUpcomingSheetName),
+		endTimesRange(scheduleUpcomingSheetName),
+		breakDurationsRange(scheduleUpcomingSheetName),
+		netHoursRange(scheduleUpcomingSheetName),
+	}
 	response, err := t.service.Spreadsheets.Values.
 		BatchGet(scheduleSheetId).
-		Ranges(
-			upcomingScheduleEmployeeIds,
-			upcomingScheduleShiftNames,
-			upcomingScheduleData,
-		).
-		MajorDimension("ROWS").
+		Ranges(ranges...).
+		MajorDimension("COLUMNS").
 		Do()
 	log.Printf("[DEBUG] Response from Google Sheets: %v", response)
 	if err != nil {
 		return &schedule{}, err
 	}
 
-	res := &schedule{
-		EmployeeIds: SharedConstants.DToStrArr(SharedConstants.Flatten(response.ValueRanges[0].Values)),
-		ShiftNames:  SharedConstants.DDToStrArr(response.ValueRanges[1].Values),
-		ShiftInfo:   SharedConstants.DDToStrArr(response.ValueRanges[2].Values),
+	if len(response.ValueRanges) != len(ranges) {
+		log.Printf("[ERROR] Trying to get schedule: expected %d value ranges while getting schedule, got %d", len(ranges), len(response.ValueRanges))
+		return &schedule{}, fmt.Errorf("expected %d value ranges while getting schedule, got %d", len(ranges), len(response.ValueRanges))
+	}
+
+	employeeIds := response.ValueRanges[0].Values
+	employeeNames := response.ValueRanges[1].Values
+	shiftTitles := response.ValueRanges[2].Values
+	dates := response.ValueRanges[3].Values
+	startTimes := response.ValueRanges[4].Values
+	endTimes := response.ValueRanges[5].Values
+	breakDurations := response.ValueRanges[6].Values
+	netHours := response.ValueRanges[7].Values
+	if err = SharedConstants.All2DArraysSameLength(
+		&employeeIds,
+		&employeeNames,
+		&shiftTitles,
+		&dates,
+		&startTimes,
+		&endTimes,
+		&breakDurations,
+		&netHours); err != nil {
+		log.Printf("[ERROR] Trying to get schedule: %s", err.Error())
+		return &schedule{}, err
+	}
+	if len(employeeIds) == 0 {
+		return &emptySchedule, nil
+	}
+
+	res := schedule{
+		EmployeeIds:    SharedConstants.DToStrArr(employeeIds[0]),
+		EmployeeNames:  SharedConstants.DToStrArr(employeeNames[0]),
+		ShiftTitles:    SharedConstants.DToStrArr(shiftTitles[0]),
+		Dates:          SharedConstants.DToStrArr(dates[0]),
+		StartTimes:     SharedConstants.DToStrArr(startTimes[0]),
+		EndTimes:       SharedConstants.DToStrArr(endTimes[0]),
+		BreakDurations: SharedConstants.DToStrArr(breakDurations[0]),
+		NetHours:       SharedConstants.DToStrArr(netHours[0]),
 	}
 	log.Printf("[DEBUG] Formatted schedule: %v", res)
-	return res, nil
+	return &res, nil
 }
 
 func (t *timesheet) getShifts(employeeId string, schedule *schedule) *Timesheet {
-	employeeShifts := []EmployeeShift{}
+	employeeShifts := []ExternalShift{}
 	for i, id := range schedule.EmployeeIds {
 		if id == employeeId {
-			netHours, err := strconv.ParseFloat(schedule.ShiftInfo[i][4], 64)
+			netHours, err := strconv.ParseFloat(schedule.NetHours[i], 64)
 			if err != nil {
-				log.Printf("[ERROR] Trying to parse nethours : %s", err.Error())
+				log.Printf("[ERROR] Trying to parse nethours: %s", err.Error())
 			}
-			employeeShifts = append(employeeShifts, EmployeeShift{
-				ShiftTitle:    schedule.ShiftNames[i][0],
-				Date:          schedule.ShiftInfo[i][0],
-				StartTime:     schedule.ShiftInfo[i][1],
-				EndTime:       schedule.ShiftInfo[i][2],
-				BreakDuration: schedule.ShiftInfo[i][3],
+			employeeShifts = append(employeeShifts, ExternalShift{
+				ShiftTitle:    schedule.ShiftTitles[i],
+				Date:          schedule.Dates[i],
+				StartTime:     schedule.StartTimes[i],
+				EndTime:       schedule.EndTimes[i],
+				BreakDuration: schedule.BreakDurations[i],
 				NetHours:      netHours,
 			})
 		}
@@ -210,21 +337,21 @@ func (t *timesheet) getShifts(employeeId string, schedule *schedule) *Timesheet 
 }
 
 func (t *timesheet) getShiftsByTimeRange(start time.Time, end time.Time, schedule *schedule) *Timesheet {
-	employeeShifts := []EmployeeShift{}
+	employeeShifts := []ExternalShift{}
 	for i, _ := range schedule.EmployeeIds {
-		shiftDate := TimeUtil.ConvertDateToTime(schedule.ShiftInfo[i][0], TimeUtil.ScheduleDateFormat)
+		shiftDate := TimeUtil.ConvertDateToTime(schedule.Dates[i], TimeUtil.ScheduleDateFormat)
 
 		if (start.Equal(shiftDate) || start.Before(shiftDate)) && (end.Equal(shiftDate) || end.After(shiftDate)) {
-			netHours, err := strconv.ParseFloat(schedule.ShiftInfo[i][4], 64)
+			netHours, err := strconv.ParseFloat(schedule.NetHours[i], 64)
 			if err != nil {
 				log.Printf("[ERROR] Trying to parse nethours : %s", err.Error())
 			}
-			employeeShifts = append(employeeShifts, EmployeeShift{
-				ShiftTitle:    schedule.ShiftNames[i][0],
-				Date:          schedule.ShiftInfo[i][0],
-				StartTime:     schedule.ShiftInfo[i][1],
-				EndTime:       schedule.ShiftInfo[i][2],
-				BreakDuration: schedule.ShiftInfo[i][3],
+			employeeShifts = append(employeeShifts, ExternalShift{
+				ShiftTitle:    schedule.ShiftTitles[i],
+				Date:          schedule.Dates[i],
+				StartTime:     schedule.StartTimes[i],
+				EndTime:       schedule.EndTimes[i],
+				BreakDuration: schedule.BreakDurations[i],
 				NetHours:      netHours,
 				EmployeeName:  schedule.EmployeeNames[i],
 			})
@@ -234,4 +361,46 @@ func (t *timesheet) getShiftsByTimeRange(start time.Time, end time.Time, schedul
 	return &Timesheet{
 		Shifts: employeeShifts,
 	}
+}
+
+func (t *timesheet) getNextRowNumForNewSchedule() (int, error) {
+	response, err := t.service.Spreadsheets.Values.
+		Get(scheduleSheetId, shiftNamesRange(scheduleSheetName)).
+		Do()
+	log.Printf("[DEBUG] Num rows from Google Sheets: %d", len(response.Values))
+	if err != nil {
+		return 0, err
+	}
+
+	return len(response.Values) + 2, nil // +1 since range starts at 2, +1 for the next row
+}
+
+func translateShiftsToGoogleSheets(shifts InternalShifts) *sheets.ValueRange {
+	var res = make([][]interface{}, len(shifts))
+	for i, shift := range shifts {
+		res[i] = []interface{}{
+			shift.ShiftTitle,
+			shift.Employee,
+			shift.Date.Format(TimeUtil.ScheduleDateFormat),
+			shift.StartTime,
+			shift.EndTime,
+			shift.BreakDuration,
+			shift.Designation,
+			shift.LastUpdated,
+		}
+	}
+
+	return &sheets.ValueRange{
+		Values: res,
+	}
+}
+
+func putScheduleRange(start int, numRows int) string {
+	return fmt.Sprintf(SharedConstants.GoogleSheetsRangeTemplate,
+		scheduleSheetName,
+		schedulePutColStart,
+		start,
+		schedulePutColEnd,
+		start+numRows,
+	)
 }

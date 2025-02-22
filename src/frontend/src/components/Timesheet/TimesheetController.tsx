@@ -1,15 +1,7 @@
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import { useContext, useState } from "react";
-import { toast } from "sonner";
+import { ReactElement, useContext, useState } from "react";
 import { AuthenticationContext } from "../AuthenticationContextProvider";
-import { ERROR_MESSAGES, TOAST } from "../common/constants";
 import { TimesheetData, useTimesheetData } from "./helpers/hooks";
 import { TimesheetWidget } from "./TimesheetWidget";
-
 
 const EMPTY_DATA: TimesheetData = { shifts: [] };
 
@@ -64,26 +56,6 @@ const TimesheetController = (): JSX.Element => {
   );
 };
 
-export const Timesheet = (): JSX.Element => {
-  const queryClient = new QueryClient({
-    queryCache: new QueryCache({
-      onError: (error) => {
-        console.error(`Error in Timesheet:\n${error}`);
-        let errMsg: string = ERROR_MESSAGES.UNKNOWN_ERROR;
-        if (error instanceof Error) {
-          errMsg = error.message;
-        }
-        toast.error(TOAST.HEADERS.ERROR, {
-          description: errMsg,
-          duration: TOAST.DURATIONS.ERROR,
-        });
-      },
-    }),
-  });
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TimesheetController />
-    </QueryClientProvider>
-  );
+export const Timesheet = (): ReactElement => {
+  return <TimesheetController />;
 };

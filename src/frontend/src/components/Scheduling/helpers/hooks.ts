@@ -1,38 +1,36 @@
 import { getSchedulingApiUrl } from "@/components/common/ApiUrlUtil";
-import { API_URLS, ERROR_MESSAGES } from "@/components/common/constants";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import { API_URLS, dateToFormatForUser, ERROR_MESSAGES } from "@/components/common/constants";
+import { DefinedUseQueryResult, useMutation, UseMutationResult, useQuery } from "@tanstack/react-query";
 
-interface ScheduleMetadata {
-  shiftTitles: string[];
-  shiftTimes: string[];
-  breakDurations: string[];
-}
-
-function isScheduleMetadata(data: unknown): data is ScheduleMetadata {
+function isSchedulingMetadata(data: unknown): data is SchedulingMetadataFromAPI {
+  if (
+    !(
+      data !== null &&
+      typeof data === "object" &&
+      "shiftTitles" in data &&
+      "shiftTimes" in data &&
+      "breakDurations" in data
+    )
+  ) {
+    return false;
+  }
   return (
-    data !== null &&
-    typeof data === "object" &&
-    "shiftTitles" in data &&
-    "shiftTimes" in data &&
-    "breakDurations" in data &&
     Array.isArray(data.shiftTitles) &&
     Array.isArray(data.shiftTimes) &&
-    Array.isArray(data.breakDurations)
+    Array.isArray(data.breakDurations) &&
+    data.shiftTitles.every((shiftTitle) => typeof shiftTitle === "string") &&
+    data.shiftTimes.every((shiftTime) => typeof shiftTime === "string") &&
+    data.breakDurations.every((breakDuration) => typeof breakDuration === "string")
   );
 }
 
-function isSchedulingData(data: unknown): data is SchedulingData {
+export function isSchedulingDataFromAPI(data: unknown): data is SchedulingDataFromAPI {
   if (
     data === null ||
     typeof data !== "object" ||
     !("availability" in data) ||
     !("metadata" in data) ||
-    !isScheduleMetadata(data.metadata) ||
+    !isSchedulingMetadata(data.metadata) ||
     !("showMonday" in data) ||
     typeof data.showMonday !== "boolean" ||
     !("disableUpdates" in data) ||
@@ -44,32 +42,74 @@ function isSchedulingData(data: unknown): data is SchedulingData {
   }
   data.startOfWeek = new Date(data.startOfWeek);
 
-  const availability = (data as SchedulingData).availability;
+  const availability = (data as SchedulingDataFromAPI).availability;
   if (typeof availability !== "object") {
     return false;
   }
 
   return Object.entries(availability).every(([key, value]) => {
-    return (
-      typeof key === "string" &&
-      Array.isArray(value) &&
-      value.every((item) => typeof item === "string")
-    );
+    return typeof key === "string" && Array.isArray(value) && value.every((item) => typeof item === "string");
   });
+}
+
+interface SchedulingMetadataFromAPI {
+  shiftTitles: string[];
+  shiftTimes: string[];
+  breakDurations: string[];
+}
+
+interface SchedulingDataFromAPI {
+  availability: { [key: string]: string[] };
+  metadata: SchedulingMetadataFromAPI;
+  showMonday: boolean;
+  disableUpdates: boolean;
+  startOfWeek: string;
+}
+
+interface SchedulingMetadata {
+  shiftTitles: Set<string>;
+  shiftTimes: string[];
+  breakDurations: string[];
 }
 
 export interface SchedulingData {
   availability: { [key: string]: string[] };
-  metadata: ScheduleMetadata;
+  metadata: SchedulingMetadata;
   showMonday: boolean;
   disableUpdates: boolean;
   startOfWeek: Date;
+  days: string[];
 }
 
-export function useSchedulingData(p: {
-  idToken: string;
-  queryKey: string[];
-}): UseQueryResult<SchedulingData, Error> {
+export function convertSchedulingDataFromAPI(data: SchedulingDataFromAPI): SchedulingData {
+  // we want to standardize the format of the strings to avoid indexing issues
+  const availability: { [key: string]: string[] } = {};
+  for (const [date, employees] of Object.entries(data.availability)) {
+    availability[dateToFormatForUser(new Date(date))] = employees;
+  }
+
+  const days: string[] = Object.keys(data.availability)
+    .map((day: string): Date => new Date(day))
+    .sort((a: Date, b: Date) => a.getTime() - b.getTime())
+    .map((date: Date): string => dateToFormatForUser(date));
+
+  return {
+    availability: availability,
+    metadata: {
+      shiftTitles: new Set(data.metadata.shiftTitles),
+      shiftTimes: data.metadata.shiftTimes,
+      breakDurations: data.metadata.breakDurations,
+    },
+    showMonday: data.showMonday,
+    disableUpdates: data.disableUpdates,
+    startOfWeek: new Date(data.startOfWeek),
+    days: days,
+  };
+}
+
+export const SCHEDULING_DATA_QUERY_KEY: string[] = ["scheduling"];
+
+export function useSchedulingData(p: { idToken: string }): DefinedUseQueryResult<SchedulingData, Error> {
   async function getSchedulingData(): Promise<SchedulingData> {
     const response = await fetch(getSchedulingApiUrl(), {
       headers: {
@@ -81,12 +121,10 @@ export function useSchedulingData(p: {
     switch (response.status) {
       case 200:
         const data = await response.json();
-        if (!isSchedulingData(data)) {
-          return Promise.reject(
-            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
-          );
+        if (!isSchedulingDataFromAPI(data)) {
+          return Promise.reject(new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT));
         }
-        return Promise.resolve(data);
+        return Promise.resolve(convertSchedulingDataFromAPI(data));
       case 404:
         return Promise.reject(new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND));
       default:
@@ -95,9 +133,20 @@ export function useSchedulingData(p: {
   }
 
   return useQuery({
-    queryKey: p.queryKey,
+    queryKey: SCHEDULING_DATA_QUERY_KEY,
     queryFn: getSchedulingData,
-    refetchOnMount: false,
+    initialData: {
+      availability: {},
+      metadata: {
+        shiftTitles: new Set<string>(),
+        shiftTimes: [],
+        breakDurations: [],
+      },
+      showMonday: false,
+      disableUpdates: false,
+      startOfWeek: new Date(),
+      days: [],
+    },
   });
 }
 
@@ -114,9 +163,7 @@ export function useUpdateSchedulingData(p: {
   onSuccess: (data: SchedulingData) => void;
   onError: (err: Error) => void;
 }): UseMutationResult<SchedulingData, Error, UpdateSchedulingRequest, unknown> {
-  async function updateSchedulingData(
-    p: UpdateSchedulingRequest,
-  ): Promise<SchedulingData> {
+  async function updateSchedulingData(p: UpdateSchedulingRequest): Promise<SchedulingData> {
     const response = await fetch(API_URLS.SCHEDULING, {
       headers: {
         Authorization: `Bearer ${p.idToken}`,
@@ -129,12 +176,10 @@ export function useUpdateSchedulingData(p: {
     switch (response.status) {
       case 200:
         const data = await response.json();
-        if (!isSchedulingData(data)) {
-          return Promise.reject(
-            new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT),
-          );
+        if (!isSchedulingDataFromAPI(data)) {
+          return Promise.reject(new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT));
         }
-        return Promise.resolve(data);
+        return Promise.resolve(convertSchedulingDataFromAPI(data));
       case 403:
         return Promise.reject(new Error(ERROR_MESSAGES.UPDATE_DISABLED));
       case 404:
