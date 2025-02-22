@@ -92,7 +92,7 @@ function NewScheduleController() {
   }
 
   const availableEmployees: string[] = schedulingData.availability[dateToFormatForUser(date)] || [];
-  const remainingAvailableEmployees: Set<string> = useMemo(() => {
+  const selectedEmployees: Set<string> = useMemo(() => {
     const formValues = form.getValues();
     return new Set(formValues.shifts?.map((row) => row.employee).filter(Boolean) || []);
   }, [watchedRows, date]);
@@ -106,7 +106,7 @@ function NewScheduleController() {
       control={form.control}
       fields={fields}
       availableEmployees={availableEmployees}
-      selectedEmployees={remainingAvailableEmployees}
+      selectedEmployees={selectedEmployees}
       shiftTitles={Array.from(schedulingData.metadata.shiftTitles)}
       shiftTimes={schedulingData.metadata.shiftTimes}
       breakDurations={schedulingData.metadata.breakDurations}
@@ -122,7 +122,14 @@ function NewScheduleController() {
       useWWTemplate={useWWTemplate}
       open={open}
       onOpenChange={onOpenChange}
-      availabilityTable={<AvailableEmployeesTable isLoading={isFetching} schedulingData={schedulingData} />}
+      availabilityTable={
+        <AvailableEmployeesTable
+          isLoading={isFetching}
+          schedulingData={schedulingData}
+          selectedEmployees={selectedEmployees}
+          schedulingForDate={dateToFormatForUser(date)}
+        />
+      }
     />
   );
 }
