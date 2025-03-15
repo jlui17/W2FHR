@@ -4,10 +4,10 @@ import exportUsers
 import google_sheets
 import cognito
 
-sheetsUsers = set(google_sheets.get_employee_ids)
+sheetsUsers = set(google_sheets.get_employee_ids())
 sheetsUsers.remove("#N/A")
 
-cognitoUsers = exportUsers.list_users()
+cognitoUsers = cognito.get_users()
 
 oldUsers = []
 for cu in cognitoUsers:
