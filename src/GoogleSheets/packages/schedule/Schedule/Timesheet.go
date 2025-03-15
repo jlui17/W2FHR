@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	scheduleSheetId           = "1qZKKoJNXHuo8pymDbGZuBV8WxD6tkgeKnao_H0OfrPk"
+	scheduleSheetId           = "1lg5jhrFZZh4GgCTdyyqEXaRp6_OAJdt6e1sVkVi8sdU"
 	rangeTemplate             = "%s!%s2:%s"
 	scheduleUpcomingSheetName = "Upcoming Shifts"
 	scheduleSheetName         = "Main Schedule"
