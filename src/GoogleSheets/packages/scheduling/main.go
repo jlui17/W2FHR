@@ -39,8 +39,8 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	if !cognitoGroupAuthorizer.IsAuthorized(employeeInfo.Group) {
-		log.Printf("[ERROR] Scheduling - user %s is not authorized to perform scheduling actions.", employeeInfo.Email)
+	if !cognitoGroupAuthorizer.IsAuthorizedForScheduling(&employeeInfo) {
+		log.Printf("[ERROR] Scheduling - user %s (%s) is not authorized to perform scheduling actions.", employeeInfo.Email, employeeInfo.Id)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 403,
 			Headers:    SharedConstants.ALLOW_ORIGINS_HEADER,
