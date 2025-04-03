@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 var (
@@ -39,10 +40,14 @@ func ErrUnauthorized(msg string) error {
 	return errors.New("Unauthorized: " + msg)
 }
 
+func normalizeString(s string) string {
+	return strings.Join(strings.Fields(s), " ")
+}
+
 func DToStrArr(arr []interface{}) []string {
 	converted := make([]string, len(arr))
 	for i, v := range arr {
-		converted[i] = v.(string)
+		converted[i] = normalizeString(v.(string))
 	}
 	return converted
 }

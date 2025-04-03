@@ -63,7 +63,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			}, nil
 		}
 
-		log.Printf("[INFO] Found from %s to %s for %s: %v", start, end, employeeInfo.Id, schedule)
+		log.Printf("[INFO] Schedule from %s to %s: %v", start, end, schedule)
 	} else {
 		getUpcomingShifts, getUpcomingShiftsExists := event.QueryStringParameters["upcoming"]
 		shouldGetUpcoming := getUpcomingShiftsExists && getUpcomingShifts == "true"

@@ -11,13 +11,24 @@ const (
 	ApiDateFormat      string = time.DateOnly
 )
 
-func ConvertDateToTime(date string, dateFormat string) time.Time {
-	vancouverTime, err := time.LoadLocation(vancouverTimeZone)
+var (
+	vancouverTime *time.Location
+)
+
+func initVancouverTime() {
+	localTime, err := time.LoadLocation(vancouverTimeZone)
 	if err != nil {
 		log.Printf("[ERROR] Couldn't load location for time zone: %s", err.Error())
 		panic(err)
 	}
+	vancouverTime = localTime
+}
 
-	t, _ := time.ParseInLocation(dateFormat, date, vancouverTime)
+func ConvertDateToTime(date string, format string) time.Time {
+	if vancouverTime == nil {
+		initVancouverTime()
+	}
+
+	t, _ := time.ParseInLocation(format, date, vancouverTime)
 	return t
 }

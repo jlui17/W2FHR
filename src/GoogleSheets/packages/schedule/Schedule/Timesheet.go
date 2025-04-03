@@ -341,7 +341,9 @@ func (t *timesheet) getShiftsByTimeRange(start time.Time, end time.Time, schedul
 	for i, _ := range schedule.EmployeeIds {
 		shiftDate := TimeUtil.ConvertDateToTime(schedule.Dates[i], TimeUtil.ScheduleDateFormat)
 
-		if (start.Equal(shiftDate) || start.Before(shiftDate)) && (end.Equal(shiftDate) || end.After(shiftDate)) {
+		include := (start.Equal(shiftDate) || start.Before(shiftDate)) && (end.Equal(shiftDate) || end.After(shiftDate))
+		log.Printf("[DEBUG] Start: %s, End: %s, ShiftDate: %s, ShouldInclude?: %t", start, end, shiftDate, include)
+		if include {
 			netHours, err := strconv.ParseFloat(schedule.NetHours[i], 64)
 			if err != nil {
 				log.Printf("[ERROR] Trying to parse nethours : %s", err.Error())

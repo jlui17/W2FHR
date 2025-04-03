@@ -47,8 +47,9 @@ func GetByTimeRange(start string, end string) (*Timesheet, error) {
 	}
 
 	startAsDate, endAsDate, err := getStartAndEndDates(start, end)
+	log.Printf("[DEBUG] StartDate: %s, EndDate: %s", startAsDate, endAsDate)
 	if err != nil {
-		log.Printf("[DEBUG] Invalid time range: %s", err.Error())
+		log.Printf("[ERROR] Invalid time range: %s", err.Error())
 		return &Timesheet{}, nil
 	}
 
@@ -66,6 +67,7 @@ func getStartAndEndDates(start string, end string) (time.Time, time.Time, error)
 	endAsDate := TimeUtil.ConvertDateToTime(end, TimeUtil.ApiDateFormat)
 
 	if startAsDate.After(endAsDate) {
+		log.Printf("[ERROR] Start date (%s) cannot be after end date (%s)", start, end)
 		return time.Time{}, time.Time{}, errors.New(fmt.Sprintf("start date (%s) cannot be after end date (%s)", start, end))
 	}
 
