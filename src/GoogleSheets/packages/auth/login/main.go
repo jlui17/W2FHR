@@ -1,6 +1,7 @@
 package LoginEmployee
 
 import (
+	CognitoGroupAuthorizer "GoogleSheets/packages/common"
 	SharedConstants "GoogleSheets/packages/common/Constants"
 	"GoogleSheets/packages/common/Constants/AuthConstants"
 	EmployeeInfo "GoogleSheets/packages/common/Utilities"
@@ -27,6 +28,10 @@ const (
 	scheduling     string = "scheduling"
 )
 
+var (
+	cognitoGroupAuthorizer = CognitoGroupAuthorizer.New(SharedConstants.ManagerUserGroup)
+)
+
 type AuthSession struct {
 	IdToken      string   `json:"idToken"`
 	RefreshToken string   `json:"refreshToken"`
@@ -39,11 +44,13 @@ func getFeaturesForUser(idToken string) ([]string, error) {
 		return []string{}, err
 	}
 
+	if cognitoGroupAuthorizer.IsAuthorizedForScheduling(&employeeInfo) && !cognitoGroupAuthorizer.IsAuthorized(employeeInfo.Group) {
+		return []string{availability, upcomingShifts, shiftHistory, schedule, scheduling}, nil
+	}
+
 	switch employeeInfo.Group {
-	case SharedConstants.AttendantUserGroup:
-		return []string{availability, upcomingShifts, shiftHistory}, nil
 	case SharedConstants.SupervisorUserGroup:
-		return []string{availability, upcomingShifts, shiftHistory}, nil
+		return []string{availability, upcomingShifts, shiftHistory, schedule}, nil
 	case SharedConstants.ManagerUserGroup:
 		return []string{availability, upcomingShifts, shiftHistory, schedule, scheduling}, nil
 	default: // default to attendant
