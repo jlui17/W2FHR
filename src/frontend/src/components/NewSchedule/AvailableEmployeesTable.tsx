@@ -12,7 +12,12 @@ export function AvailableEmployeesTable(p: {
     return <p>...</p>;
   }
 
-  const numRows = Math.max(...Object.values(p.schedulingData.availability).map((day: string[]): number => day.length));
+  const numRows = Math.max(
+    ...Object.values(p.schedulingData.availability).map((day: string[] | null): number =>
+      day === null ? 0 : day.length,
+    ),
+  );
+
   return (
     <Table>
       <TableHeader>
@@ -26,6 +31,10 @@ export function AvailableEmployeesTable(p: {
         {[...Array(numRows)].map((_, i) => (
           <TableRow key={i}>
             {p.schedulingData.days.map((day) => {
+              if (p.schedulingData.availability[day] === null) {
+                return <TableCell key={day}>-</TableCell>;
+              }
+
               const employee: string = p.schedulingData.availability[day][i] || "";
               if (day === p.schedulingForDate && p.selectedEmployees.has(p.schedulingData.availability[day][i])) {
                 return (

@@ -48,7 +48,10 @@ export function isSchedulingDataFromAPI(data: unknown): data is SchedulingDataFr
   }
 
   return Object.entries(availability).every(([key, value]) => {
-    return typeof key === "string" && Array.isArray(value) && value.every((item) => typeof item === "string");
+    return (
+      typeof key === "string" &&
+      (value === null || (Array.isArray(value) && value.every((item) => typeof item === "string")))
+    );
   });
 }
 
