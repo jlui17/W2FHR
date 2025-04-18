@@ -1,13 +1,13 @@
 import { jwtDecode } from "jwt-decode";
 import { createContext, ReactNode } from "react";
-import {
-  AuthSession,
-  isAuthSession,
-} from "./Authentication/helpers/authentication";
+import { AuthSession, isAuthSession } from "./Authentication/helpers/authentication";
 
 interface AuthenticationContextProviderProps {
   children: ReactNode;
 }
+
+const KEY_LOGGED_OUT_BY_ADMIN: string = "LOGGED_OUT_BY_ADMIN";
+const ADMIN_LOGOUT_DATE: Date = new Date("2025-04-17");
 
 const getInitialAuthenticationContext = (): {
   getAuthSession: () => AuthSession | null;
@@ -29,13 +29,12 @@ const getInitialAuthenticationContext = (): {
   };
 };
 
-export const AuthenticationContext = createContext(
-  getInitialAuthenticationContext(),
-);
+export const AuthenticationContext = createContext(getInitialAuthenticationContext());
 
 interface IdToken {
   exp: number;
 }
+
 function idTokenIsExpired(idToken: string | undefined): boolean {
   if (idToken === undefined) {
     return true;
@@ -50,9 +49,7 @@ function idTokenIsExpired(idToken: string | undefined): boolean {
   }
 }
 
-export const AuthenticationContextProvider = ({
-  children,
-}: AuthenticationContextProviderProps) => {
+export const AuthenticationContextProvider = ({ children }: AuthenticationContextProviderProps) => {
   function saveAuthSession(newSess: AuthSession): void {
     let sess: AuthSession | null = getAuthSession();
     if (sess == null) {
@@ -71,6 +68,7 @@ export const AuthenticationContextProvider = ({
     if (savedAuthSession == null) {
       return null;
     }
+    logoutIfNecessary();
 
     const authSession: unknown = JSON.parse(savedAuthSession);
     if (!isAuthSession(authSession)) {
@@ -83,6 +81,21 @@ export const AuthenticationContextProvider = ({
   function isLoggedIn(): boolean {
     const authSession: AuthSession | null = getAuthSession();
     return authSession !== null && !idTokenIsExpired(authSession.idToken);
+  }
+
+  // Log out user from frontend
+  function logoutIfNecessary(): void {
+    const hasBeenLoggedOutByAdmin: string | null = localStorage.getItem(KEY_LOGGED_OUT_BY_ADMIN);
+    if (hasBeenLoggedOutByAdmin !== null && hasBeenLoggedOutByAdmin === "true") {
+      return;
+    }
+
+    const now: Date = new Date();
+    if (now >= ADMIN_LOGOUT_DATE) {
+      localStorage.setItem(KEY_LOGGED_OUT_BY_ADMIN, "true");
+      logout();
+      window.location.reload();
+    }
   }
 
   function logout(): void {
