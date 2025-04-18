@@ -5,13 +5,13 @@ from botocore.exceptions import ClientError
 import json
 import os
 
-STAFF_LIST_SHEET_ID = "1kwvcsbcyHA5x__RoXzo1a-4b1zURwwCUuahCgNUtAJ8"
+STAFF_LIST_SHEET_ID = "1lg5jhrFZZh4GgCTdyyqEXaRp6_OAJdt6e1sVkVi8sdU"
 STAFF_LIST_EMPLOYEE_ID_RANGE = "'Total Staff'!A2:A"
 STAFF_LIST_EMAIL_RANGE = "'Total Staff'!G2:G"
 STAFF_LIST_POSITION_RANGE = "'Total Staff'!J2:J"
 
-SCHEDULE_SHEET_ID = "13opuSCYugK7dKPF6iMl8iy1u2grKO_v7HHesHONN20w"
-SCHEDULE_AVAILABILITY_EMPLOYEE_ID_RANGE = "Availability!A1:A"
+SCHEDULE_SHEET_ID = "1aD4gOklV79zj6ctsOH8N6mUB0cE-Nz5F_ZCh1Mww8zI"
+SCHEDULE_AVAILABILITY_EMPLOYEE_ID_RANGE = "Availability!A3:A"
 
 GOOGLE_SHEETS_SECRET_FILE_NAME = "google-sheets-secret.txt"
 client = None
@@ -108,7 +108,7 @@ def get_emails_to_positions_map():
         res[emails[i]] = positions[i]
     return res
 
-def get_availability_employee_ids_col():
+def get_availability_employee_ids():
     result = (
         client.values()
         .get(spreadsheetId=SCHEDULE_SHEET_ID, range=SCHEDULE_AVAILABILITY_EMPLOYEE_ID_RANGE, majorDimension="COLUMNS")
