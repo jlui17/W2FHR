@@ -80,7 +80,10 @@ const NewScheduleSchema = z.object({
 });
 export type NewScheduleSchemaFormData = z.infer<typeof NewScheduleSchema>;
 
-export function getGamesTemplate(): NewScheduleSchemaFormData {
+export function getGamesTemplate(startTime: string, endTime: string, shiftTimes: string[]): NewScheduleSchemaFormData {
+  const earlierStartTimeIndex: number = Math.max(0, shiftTimes.indexOf(startTime) - 3);
+  const earlierStartTime: string = shiftTimes[earlierStartTimeIndex];
+
   return {
     shifts: [
       ...Array.from(
@@ -111,10 +114,12 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
           "17. Pool",
           "18. Stick Catcher",
           "18. Stick Catcher",
-          "19. Bowler Roller",
+          "19. Strong Man",
           "20. Tubs",
           "21. Water Racer",
           "22. Bar Hang",
+          "23. Hoop Toss",
+          "23. Hoop Toss",
           "Games Supervisor",
           "Games Supervisor",
           "Games Supervisor",
@@ -123,22 +128,16 @@ export function getGamesTemplate(): NewScheduleSchemaFormData {
           "General Manager",
           "Operations Manager",
         ].map((shiftTitle): ShiftSchemaFormData => {
+          let actualStartTime: string = startTime;
           if (shiftTitle.endsWith("Supervisor") || shiftTitle.endsWith("Manager")) {
-            return {
-              employee: "",
-              shiftTitle: shiftTitle,
-              startTime: "6:00 pm",
-              endTime: "12:15 am",
-              breakDuration: "00:30:00",
-              designation: "Games",
-            };
+            actualStartTime = earlierStartTime;
           }
 
           return {
             employee: "",
             shiftTitle: shiftTitle,
-            startTime: "6:45 pm",
-            endTime: "12:15 am",
+            startTime: actualStartTime,
+            endTime: endTime,
             breakDuration: "00:30:00",
             designation: "Games",
           };
@@ -163,7 +162,10 @@ export function getBlankTemplate(): NewScheduleSchemaFormData {
   };
 }
 
-export function getWWTemplate(): NewScheduleSchemaFormData {
+export function getWWTemplate(startTime: string, endTime: string, shiftTimes: string[]): NewScheduleSchemaFormData {
+  const laterStartTimeIndex: number = Math.min(shiftTimes.length - 1, shiftTimes.indexOf(startTime) + 3);
+  const laterStartTime: string = shiftTimes[laterStartTimeIndex];
+
   return {
     shifts: [
       ...Array.from(
@@ -175,22 +177,16 @@ export function getWWTemplate(): NewScheduleSchemaFormData {
           "Water Walkers Supervisor",
           "Water Walkers Supervisor",
         ].map((shiftTitle): ShiftSchemaFormData => {
+          let actualStartTime: string = startTime;
           if (shiftTitle.endsWith("Breaker")) {
-            return {
-              employee: "",
-              shiftTitle,
-              startTime: "7:30 pm",
-              endTime: "12:15 am",
-              breakDuration: "00:00:00",
-              designation: "Water Walkers",
-            };
+            actualStartTime = laterStartTime;
           }
 
           return {
             employee: "",
             shiftTitle,
-            startTime: "6:45 pm",
-            endTime: "12:15 am",
+            startTime: actualStartTime,
+            endTime: endTime,
             breakDuration: "00:30:00",
             designation: "Water Walkers",
           };

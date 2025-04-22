@@ -22,6 +22,8 @@ function NewScheduleController() {
   const { getAuthSession } = useContext(AuthenticationContext);
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
+  const [startTime, setStartTime] = useState<string>("6:45 pm");
+  const [endTime, setEndTime] = useState<string>("12:15 am");
   const { isFetching, data: schedulingData } = useSchedulingData({
     idToken: getAuthSession()?.idToken || "",
   });
@@ -80,15 +82,45 @@ function NewScheduleController() {
   }
 
   function useGamesTemplate(): void {
-    form.setValue("shifts", getGamesTemplate().shifts);
+    form.setValue("shifts", getGamesTemplate(startTime, endTime, schedulingData.metadata.shiftTimes).shifts);
   }
 
   function useWWTemplate(): void {
-    form.setValue("shifts", getWWTemplate().shifts);
+    form.setValue("shifts", getWWTemplate(startTime, endTime, schedulingData.metadata.shiftTimes).shifts);
   }
 
   function onOpenChange(): void {
     setOpen(!open);
+  }
+
+  function onChangeStartTime(newStartTime: string): void {
+    setStartTime(newStartTime);
+    const currentFormData: NewScheduleSchemaFormData = form.getValues();
+
+    form.setValue(
+      "shifts",
+      currentFormData.shifts.map((shift) => {
+        return {
+          ...shift,
+          startTime: newStartTime,
+        };
+      }),
+    );
+  }
+
+  function onChangeEndTime(newEndTime: string): void {
+    setEndTime(newEndTime);
+    const currentFormData: NewScheduleSchemaFormData = form.getValues();
+
+    form.setValue(
+      "shifts",
+      currentFormData.shifts.map((shift) => {
+        return {
+          ...shift,
+          endTime: newEndTime,
+        };
+      }),
+    );
   }
 
   const availableEmployees: string[] = schedulingData.availability[dateToFormatForUser(date)] || [];
@@ -130,6 +162,10 @@ function NewScheduleController() {
           schedulingForDate={dateToFormatForUser(date)}
         />
       }
+      onChangeStartTime={onChangeStartTime}
+      onChangeEndTime={onChangeEndTime}
+      startTime={startTime}
+      endTime={endTime}
     />
   );
 }

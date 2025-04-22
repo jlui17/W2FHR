@@ -14,6 +14,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { dateToFormatForUser } from "@/components/common/constants";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { NewScheduleSchemaFormData } from "@/components/NewSchedule/helpers/hooks";
 
 interface NewScheduleFormProps {
   control: Control<any>;
@@ -36,6 +37,10 @@ interface NewScheduleFormProps {
   open: boolean;
   onOpenChange: () => void;
   availabilityTable: ReactElement;
+  onChangeStartTime: (time: string) => void;
+  onChangeEndTime: (time: string) => void;
+  startTime: string;
+  endTime: string;
 }
 
 function onSelectEmployee(
@@ -103,6 +108,10 @@ export function NewScheduleForm(p: NewScheduleFormProps) {
                       />
                     </PopoverContent>
                   </Popover>
+                  <p className="font-normal text-sm">Start Time: </p>
+                  <Combobox value={p.startTime} values={p.shiftTimes} onChange={p.onChangeStartTime} name="Start Time" />
+                  <p className="font-normal text-sm">End Time: </p>
+                  <Combobox className="mr-6" value={p.endTime} values={p.shiftTimes} onChange={p.onChangeEndTime} name="End Time" />
                   <Button
                     className="font-normal"
                     variant="outline"
@@ -260,7 +269,7 @@ export function NewScheduleForm(p: NewScheduleFormProps) {
                     {p.isSubmitting ? "Submitting..." : "Submit"}
                   </Button>
                 </div>
-                <h1 className="font-bold text-2xl mb-4">Available Employees</h1>
+                <h1 className="mb-4 text-2xl font-bold">Available Employees</h1>
                 {p.availabilityTable}
               </CardFooter>
             </CollapsibleContent>
