@@ -44,7 +44,7 @@ export const Dashboard = () => {
           {hasAccessToFeature("scheduling") && <Scheduling />}
           {!hasAccessToFeature("scheduling") &&
             hasAccessToFeature("schedule") && <Schedule />}
-          <NewSchedule />
+          {hasAccessToFeature("scheduling") && <NewSchedule />}
         </QueryClientProvider>
       </div>
     </div>
