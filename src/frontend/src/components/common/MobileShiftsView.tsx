@@ -7,8 +7,10 @@ export default function MobileShiftsView(p: {
   shifts: Shift[];
   isLoading: boolean;
   noShiftsMessage: string;
+  showName?: boolean;
 }): ReactElement {
   const hasShifts: boolean = p.shifts.length > 0;
+  const shouldShowName: boolean = p.showName !== undefined && p.showName;
   return p.isLoading ? (
     <div className="flex justify-center">
       <Loader2 className="h-16 w-16 animate-spin" />
@@ -29,6 +31,7 @@ export default function MobileShiftsView(p: {
             <i>
               <p className="text-md">{shift.shiftTitle}</p>
             </i>
+            {shouldShowName && <u><p className="text-md">{shift.employeeName}</p></u>}
             <p className="text-sm text-gray-600">
               Start Time: {shift.startTime}
             </p>

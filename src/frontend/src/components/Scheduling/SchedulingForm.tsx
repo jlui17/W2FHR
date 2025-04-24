@@ -210,6 +210,7 @@ export function SchedulingForm(p: SchedulingWidgetProps): ReactElement {
                     shifts={p.shifts}
                     isLoading={p.isLoading}
                     noShiftsMessage={NO_SHIFTS_MESSAGE}
+                    showName={true}
                   />
                 )}
               </CardContent>
