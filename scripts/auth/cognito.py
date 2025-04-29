@@ -25,3 +25,11 @@ def get_users():
     except ClientError as err:
         print("Error: " + err)
         raise
+
+def delete_user(email: str):
+    try:
+        client.admin_delete_user(
+            UserPoolId=USER_POOL_ID, Username=email)
+        print(f"[SUCCESS] DeleteUser - {email}\n")
+    except Exception as e:
+        print(f"\n[ERROR] DeleteUser - {email} {e}\n")
