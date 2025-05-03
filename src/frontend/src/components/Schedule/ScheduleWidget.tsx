@@ -141,6 +141,7 @@ export function ScheduleWidget(p: ScheduleWidgetProps): ReactElement {
                 shifts={p.shifts}
                 isLoading={p.isLoading}
                 noShiftsMessage={NO_SHIFTS_MESSAGE}
+                showName
               />
             )}
           </CardContent>
