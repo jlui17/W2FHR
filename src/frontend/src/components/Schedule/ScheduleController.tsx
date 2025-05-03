@@ -38,7 +38,7 @@ export function convertToShifts(data: ScheduleData): Shift[] {
   });
 }
 
-function ScheduleController(): ReactElement {
+function ScheduleController(p: { noCollapsible: boolean }): ReactElement {
   const { getAuthSession } = useContext(AuthenticationContext);
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -94,6 +94,7 @@ function ScheduleController(): ReactElement {
         onSetEndDate={onSetEndDate}
         shifts={EMPTY_DATA}
         onSortChange={onSortChange}
+        noCollapsible={p.noCollapsible}
       />
     );
   }
@@ -109,10 +110,11 @@ function ScheduleController(): ReactElement {
       onSetEndDate={onSetEndDate}
       shifts={convertToShifts(scheduleData)}
       onSortChange={onSortChange}
+      noCollapsible={p.noCollapsible}
     />
   );
 }
 
-export function Schedule(): ReactElement {
-  return <ScheduleController />;
+export function Schedule(p: { noCollapsible?: boolean }): ReactElement {
+  return <ScheduleController noCollapsible={p.noCollapsible || false} />;
 }
