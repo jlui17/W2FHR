@@ -71,8 +71,11 @@ export const TOAST = {
   },
 } as const;
 
+const LOCAL_TIMEZONE: string = "America/Los_Angeles";
+
 export function dateToFormatForUser(date: Date): string {
   return date.toLocaleDateString("en-US", {
+    timeZone: LOCAL_TIMEZONE,
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -81,5 +84,13 @@ export function dateToFormatForUser(date: Date): string {
 }
 
 export function dateToFormatForApi(date: Date): string {
-  return date.toISOString().split("T")[0];
+  // Convert to PST timezone using native JS
+  const pstDate = new Date(date.toLocaleString("en-US", { timeZone: LOCAL_TIMEZONE }));
+  
+  // Format the PST date to YYYY-MM-DD
+  const year = pstDate.getFullYear();
+  const month = String(pstDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(pstDate.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
 }
