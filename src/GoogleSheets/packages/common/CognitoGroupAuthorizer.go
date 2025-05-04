@@ -32,7 +32,7 @@ func New(group string) *cognitoGroupAuthorizer {
 
 func (c *cognitoGroupAuthorizer) IsAuthorized(group string) bool {
 	authorizedLevel := convertGroupToLevel(group)
-	log.Printf("[INFO] Checking group (%s) and level (%d) against authorizer level %d", group, authorizedLevel, c.level)
+	log.Printf("[INFO] Checking group (%s), level (%d) against authorizer level %d", group, authorizedLevel, c.level)
 	return authorizedLevel >= c.level
 }
 
@@ -41,6 +41,7 @@ func (c *cognitoGroupAuthorizer) IsAuthorizedForScheduling(employee *EmployeeInf
 }
 
 func convertGroupToLevel(group string) int {
+	log.Printf("JUSLUI - %s", SharedConstants.ManagerUserGroup)
 	switch group {
 	case SharedConstants.SupervisorUserGroup:
 		return 2

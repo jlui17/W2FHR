@@ -3,7 +3,7 @@ package Scheduling
 import (
 	Availability "GoogleSheets/packages/availability/handlers"
 	"GoogleSheets/packages/common/TimeUtil"
-	"GoogleSheets/packages/schedule/Schedule"
+	Schedule "GoogleSheets/packages/schedule/handlers"
 	"log"
 )
 

@@ -2,7 +2,7 @@ package Scheduling
 
 import (
 	Availability "GoogleSheets/packages/availability/handlers"
-	"GoogleSheets/packages/schedule/Schedule"
+	Schedule "GoogleSheets/packages/schedule/handlers"
 	"fmt"
 	"regexp"
 )

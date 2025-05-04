@@ -1,4 +1,7 @@
-const BASE_URL = "https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1";
+// Determine which API endpoint to use based on environment
+const BASE_URL = import.meta.env.MODE === "development" 
+  ? "http://localhost:8080"
+  : "https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1";
 export const API_URLS = {
   TIMESHEET: `${BASE_URL}/timesheet`,
   AVAILABILITY: `${BASE_URL}/availability`,

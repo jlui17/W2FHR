@@ -2,7 +2,7 @@ package Scheduling
 
 import (
 	"GoogleSheets/packages/common/TimeUtil"
-	"GoogleSheets/packages/schedule/Schedule"
+	Schedule "GoogleSheets/packages/schedule/handlers"
 	"log"
 	"sort"
 	"time"

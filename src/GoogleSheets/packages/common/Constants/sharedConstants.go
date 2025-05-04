@@ -31,9 +31,9 @@ var (
 	ErrInvalidMethod    = errors.New("Invalid method.")
 	ErrInvalidRequest   = errors.New("Invalid request.")
 
-	AttendantUserGroup  = os.Getenv(COGNITO_ATTENDANTS_GROUP_ENV_KEY)
-	SupervisorUserGroup = os.Getenv(COGNITO_SUPERVISORS_GROUP_ENV_KEY)
-	ManagerUserGroup    = os.Getenv(COGNITO_MANAGERS_GROUP_ENV_KEY)
+	AttendantUserGroup  string = os.Getenv(COGNITO_ATTENDANTS_GROUP_ENV_KEY)
+	SupervisorUserGroup string = os.Getenv(COGNITO_SUPERVISORS_GROUP_ENV_KEY)
+	ManagerUserGroup    string = os.Getenv(COGNITO_MANAGERS_GROUP_ENV_KEY)
 )
 
 func ErrUnauthorized(msg string) error {
