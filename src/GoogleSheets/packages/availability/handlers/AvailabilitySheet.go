@@ -7,10 +7,11 @@ import (
 	EmployeeInfo "GoogleSheets/packages/common/Utilities"
 	"errors"
 	"fmt"
-	"google.golang.org/api/sheets/v4"
 	"log"
 	"sort"
 	"time"
+
+	"google.golang.org/api/sheets/v4"
 )
 
 const (
@@ -25,6 +26,7 @@ var (
 	availabilityDates         = fmt.Sprintf("'%s'!E2:H2", availabilitySheetName)
 	availabilityEmployeeIds   = fmt.Sprintf("'%s'!A3:A", availabilitySheetName)
 	availabilityData          = fmt.Sprintf("'%s'!D3:H", availabilitySheetName)
+	availabilityPositionsCol  = fmt.Sprintf("'%s'!C3:C", availabilitySheetName)
 	availabilityShowMonday    = fmt.Sprintf("'%s'!I3", availabilitySheetName)
 	availabilityStartOfWeek   = fmt.Sprintf("'%s'!E2", availabilitySheetName)
 
@@ -166,6 +168,7 @@ func (a *availabilitySheet) GetAvailabilityForTheWeek() (AvailabilityForTheWeek,
 		Ranges(
 			availabilityDates,
 			availabilityData,
+			availabilityPositionsCol,
 		).
 		MajorDimension("ROWS").
 		Do()
@@ -173,36 +176,42 @@ func (a *availabilitySheet) GetAvailabilityForTheWeek() (AvailabilityForTheWeek,
 		return AvailabilityForTheWeek{}, err
 	}
 
-	rawDates := res.ValueRanges[0].Values[0]
-	log.Printf("[DEBUG] Dates from google sheets: %v", rawDates)
-	rawAvailability := res.ValueRanges[1].Values
-	log.Printf("[DEBUG] Availability data from google sheets: %v", rawAvailability)
+	dates := SharedConstants.DToStrArr(res.ValueRanges[0].Values[0])
+	log.Printf("[DEBUG] Dates from google sheets: %v", dates)
+	employeeNamesAndAvailability := SharedConstants.DDToStrArr(res.ValueRanges[1].Values)
+	log.Printf("[DEBUG] Availability data from google sheets: %v", employeeNamesAndAvailability)
+	positions := SharedConstants.DToStrArr(SharedConstants.Flatten(res.ValueRanges[2].Values))
+	log.Printf("[DEBUG] Positions from google sheets: %v", positions)
 
-	return createAvailabilityForTheWeek(SharedConstants.DToStrArr(rawDates), getEmployeesAvailablePerDay(SharedConstants.DDToStrArr(rawAvailability))), nil
+	return createAvailabilityForTheWeek(
+		dates,
+		getEmployeesAvailablePerDay(employeeNamesAndAvailability, positions)), nil
 }
 
-func createAvailabilityForTheWeek(dates []string, employeesAvailablePerDay [][]string) AvailabilityForTheWeek {
+func createAvailabilityForTheWeek(dates []string, employeesAvailablePerDay *[]AvailabileEmployees) AvailabilityForTheWeek {
 	res := AvailabilityForTheWeek{}
-	for i, _ := range dates {
-		sort.Strings(employeesAvailablePerDay[i])
-		res[dates[i]] = employeesAvailablePerDay[i]
+	for i := range dates {
+		sort.Sort((*employeesAvailablePerDay)[i])
+		res[dates[i]] = (*employeesAvailablePerDay)[i]
 	}
 
 	return res
 }
 
-func getEmployeesAvailablePerDay(availability [][]string) [][]string {
-	var res = make([][]string, 4)
+func getEmployeesAvailablePerDay(availability [][]string, positions []string) *[]AvailabileEmployees {
+	var res = make([]AvailabileEmployees, 4)
 
-	for i, _ := range availability {
-		for d := 1; d < 5; d++ {
-			if availability[i][d] == "TRUE" {
-				res[d-1] = append(res[d-1], availability[i][0])
+	for row := range availability {
+		for day := 1; day < 5; day++ {
+			if availability[row][day] == "TRUE" {
+				employeeName := availability[row][0]
+				position := positions[row]
+				res[day-1] = append(res[day-1], AvailabileEmployee{Name: employeeName, Position: position})
 			}
 		}
 	}
 
-	return res
+	return &res
 }
 
 func (a *availabilitySheet) GetStartOfWeek() (time.Time, error) {

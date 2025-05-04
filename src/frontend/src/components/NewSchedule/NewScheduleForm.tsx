@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
 import { Control, Controller, FieldArrayWithId, UseFieldArrayRemove } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,14 @@ import { Combobox } from "@/components/ui/combobox";
 import { dateToFormatForUser } from "@/components/common/constants";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { NewScheduleSchemaFormData } from "@/components/NewSchedule/helpers/hooks";
+import { AvailableEmployee } from "../Scheduling/helpers/hooks";
 
 interface NewScheduleFormProps {
   control: Control<any>;
   fields: FieldArrayWithId[];
-  availableEmployees: string[];
-  selectedEmployees: Set<string>;
+  availableEmployees: AvailableEmployee[];
+  availableEmployeeNames: string[];
+  selectedAvailableEmployeeNames: Set<string>;
   shiftTitles: string[];
   shiftTimes: string[];
   breakDurations: string[];
@@ -172,10 +173,10 @@ export function NewScheduleForm(p: NewScheduleFormProps) {
                             render={({ field }) => (
                               <Combobox
                                 value={field.value}
-                                values={p.availableEmployees}
-                                selectedValues={p.selectedEmployees}
+                                values={p.availableEmployeeNames}
+                                selectedValues={p.selectedAvailableEmployeeNames}
                                 onChange={(newValue: string): void =>
-                                  onSelectEmployee(field.value, newValue, p.selectedEmployees, field.onChange)
+                                  onSelectEmployee(field.value, newValue, p.selectedAvailableEmployeeNames, field.onChange)
                                 }
                                 name="employee"
                                 className="w-[300px]"

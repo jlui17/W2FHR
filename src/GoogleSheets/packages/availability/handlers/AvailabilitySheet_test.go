@@ -49,14 +49,38 @@ func TestGetEmployeesAvailablePerDay(t *testing.T) {
 		{"Alice Brown", "FALSE", "FALSE", "TRUE", "FALSE"},
 		{"Mike Johnson", "TRUE", "FALSE", "FALSE", "TRUE"},
 	}
-	expected := [][]string{
-		{"John Doe", "Bob Wilson", "Mike Johnson"},
-		{"Jane Smith", "Bob Wilson"},
-		{"John Doe", "Jane Smith", "Alice Brown"},
-		{"John Doe", "Bob Wilson", "Mike Johnson"},
+	positions := []string{
+		"Attendant",
+		"Supervisor",
+		"Manager",
+		"Attendant",
+		"Supervisor",
 	}
 
-	actual := getEmployeesAvailablePerDay(input)
+	expected := &[]AvailabileEmployees{
+		{ // Day 1
+			{Name: "John Doe", Position: "Attendant"},
+			{Name: "Bob Wilson", Position: "Manager"},
+			{Name: "Mike Johnson", Position: "Supervisor"},
+		},
+		{ // Day 2
+			{Name: "Jane Smith", Position: "Supervisor"},
+			{Name: "Bob Wilson", Position: "Manager"},
+		},
+		{ // Day 3
+			{Name: "John Doe", Position: "Attendant"},
+			{Name: "Jane Smith", Position: "Supervisor"},
+			{Name: "Alice Brown", Position: "Attendant"},
+		},
+		{ // Day 4
+			{Name: "John Doe", Position: "Attendant"},
+			{Name: "Bob Wilson", Position: "Manager"},
+			{Name: "Mike Johnson", Position: "Supervisor"},
+		},
+	}
+
+	actual := getEmployeesAvailablePerDay(input, positions)
+
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Expected %v, but got %v", expected, actual)
 	}
@@ -64,17 +88,32 @@ func TestGetEmployeesAvailablePerDay(t *testing.T) {
 
 func TestCreateAvailabilityForTheWeek(t *testing.T) {
 	dates := []string{"d1", "d2", "d3", "d4"}
-	employeesAvailablePerDay := [][]string{
-		{"Bob Wilson", "John Doe", "Mike Johnson"},
-		{"Bob Wilson", "Jane Smith"},
-		{"Alice Brown", "Jane Smith", "John Doe"},
-		{"Bob Wilson", "John Doe", "Mike Johnson"},
+	employeesAvailablePerDay := &[]AvailabileEmployees{
+		{ // Day 1
+			{Name: "Bob Wilson", Position: "Manager"},
+			{Name: "John Doe", Position: "Attendant"},
+			{Name: "Mike Johnson", Position: "Supervisor"},
+		},
+		{ // Day 2
+			{Name: "Bob Wilson", Position: "Manager"},
+			{Name: "Jane Smith", Position: "Supervisor"},
+		},
+		{ // Day 3
+			{Name: "Alice Brown", Position: "Attendant"},
+			{Name: "Jane Smith", Position: "Supervisor"},
+			{Name: "John Doe", Position: "Attendant"},
+		},
+		{ // Day 4
+			{Name: "Bob Wilson", Position: "Manager"},
+			{Name: "John Doe", Position: "Attendant"},
+			{Name: "Mike Johnson", Position: "Supervisor"},
+		},
 	}
 	expected := AvailabilityForTheWeek{
-		"d1": employeesAvailablePerDay[0],
-		"d2": employeesAvailablePerDay[1],
-		"d3": employeesAvailablePerDay[2],
-		"d4": employeesAvailablePerDay[3],
+		"d1": (*employeesAvailablePerDay)[0],
+		"d2": (*employeesAvailablePerDay)[1],
+		"d3": (*employeesAvailablePerDay)[2],
+		"d4": (*employeesAvailablePerDay)[3],
 	}
 
 	actual := createAvailabilityForTheWeek(dates, employeesAvailablePerDay)

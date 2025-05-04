@@ -50,9 +50,20 @@ export function isSchedulingDataFromAPI(data: unknown): data is SchedulingDataFr
   return Object.entries(availability).every(([key, value]) => {
     return (
       typeof key === "string" &&
-      (value === null || (Array.isArray(value) && value.every((item) => typeof item === "string")))
+      (value === null || (Array.isArray(value) && value.every((item) => isAvailableEmployeeType(item))))
     );
   });
+}
+
+function isAvailableEmployeeType(data: unknown): data is AvailableEmployee {
+  return (
+    data !== null &&
+    typeof data === "object" &&
+    "name" in data &&
+    typeof data.name === "string" &&
+    "position" in data &&
+    typeof data.position === "string"
+  );
 }
 
 interface SchedulingMetadataFromAPI {
@@ -61,8 +72,13 @@ interface SchedulingMetadataFromAPI {
   breakDurations: string[];
 }
 
+export interface AvailableEmployee {
+  name: string;
+  position: string;
+}
+
 interface SchedulingDataFromAPI {
-  availability: { [key: string]: string[] };
+  availability: { [key: string]: AvailableEmployee[] };
   metadata: SchedulingMetadataFromAPI;
   showMonday: boolean;
   disableUpdates: boolean;
@@ -76,7 +92,7 @@ interface SchedulingMetadata {
 }
 
 export interface SchedulingData {
-  availability: { [key: string]: string[] };
+  availability: { [key: string]: AvailableEmployee[] };
   metadata: SchedulingMetadata;
   showMonday: boolean;
   disableUpdates: boolean;
@@ -86,7 +102,7 @@ export interface SchedulingData {
 
 export function convertSchedulingDataFromAPI(data: SchedulingDataFromAPI): SchedulingData {
   // we want to standardize the format of the strings to avoid indexing issues
-  const availability: { [key: string]: string[] } = {};
+  const availability: { [key: string]: AvailableEmployee[] } = {};
   for (const [date, employees] of Object.entries(data.availability)) {
     availability[dateToFormatForUser(new Date(date))] = employees;
   }
@@ -125,6 +141,7 @@ export function useSchedulingData(p: { idToken: string }): DefinedUseQueryResult
       case 200:
         const data = await response.json();
         if (!isSchedulingDataFromAPI(data)) {
+          console.error("Inconsistent data from useSchedulingData hook: ", data);
           return Promise.reject(new Error(ERROR_MESSAGES.SERVER.DATA_INCONSISTENT));
         }
         return Promise.resolve(convertSchedulingDataFromAPI(data));

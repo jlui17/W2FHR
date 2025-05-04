@@ -1,6 +1,29 @@
 import { ReactElement } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SchedulingData } from "@/components/Scheduling/helpers/hooks";
+import { AvailableEmployee, SchedulingData } from "@/components/Scheduling/helpers/hooks";
+
+const ATTENDANTS_COLOR: string = "bg-yellow-100";
+const SUPERVISORS_COLOR: string = "bg-blue-300";
+
+function isManager(employee: AvailableEmployee): boolean {
+  return employee.position.includes("Manager");
+}
+
+function isSupervisor(employee: AvailableEmployee): boolean {
+  return employee.position.includes("Supervisor");
+}
+
+function getBackgroundColour(employee: AvailableEmployee): string {
+  if (isManager(employee) || employee.name === "") {
+    return "";
+  } else if (isSupervisor(employee)) {
+    return SUPERVISORS_COLOR;
+  } else {
+    return ATTENDANTS_COLOR;
+  }
+}
+
+const BLANK_EMPLOYEE: AvailableEmployee = { name: "", position: "" };
 
 export function AvailableEmployeesTable(p: {
   isLoading: boolean;
@@ -12,11 +35,14 @@ export function AvailableEmployeesTable(p: {
     return <p>...</p>;
   }
 
-  const numRows = Math.max(
-    ...Object.values(p.schedulingData.availability).map((day: string[] | null): number =>
-      day === null ? 0 : day.length,
-    ),
-  );
+  const numberOfAvailableEmployeesPerDay: number[] = Object.values(p.schedulingData.availability)
+    .map((availableEmployees: AvailableEmployee[] | null): number =>
+      availableEmployees === null ? 0 : availableEmployees.length
+    );
+  
+  const numRows: number = numberOfAvailableEmployeesPerDay.length > 0 
+    ? Math.max(...numberOfAvailableEmployeesPerDay) 
+    : 0;
 
   return (
     <Table>
@@ -35,15 +61,15 @@ export function AvailableEmployeesTable(p: {
                 return <TableCell key={day}>-</TableCell>;
               }
 
-              const employee: string = p.schedulingData.availability[day][i] || "";
-              if (day === p.schedulingForDate && p.selectedEmployees.has(p.schedulingData.availability[day][i])) {
+              const employee: AvailableEmployee = p.schedulingData.availability[day][i] || BLANK_EMPLOYEE;
+              if (day === p.schedulingForDate && p.selectedEmployees.has(employee.name)) {
                 return (
-                  <TableCell key={day} className="line-through opacity-50">
-                    {employee}
+                  <TableCell key={day} className={"line-through opacity-50 " + getBackgroundColour(employee)}>
+                    {employee.name}
                   </TableCell>
                 );
               }
-              return <TableCell key={day}>{employee}</TableCell>;
+              return <TableCell key={day} className={getBackgroundColour(employee)}>{employee.name}</TableCell>;
             })}
           </TableRow>
         ))}

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, UseFormReturn, useWatch } from "react-hook-form";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NewScheduleForm } from "./NewScheduleForm";
-import { useSchedulingData } from "@/components/Scheduling/helpers/hooks";
+import { AvailableEmployee, useSchedulingData } from "@/components/Scheduling/helpers/hooks";
 import {
   getBlankTemplate,
   getGamesTemplate,
@@ -123,8 +123,11 @@ function NewScheduleController() {
     );
   }
 
-  const availableEmployees: string[] = schedulingData.availability[dateToFormatForUser(date)] || [];
-  const selectedEmployees: Set<string> = useMemo(() => {
+  const availableEmployees: AvailableEmployee[] = schedulingData.availability[dateToFormatForUser(date)] || [];
+  const availableEmployeeNames: string[] = useMemo(() => {
+    return availableEmployees.map((employee) => employee.name);
+  }, [schedulingData, date]);
+  const selectedAvailableEmployeeNames: Set<string> = useMemo(() => {
     const formValues = form.getValues();
     return new Set(formValues.shifts?.map((row) => row.employee).filter(Boolean) || []);
   }, [watchedRows, date]);
@@ -138,7 +141,8 @@ function NewScheduleController() {
       control={form.control}
       fields={fields}
       availableEmployees={availableEmployees}
-      selectedEmployees={selectedEmployees}
+      availableEmployeeNames={availableEmployeeNames}
+      selectedAvailableEmployeeNames={selectedAvailableEmployeeNames}
       shiftTitles={Array.from(schedulingData.metadata.shiftTitles)}
       shiftTimes={schedulingData.metadata.shiftTimes}
       breakDurations={schedulingData.metadata.breakDurations}
@@ -158,7 +162,7 @@ function NewScheduleController() {
         <AvailableEmployeesTable
           isLoading={isFetching}
           schedulingData={schedulingData}
-          selectedEmployees={selectedEmployees}
+          selectedEmployees={selectedAvailableEmployeeNames}
           schedulingForDate={dateToFormatForUser(date)}
         />
       }
