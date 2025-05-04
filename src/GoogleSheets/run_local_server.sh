@@ -10,7 +10,19 @@ if [ ! -f ".env" ]; then
 fi
 echo "Found .env file with environment variables"
 
-go build -o local_server server.go
+# Run all tests
+echo "Running tests..."
+go test -v ./...
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Please fix the failing tests before running the server."
+  exit 1
+fi
+echo "All tests passed successfully"
+
+# Build the server
+echo "Building server..."
+local_server_path="./build/local_server"
+go build -o $local_server_path server.go
 if [ $? -ne 0 ]; then
   echo "Build failed. Please check the error messages above."
   exit 1
@@ -30,4 +42,4 @@ echo "Press Ctrl+C to stop the server"
 echo
 
 # Run the server
-./local_server
+eval $local_server_path
