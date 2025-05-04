@@ -1,17 +1,25 @@
 import { Stack } from "aws-cdk-lib";
 import {
-  CloudFrontWebDistribution,
+  Distribution,
   OriginAccessIdentity,
+  AllowedMethods,
+  CachedMethods,
+  CachePolicy,
+  ErrorResponse,
+  OriginRequestPolicy,
+  ViewerProtocolPolicy
 } from "aws-cdk-lib/aws-cloudfront";
-import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
+import { BlockPublicAccess, Bucket, IBucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import { Construct } from "constructs";
+import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 
 export class FrontendService extends Stack {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const siteBucket = new Bucket(this, "SiteBucket", {
+    const siteBucket: IBucket = new Bucket(this, "SiteBucket", {
       websiteIndexDocument: "index.html",
       websiteErrorDocument: "index.html",
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
@@ -20,44 +28,48 @@ export class FrontendService extends Stack {
     const oia = new OriginAccessIdentity(this, "OIA");
     siteBucket.grantRead(oia);
 
-    const siteDistribution = new CloudFrontWebDistribution(
+    const domainCertificate = Certificate.fromCertificateArn(
+      this,
+      "SiteCertificate",
+      "arn:aws:acm:us-east-1:268847659094:certificate/2ead05e3-e943-4404-bb96-92728cef12ae"
+    );
+
+    const errorResponses: ErrorResponse[] = [
+      {
+        httpStatus: 403,
+        responseHttpStatus: 200,
+        responsePagePath: "/index.html",
+      },
+      {
+        httpStatus: 404,
+        responseHttpStatus: 200,
+        responsePagePath: "/index.html",
+      },
+    ];
+
+    // Create the distribution using the new Distribution class with S3 bucket as origin
+    const siteDistribution = new Distribution(
       this,
       "SiteDistribution",
       {
-        originConfigs: [
-          {
-            s3OriginSource: {
-              s3BucketSource: siteBucket,
-              originAccessIdentity: oia,
-            },
-            behaviors: [{ isDefaultBehavior: true }],
-          },
-        ],
-        errorConfigurations: [
-          // redirect all 403 and 404 errors to index.html
-          {
-            errorCode: 403,
-            responseCode: 200,
-            responsePagePath: "/index.html",
-          },
-          {
-            errorCode: 404,
-            responseCode: 200,
-            responsePagePath: "/index.html",
-          },
-        ],
-        viewerCertificate: {
-          aliases: ["employees.wun2free.com", "www.employees.wun2free.com"],
-          props: {
-            acmCertificateArn:
-              "arn:aws:acm:us-east-1:268847659094:certificate/9d07d255-1fba-4718-a166-610c727b9777", // created manually, must be in us-east-1
-            sslSupportMethod: "sni-only",
-          },
+        defaultBehavior: {
+          origin: S3BucketOrigin.withOriginAccessIdentity(siteBucket, {
+            originAccessIdentity: oia
+          }),
+          allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachedMethods: CachedMethods.CACHE_GET_HEAD_OPTIONS,
+          viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
+          cachePolicy: CachePolicy.CACHING_OPTIMIZED,
         },
+        domainNames: ["w2f.justinlui.dev"],
+        certificate: domainCertificate,
+        errorResponses: errorResponses,
+        defaultRootObject: "index.html",
       }
     );
 
-    const siteDeployment = new BucketDeployment(this, "SiteDeployment", {
+    new BucketDeployment(this, "SiteDeployment", {
       sources: [Source.asset("src/frontend/dist")],
       destinationBucket: siteBucket,
       distribution: siteDistribution,
