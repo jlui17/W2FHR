@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AvailableEmployee, SchedulingData } from "@/components/Scheduling/helpers/hooks";
 
-const ATTENDANTS_COLOR: string = "bg-yellow-100";
+const ATTENDANTS_COLOR: string = "bg-pink-200";
 const SUPERVISORS_COLOR: string = "bg-blue-300";
 
 function isManager(employee: AvailableEmployee): boolean {
