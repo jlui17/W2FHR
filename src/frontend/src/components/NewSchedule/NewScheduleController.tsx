@@ -22,8 +22,8 @@ function NewScheduleController() {
   const { getAuthSession } = useContext(AuthenticationContext);
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
-  const [startTime, setStartTime] = useState<string>("6:45 pm");
-  const [endTime, setEndTime] = useState<string>("12:15 am");
+  const [startTime, setStartTime] = useState<string>("18:45");
+  const [endTime, setEndTime] = useState<string>("00:15");
   const { isFetching, data: schedulingData } = useSchedulingData({
     idToken: getAuthSession()?.idToken || "",
   });

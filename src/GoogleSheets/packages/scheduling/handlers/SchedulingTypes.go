@@ -35,12 +35,14 @@ type NewScheduleShift struct {
 	Designation   string `json:"designation"`
 }
 
-func validateNewScheduleRequest(request NewScheduleRequest) error {
-	employeePattern := regexp.MustCompile(`^.+ \(.+\)$`)                                   // "John Smith (123)"
-	datePattern := regexp.MustCompile(`^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$`) // "YYYY-MM-DD"
-	timePattern := regexp.MustCompile(`^(?:0?[1-9]|1[0-2]):[0-5][0-9] (?:am|pm)$`)         // "HH:MM am/pm"
-	breakPattern := regexp.MustCompile(`^\d{2}:\d{2}:\d{2}$`)                              // "xx:xx:xx"
+var (
+	employeePattern = regexp.MustCompile(`^.+ \(.+\)$`)                                       // "John Smith (123)"
+	datePattern     = regexp.MustCompile(`^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$`) // "YYYY-MM-DD"
+	timePattern     = regexp.MustCompile(`^(?:[01]?[0-9]|2[0-3]):[0-5][0-9]$`)                // "HH:MM"
+	breakPattern    = regexp.MustCompile(`^\d{2}:\d{2}:\d{2}$`)                               // "xx:xx:xx"
+)
 
+func validateNewScheduleRequest(request NewScheduleRequest) error {
 	for i, shift := range request.Shifts {
 		if !employeePattern.MatchString(shift.Employee) {
 			return fmt.Errorf("shift %d: employee format invalid. Must be 'Name (ID)', got: %s", i+1, shift.Employee)
@@ -51,11 +53,11 @@ func validateNewScheduleRequest(request NewScheduleRequest) error {
 		}
 
 		if !timePattern.MatchString(shift.StartTime) {
-			return fmt.Errorf("shift %d: start time format invalid. Must be 'HH:MM am/pm', got: %s", i+1, shift.StartTime)
+			return fmt.Errorf("shift %d: start time format invalid. Must be 'HH:MM', got: %s", i+1, shift.StartTime)
 		}
 
 		if !timePattern.MatchString(shift.EndTime) {
-			return fmt.Errorf("shift %d: end time format invalid. Must be 'HH:MM am/pm', got: %s", i+1, shift.EndTime)
+			return fmt.Errorf("shift %d: end time format invalid. Must be 'HH:MM', got: %s", i+1, shift.EndTime)
 		}
 
 		if !breakPattern.MatchString(shift.BreakDuration) {
