@@ -5,10 +5,11 @@ import (
 	"GoogleSheets/packages/common/GoogleClient"
 	"GoogleSheets/packages/common/TimeUtil"
 	"fmt"
-	"google.golang.org/api/sheets/v4"
 	"log"
 	"strconv"
 	"time"
+
+	"google.golang.org/api/sheets/v4"
 )
 
 const (
@@ -156,8 +157,9 @@ func (t *timesheet) GetScheduleMetadata() (Metadata, error) {
 	return res, nil
 }
 
-func (t *timesheet) PostNewSchedule(newSchedule InternalShifts) error {
+func (t *timesheet) PostNewSchedule(newSchedule []InternalShift) error {
 	input := translateShiftsToGoogleSheets(newSchedule)
+	log.Printf("[DEBUG] Translated schedule: %v", input)
 
 	start, err := t.getNextRowNumForNewSchedule()
 	if err != nil {
@@ -174,7 +176,7 @@ func (t *timesheet) PostNewSchedule(newSchedule InternalShifts) error {
 			updateRange,
 			input,
 		).
-		ValueInputOption("RAW").
+		ValueInputOption("USER_ENTERED").
 		Do()
 	if err != nil {
 		log.Printf("[ERROR] Trying to post new schedule: %s", err.Error())
@@ -377,7 +379,7 @@ func (t *timesheet) getNextRowNumForNewSchedule() (int, error) {
 	return len(response.Values) + 2, nil // +1 since range starts at 2, +1 for the next row
 }
 
-func translateShiftsToGoogleSheets(shifts InternalShifts) *sheets.ValueRange {
+func translateShiftsToGoogleSheets(shifts []InternalShift) *sheets.ValueRange {
 	var res = make([][]interface{}, len(shifts))
 	for i, shift := range shifts {
 		res[i] = []interface{}{

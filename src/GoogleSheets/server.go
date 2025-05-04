@@ -180,7 +180,7 @@ func loadEnvVars() error {
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
 		switch key {
-		case "G_SERVICE_CONFIG_JSON":
+		case "G_SERVICE_CONFIG_JSON", "COGNITO_CLIENT_ID", "COGNITO_POOL_ID":
 			os.Setenv(key, value)
 		case SharedConstants.COGNITO_ATTENDANTS_GROUP_ENV_KEY:
 			SharedConstants.AttendantUserGroup = value
@@ -201,6 +201,7 @@ func main() {
 	// Load Google service account config JSON from .env file at runtime
 	err := loadEnvVars()
 	if err != nil {
+		log.Fatalf("Error loading environment variables: %v", err)
 		return
 	}
 

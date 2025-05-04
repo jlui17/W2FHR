@@ -41,7 +41,6 @@ func (c *cognitoGroupAuthorizer) IsAuthorizedForScheduling(employee *EmployeeInf
 }
 
 func convertGroupToLevel(group string) int {
-	log.Printf("JUSLUI - %s", SharedConstants.ManagerUserGroup)
 	switch group {
 	case SharedConstants.SupervisorUserGroup:
 		return 2

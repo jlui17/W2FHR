@@ -44,20 +44,3 @@ type InternalShift struct {
 	LastUpdated   string
 	Designation   string
 }
-
-type InternalShifts []InternalShift
-
-func (s InternalShifts) Len() int {
-	return len(s)
-}
-
-func (s InternalShifts) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s InternalShifts) Less(i, j int) bool {
-	if s[i].ShiftTitle != s[j].ShiftTitle {
-		return s[i].ShiftTitle < s[j].ShiftTitle
-	}
-	return s[i].Employee < s[j].Employee
-}
