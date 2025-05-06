@@ -85,7 +85,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if loginReq.RefreshToken != nil {
 		flow = "REFRESH_TOKEN"
 		params["REFRESH_TOKEN"] = *loginReq.RefreshToken
-		log.Printf("logging in via refresh token: %v", *&loginReq.RefreshToken)
+		log.Printf("logging in via refresh token: %v", loginReq.RefreshToken)
 	} else {
 		flow = "USER_PASSWORD_AUTH"
 		params["USERNAME"] = loginReq.Email
@@ -137,6 +137,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       errMsg,
 		}, nil
 	}
+	log.Printf("[DEBUG] Successfully logged in. Result from AWS Cognito: %v", res.AuthenticationResult)
 
 	features, err := getFeaturesForUser(*res.AuthenticationResult.IdToken)
 	if err != nil {
@@ -149,10 +150,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	var resp AuthSession = AuthSession{
-		IdToken:      *res.AuthenticationResult.IdToken,
-		RefreshToken: *res.AuthenticationResult.RefreshToken,
-		Features:     features,
+		IdToken:  *res.AuthenticationResult.IdToken,
+		Features: features,
 	}
+	if res.AuthenticationResult.RefreshToken != nil {
+		resp.RefreshToken = *res.AuthenticationResult.RefreshToken
+	}
+	log.Printf("[DEBUG] Successfully logged in. AuthSession: %v", resp)
 	authResultJSON, err := json.Marshal(resp)
 
 	if err != nil {
