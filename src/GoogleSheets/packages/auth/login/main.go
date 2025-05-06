@@ -68,6 +68,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 			Body:       "Invalid request body",
 		}, nil
 	}
+	log.Printf("[INFO] Received log-in request for %s", loginReq.Email)
 
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
@@ -97,13 +98,14 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		AuthParameters: params,
 		ClientId:       aws.String(os.Getenv("COGNITO_CLIENT_ID")),
 	}
+	log.Printf("[INFO] InitiateAuthInput - flow: %s, username: %s, refresh token: %s", req.AuthFlow, params["USERNAME"], params["REFRESH_TOKEN"])
 
 	res, err := svc.InitiateAuth(ctx, req)
 	if err != nil {
 		log.Printf("[ERROR] Auth - error initiating authentication, err: %s", err)
 
 		statusCode := 500
-		errMsg := fmt.Sprintf("An error occurred during authentication: %v", err.Error())
+		errMsg := fmt.Sprintf("An error occurred during authentication: %s", err)
 
 		var userNotFound *types.UserNotFoundException
 		var notAuthorized *types.NotAuthorizedException
@@ -156,7 +158,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	if res.AuthenticationResult.RefreshToken != nil {
 		resp.RefreshToken = *res.AuthenticationResult.RefreshToken
 	}
-	log.Printf("[DEBUG] Successfully logged in. AuthSession: %v", resp)
+	log.Printf("[INFO] Successfully logged in. AuthSession: %v", resp)
 	authResultJSON, err := json.Marshal(resp)
 
 	if err != nil {
