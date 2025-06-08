@@ -131,6 +131,23 @@ function NewScheduleController() {
     const formValues = form.getValues();
     return new Set(formValues.shifts?.map((row) => row.employee).filter(Boolean) || []);
   }, [watchedRows, date]);
+  
+  const scheduledEmployeeNamesByDay: Record<string, Set<string>> = useMemo(() => {
+    const result: Record<string, Set<string>> = {};
+    
+    for (const [day, employeeSet] of Object.entries(schedulingData.scheduledEmployees)) {
+      result[day] = new Set(
+        Array.from(employeeSet).map(employee => employee.name)
+      );
+    }
+    
+    return result;
+  }, [schedulingData.scheduledEmployees]);
+
+  function isEmployeeScheduled(employeeName: string, day: string): boolean {
+    console.log(scheduledEmployeeNamesByDay, scheduledEmployeeNamesByDay[day], employeeName)
+    return selectedAvailableEmployeeNames.has(employeeName) || scheduledEmployeeNamesByDay[day]?.has(employeeName) || false;
+  }
 
   useEffect(() => {
     setDate(schedulingData.startOfWeek);
@@ -162,8 +179,7 @@ function NewScheduleController() {
         <AvailableEmployeesTable
           isLoading={isFetching}
           schedulingData={schedulingData}
-          selectedEmployees={selectedAvailableEmployeeNames}
-          schedulingForDate={dateToFormatForUser(date)}
+          isEmployeeScheduled={isEmployeeScheduled}
         />
       }
       onChangeStartTime={onChangeStartTime}

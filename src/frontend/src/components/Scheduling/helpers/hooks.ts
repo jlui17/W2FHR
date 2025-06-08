@@ -29,6 +29,7 @@ export function isSchedulingDataFromAPI(data: unknown): data is SchedulingDataFr
     data === null ||
     typeof data !== "object" ||
     !("availability" in data) ||
+    !("scheduledEmployees" in data) ||
     !("metadata" in data) ||
     !isSchedulingMetadata(data.metadata) ||
     !("showMonday" in data) ||
@@ -47,12 +48,28 @@ export function isSchedulingDataFromAPI(data: unknown): data is SchedulingDataFr
     return false;
   }
 
-  return Object.entries(availability).every(([key, value]) => {
+  const scheduledEmployees = (data as SchedulingDataFromAPI).scheduledEmployees;
+  if (typeof scheduledEmployees !== "object") {
+    return false;
+  }
+
+  // Check availability structure
+  const availabilityValid = Object.entries(availability).every(([key, value]) => {
     return (
       typeof key === "string" &&
       (value === null || (Array.isArray(value) && value.every((item) => isAvailableEmployeeType(item))))
     );
   });
+
+  // Check scheduledEmployees structure
+  const scheduledEmployeesValid = Object.entries(scheduledEmployees).every(([key, value]) => {
+    return (
+      typeof key === "string" &&
+      (value === null || (Array.isArray(value) && value.every((item) => isScheduledEmployeeType(item))))
+    );
+  });
+
+  return availabilityValid && scheduledEmployeesValid;
 }
 
 function isAvailableEmployeeType(data: unknown): data is AvailableEmployee {
@@ -77,8 +94,22 @@ export interface AvailableEmployee {
   position: string;
 }
 
+interface ScheduledEmployee {
+  name: string;
+}
+
+function isScheduledEmployeeType(data: unknown): data is ScheduledEmployee {
+  return (
+    data !== null &&
+    typeof data === "object" &&
+    "name" in data &&
+    typeof data.name === "string"
+  );
+}
+
 interface SchedulingDataFromAPI {
   availability: { [key: string]: AvailableEmployee[] };
+  scheduledEmployees: { [key: string]: ScheduledEmployee[] };
   metadata: SchedulingMetadataFromAPI;
   showMonday: boolean;
   disableUpdates: boolean;
@@ -93,6 +124,7 @@ interface SchedulingMetadata {
 
 export interface SchedulingData {
   availability: { [key: string]: AvailableEmployee[] };
+  scheduledEmployees: { [key: string]: Set<ScheduledEmployee> };
   metadata: SchedulingMetadata;
   showMonday: boolean;
   disableUpdates: boolean;
@@ -107,6 +139,12 @@ export function convertSchedulingDataFromAPI(data: SchedulingDataFromAPI): Sched
     availability[dateToFormatForUser(new Date(date))] = employees;
   }
 
+  // Convert scheduledEmployees arrays to Sets
+  const scheduledEmployees: { [key: string]: Set<ScheduledEmployee> } = {};
+  for (const [date, employees] of Object.entries(data.scheduledEmployees)) {
+    scheduledEmployees[dateToFormatForUser(new Date(date))] = new Set(employees);
+  }
+
   const days: string[] = Object.keys(data.availability)
     .map((day: string): Date => new Date(day))
     .sort((a: Date, b: Date) => a.getTime() - b.getTime())
@@ -114,6 +152,7 @@ export function convertSchedulingDataFromAPI(data: SchedulingDataFromAPI): Sched
 
   return {
     availability: availability,
+    scheduledEmployees: scheduledEmployees,
     metadata: {
       shiftTitles: new Set(data.metadata.shiftTitles),
       shiftTimes: data.metadata.shiftTimes,
@@ -157,6 +196,7 @@ export function useSchedulingData(p: { idToken: string }): DefinedUseQueryResult
     queryFn: getSchedulingData,
     initialData: {
       availability: {},
+      scheduledEmployees: {},
       metadata: {
         shiftTitles: new Set<string>(),
         shiftTimes: [],

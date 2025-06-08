@@ -7,12 +7,24 @@ import (
 	"regexp"
 )
 
+// ScheduledEmployeesForTheWeek maps dates to lists of scheduled employees
+type ScheduledEmployeesForTheWeek map[string]ScheduledEmployees
+
+// ScheduledEmployee represents a scheduled employee with just their name for now
+type ScheduledEmployee struct {
+	Name string `json:"name"` // Just include the name for now
+}
+
+// ScheduledEmployees is a slice of ScheduledEmployee
+type ScheduledEmployees []ScheduledEmployee
+
 type Data struct {
-	Availability   Availability.AvailabilityForTheWeek `json:"availability"`
-	Metadata       Schedule.Metadata                   `json:"metadata"`
-	ShowMonday     bool                                `json:"showMonday"`
-	StartOfWeek    string                              `json:"startOfWeek"`
-	DisableUpdates bool                                `json:"disableUpdates"`
+	Availability       Availability.AvailabilityForTheWeek `json:"availability"`
+	ScheduledEmployees ScheduledEmployeesForTheWeek        `json:"scheduledEmployees"`
+	Metadata           Schedule.Metadata                   `json:"metadata"`
+	ShowMonday         bool                                `json:"showMonday"`
+	StartOfWeek        string                              `json:"startOfWeek"`
+	DisableUpdates     bool                                `json:"disableUpdates"`
 }
 
 type UpdateSchedulingRequest struct {

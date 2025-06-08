@@ -20,7 +20,7 @@ const (
 
 	scheduleEmployeeIdCol    = "K"
 	scheduleTitleCol         = "A"
-	scheduleEmployeeNameCol  = "J"
+	scheduleEmployeeNameCol  = "B"
 	scheduleDateCol          = "C"
 	scheduleStartTimeCol     = "D"
 	scheduleEndTimeCol       = "E"

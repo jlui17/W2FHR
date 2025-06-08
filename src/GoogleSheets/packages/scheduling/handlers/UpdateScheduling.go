@@ -41,6 +41,8 @@ func Update(req UpdateSchedulingRequest) (Data, error) {
 		log.Print("[INFO] Successfully updated DisableUpdates")
 	}
 
+	// After updates are applied, get the complete updated data
+	// The Get() function will now also populate the ScheduledEmployees field
 	data, err := Get()
 	if err != nil {
 		log.Printf("[ERROR] Failed to get updated scheduling data: %v", err)

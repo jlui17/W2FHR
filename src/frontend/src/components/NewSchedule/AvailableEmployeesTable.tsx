@@ -28,8 +28,7 @@ const BLANK_EMPLOYEE: AvailableEmployee = { name: "", position: "" };
 export function AvailableEmployeesTable(p: {
   isLoading: boolean;
   schedulingData: SchedulingData;
-  schedulingForDate: string;
-  selectedEmployees: Set<string>;
+  isEmployeeScheduled: (employeeName: string, day: string) => boolean;
 }): ReactElement {
   if (p.isLoading) {
     return <p>...</p>;
@@ -62,7 +61,7 @@ export function AvailableEmployeesTable(p: {
               }
 
               const employee: AvailableEmployee = p.schedulingData.availability[day][i] || BLANK_EMPLOYEE;
-              if (day === p.schedulingForDate && p.selectedEmployees.has(employee.name)) {
+              if (p.isEmployeeScheduled(employee.name, day)) {
                 return (
                   <TableCell key={day} className={"line-through opacity-50 " + getBackgroundColour(employee)}>
                     {employee.name}
