@@ -1,7 +1,7 @@
 {
   "name": "w2_fhr",
   "version": "0.1.0",
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017",
   "bin": {
     "w2_fhr": "bin/w2_fhr.js"
   },
@@ -11,22 +11,22 @@
     "deploy": "./deploy.sh",
     "watch": "tsc -w",
     "test": "pnpm run test:Googlesheets",
-    "test:Googlesheets": "cd src/Googlesheets; go test ./...",
+    "test:Googlesheets": "cd src/GoogleSheets; go test ./...",
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.10",
-    "aws-cdk": "^2.1010.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.19.13",
+    "aws-cdk": "^2.1108.0",
     "jest": "^29.7.0",
-    "ts-jest": "^29.1.5",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@aws-cdk/aws-lambda-go-alpha": "2.148.0-alpha.0",
-    "aws-cdk-lib": "^2.190.0",
-    "constructs": "^10.3.0",
+    "aws-cdk-lib": "^2.241.0",
+    "constructs": "^10.5.1",
     "source-map-support": "^0.5.21"
   }
 }
