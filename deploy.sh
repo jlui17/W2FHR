@@ -107,13 +107,13 @@ fi
 
 # ── CDK synth warning for TypeScript config changes ──────
 echo -e "${YELLOW}━━━ Synthesizing & deploying CDK stacks ━━━${NC}"
-tsc
+pnpm build
 
 # ── CDK deploy ───────────────────────────────────────────
 if $DEPLOY_ALL; then
-  cdk deploy "${CDK_ARGS[@]}"
+  op plugin run -- pnpm cdk deploy "${CDK_ARGS[@]}"
 else
-  cdk deploy "${ARGS[@]}" "${CDK_ARGS[@]}"
+  op plugin run -- pnpm cdk deploy "${ARGS[@]}" "${CDK_ARGS[@]}"
 fi
 
 echo -e "${GREEN}✓ Deployment complete${NC}"
