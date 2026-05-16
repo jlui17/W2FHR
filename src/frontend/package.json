@@ -4,6 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "packageManager": "pnpm@10.8.1",
+  "pnpm": {
+    "overrides": {
+      "brace-expansion": ">=2.0.3",
+      "yaml": ">=2.8.3",
+      "fast-xml-parser": ">=4.5.5",
+      "minimatch": ">=9.0.7",
+      "@remix-run/router": ">=1.23.2",
+      "@smithy/config-resolver": ">=4.4.0",
+      "glob": ">=10.5.0",
+      "@babel/runtime": ">=7.26.10",
+      "object-path": ">=0.11.8"
+    }
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
@@ -35,7 +48,7 @@
     "react-day-picker": "8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.1",
-    "react-router-dom": "^6.24.1",
+    "react-router-dom": "^6.30.2",
     "sonner": "^1.5.0",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.3.0",
