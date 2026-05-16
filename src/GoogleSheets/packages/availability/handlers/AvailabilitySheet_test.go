@@ -31,13 +31,13 @@ func TestCreateAvailability(t *testing.T) {
 	}
 
 	if ans := createAvailability(daysAvailable, dates, "TRUE", false); !reflect.DeepEqual(ans, expected) {
-		t.Errorf("Expected %v, but got %v", expected, ans)
+		t.Errorf("createAvailability(days, dates, %q, false) = %v, want %v", "TRUE", ans, expected)
 	}
 
 	expected.CanUpdate = true
 	expected.ShowMonday = true
 	if ans := createAvailability(daysAvailable, dates, "FALSE", true); !reflect.DeepEqual(ans, expected) {
-		t.Errorf("Expected %v, but got %v", expected, ans)
+		t.Errorf("createAvailability(days, dates, %q, true) = %v, want %v", "FALSE", ans, expected)
 	}
 }
 
@@ -82,7 +82,7 @@ func TestGetEmployeesAvailablePerDay(t *testing.T) {
 	actual := getEmployeesAvailablePerDay(input, positions)
 
 	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Expected %v, but got %v", expected, actual)
+		t.Errorf("getEmployeesAvailablePerDay(input, positions) = %v, want %v", actual, expected)
 	}
 }
 
@@ -151,6 +151,6 @@ func TestCreateAvailabilityForTheWeek(t *testing.T) {
 
 	actual := createAvailabilityForTheWeek(dates, employeesAvailablePerDay)
 	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Expected %v, but got %v", expected, actual)
+		t.Errorf("createAvailabilityForTheWeek(dates, employees) = %v, want %v", actual, expected)
 	}
 }

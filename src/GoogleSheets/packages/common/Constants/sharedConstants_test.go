@@ -12,7 +12,7 @@ func TestNormalizeString(t *testing.T) {
 	normalized := normalizeString(raw)
 
 	if normalized != expected {
-		t.Errorf("normalizeString failed, expected %s, got %s", expected, normalized)
+		t.Errorf("normalizeString(%q) = %q, want %q", raw, normalized, expected)
 	}
 }
 
@@ -48,7 +48,7 @@ func TestDToStrArr(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := DToStrArr(tt.arr)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DToStrArr() = %v, want %v", got, tt.want)
+				t.Errorf("DToStrArr(%v) = %v, want %v", tt.arr, got, tt.want)
 			}
 		})
 	}
@@ -86,7 +86,7 @@ func TestDDToStrArr(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := DDToStrArr(tt.arr)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DDToStrArr() = %v, want %v", got, tt.want)
+				t.Errorf("DDToStrArr(%v) = %v, want %v", tt.arr, got, tt.want)
 			}
 		})
 	}
@@ -124,7 +124,7 @@ func TestFlatten(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Flatten(tt.arr)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Flatten() = %v, want %v", got, tt.want)
+				t.Errorf("Flatten(%v) = %v, want %v", tt.arr, got, tt.want)
 			}
 		})
 	}
@@ -172,7 +172,7 @@ func TestAll2DArraysSameLength(t *testing.T) {
 			}
 			got := All2DArraysSameLength(ptrs...)
 			if (got != nil) != tt.wantErr {
-				t.Errorf("All2DArraysSameLength() error = %v, wantErr = %v", got, tt.wantErr)
+				t.Errorf("All2DArraysSameLength(%v) error = %v, wantErr = %v", tt.arrs, got, tt.wantErr)
 			}
 		})
 	}
