@@ -111,11 +111,11 @@ func TestGetEmployeeInfoForSignUp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ans, err := doGetInfo(tt.input.email, tt.input.staffListInfo, tt.input.availabilitySheetEmployeeIds)
 			if tt.expectedErr != nil && err != tt.expectedErr {
-				t.Errorf("Got %v, expected: %v", err, tt.expectedErr)
+				t.Errorf("doGetInfo(%q, ...): expected error %v, got %v", tt.input.email, tt.expectedErr, err)
 			}
 
 			if !reflect.DeepEqual(ans, tt.expected) {
-				t.Errorf("Got %v, expected %v", ans, tt.expected)
+				t.Errorf("doGetInfo(%q, ...) = %v, want %v", tt.input.email, ans, tt.expected)
 			}
 		})
 	}
@@ -143,7 +143,7 @@ func TestTranslateToCognitoGroups(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ans := translateToCognitoGroup(tt.input)
 			if ans != tt.expected {
-				t.Errorf("Got %s, expected %s", ans, tt.expected)
+				t.Errorf("translateToCognitoGroup(%q) = %q, want %q", tt.input, ans, tt.expected)
 			}
 		})
 	}

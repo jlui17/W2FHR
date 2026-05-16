@@ -4,369 +4,148 @@ import (
 	"testing"
 )
 
-func TestValidateNewScheduleRequest_ValidRequest(t *testing.T) {
-	// Test a completely valid request
-	validRequest := NewScheduleRequest{
-		Shifts: []NewScheduleShift{
-			{
-				ShiftTitle:    "Morning Shift",
-				Employee:      "John Smith (123)",
-				Date:          "2025-05-04",
-				StartTime:     "09:00",
-				EndTime:       "17:00",
-				BreakDuration: "00:30:00",
-				Designation:   "Games",
-			},
-		},
-	}
-
-	err := validateNewScheduleRequest(validRequest)
-	if err != nil {
-		t.Errorf("Expected no error for valid request, got: %v", err)
+// validShift returns a fully valid NewScheduleShift with realistic defaults.
+func validShift() NewScheduleShift {
+	return NewScheduleShift{
+		ShiftTitle:    "Morning Shift",
+		Employee:      "John Smith (123)",
+		Date:          "2025-05-04",
+		StartTime:     "09:00",
+		EndTime:       "17:00",
+		BreakDuration: "00:30:00",
+		Designation:   "Games",
 	}
 }
 
-func TestValidateNewScheduleRequest_EmptyRequest(t *testing.T) {
-	// Test with no shifts
-	emptyRequest := NewScheduleRequest{
-		Shifts: []NewScheduleShift{},
+func TestValidateNewScheduleRequest_ValidFields(t *testing.T) {
+	tests := []struct {
+		name  string
+		shift NewScheduleShift
+	}{
+		{"single valid shift", validShift()},
+		{"minimum time values", NewScheduleShift{
+			ShiftTitle: "Midnight Shift", Employee: "John Smith (123)",
+			Date: "2025-05-04", StartTime: "00:00", EndTime: "00:01",
+			BreakDuration: "00:00:00", Designation: "Games",
+		}},
+		{"maximum time values", NewScheduleShift{
+			ShiftTitle: "Late Night Shift", Employee: "John Smith (123)",
+			Date: "2025-05-04", StartTime: "23:59", EndTime: "23:59",
+			BreakDuration: "99:59:59", Designation: "Water Walkers",
+		}},
+		{"complex employee name", NewScheduleShift{
+			ShiftTitle: "Morning Shift", Employee: "John O'Connor-Smith Jr. (ABC123)",
+			Date: "2025-05-04", StartTime: "09:00", EndTime: "17:00",
+			BreakDuration: "00:30:00", Designation: "Games",
+		}},
 	}
 
-	err := validateNewScheduleRequest(emptyRequest)
-	if err != nil {
-		t.Errorf("Expected no error for empty shifts array, got: %v", err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := NewScheduleRequest{Shifts: []NewScheduleShift{tt.shift}}
+			if err := validateNewScheduleRequest(req); err != nil {
+				t.Errorf("validateNewScheduleRequest(valid %s): unexpected error: %v", tt.name, err)
+			}
+		})
+	}
+}
+
+func TestValidateNewScheduleRequest_EmptyShifts(t *testing.T) {
+	req := NewScheduleRequest{Shifts: []NewScheduleShift{}}
+	if err := validateNewScheduleRequest(req); err != nil {
+		t.Errorf("validateNewScheduleRequest(empty shifts): unexpected error: %v", err)
 	}
 }
 
 func TestValidateNewScheduleRequest_MultipleValidShifts(t *testing.T) {
-	// Test with multiple valid shifts
-	request := NewScheduleRequest{
+	req := NewScheduleRequest{
 		Shifts: []NewScheduleShift{
+			validShift(),
 			{
-				ShiftTitle:    "Morning Shift",
-				Employee:      "John Smith (123)",
-				Date:          "2025-05-04",
-				StartTime:     "09:00",
-				EndTime:       "17:00",
-				BreakDuration: "00:30:00",
-				Designation:   "Games",
-			},
-			{
-				ShiftTitle:    "Evening Shift",
-				Employee:      "Jane Doe (456)",
-				Date:          "2025-05-04",
-				StartTime:     "18:00",
-				EndTime:       "22:00",
-				BreakDuration: "00:15:00",
-				Designation:   "Water Walkers",
+				ShiftTitle: "Evening Shift", Employee: "Jane Doe (456)",
+				Date: "2025-05-04", StartTime: "18:00", EndTime: "22:00",
+				BreakDuration: "00:15:00", Designation: "Water Walkers",
 			},
 		},
 	}
-
-	err := validateNewScheduleRequest(request)
-	if err != nil {
-		t.Errorf("Expected no error for multiple valid shifts, got: %v", err)
+	if err := validateNewScheduleRequest(req); err != nil {
+		t.Errorf("validateNewScheduleRequest(multiple valid shifts): unexpected error: %v", err)
 	}
 }
 
-func TestValidateNewScheduleRequest_InvalidEmployee(t *testing.T) {
-	testCases := []struct {
-		name     string
-		employee string
-	}{
-		{"Missing Parenthesis", "John Smith 123"},
-		{"Empty Employee", ""},
-		{"Only Name", "John Smith"},
-		{"Only ID", "(123)"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{
-					{
-						ShiftTitle:    "Morning Shift",
-						Employee:      tc.employee,
-						Date:          "2025-05-04",
-						StartTime:     "09:00",
-						EndTime:       "17:00",
-						BreakDuration: "00:30:00",
-						Designation:   "Games",
-					},
-				},
-			}
-
-			err := validateNewScheduleRequest(request)
-			if err == nil {
-				t.Errorf("Expected error for invalid employee format '%s', but got none", tc.employee)
-			}
-		})
-	}
-}
-
-func TestValidateNewScheduleRequest_InvalidDate(t *testing.T) {
-	testCases := []struct {
-		name string
-		date string
-	}{
-		{"Wrong Format", "05/04/2025"},
-		{"Invalid Month", "2025-13-04"},
-		{"Invalid Day", "2025-05-32"},
-		{"Missing Parts", "2025-05"},
-		{"Empty Date", ""},
-		{"Wrong Order", "04-05-2025"},
-		{"Non-numeric", "YYYY-MM-DD"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{
-					{
-						ShiftTitle:    "Morning Shift",
-						Employee:      "John Smith (123)",
-						Date:          tc.date,
-						StartTime:     "09:00",
-						EndTime:       "17:00",
-						BreakDuration: "00:30:00",
-						Designation:   "Games",
-					},
-				},
-			}
-
-			err := validateNewScheduleRequest(request)
-			if err == nil {
-				t.Errorf("Expected error for invalid date format '%s', but got none", tc.date)
-			}
-		})
-	}
-}
-
-func TestValidateNewScheduleRequest_InvalidStartTime(t *testing.T) {
-	testCases := []struct {
-		name      string
-		startTime string
-	}{
-		{"Wrong Format", "9:00 AM"},
-		{"Missing Colon", "0900"},
-		{"Out Of Range Hours", "24:00"},
-		{"Out Of Range Minutes", "09:60"},
-		{"Empty Time", ""},
-		{"Extra Characters", "09:00:00"},
-		{"Non-numeric", "HH:MM"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{
-					{
-						ShiftTitle:    "Morning Shift",
-						Employee:      "John Smith (123)",
-						Date:          "2025-05-04",
-						StartTime:     tc.startTime,
-						EndTime:       "17:00",
-						BreakDuration: "00:30:00",
-						Designation:   "Games",
-					},
-				},
-			}
-
-			err := validateNewScheduleRequest(request)
-			if err == nil {
-				t.Errorf("Expected error for invalid start time format '%s', but got none", tc.startTime)
-			}
-		})
-	}
-}
-
-func TestValidateNewScheduleRequest_InvalidEndTime(t *testing.T) {
-	testCases := []struct {
-		name    string
-		endTime string
-	}{
-		{"Wrong Format", "5:00 PM"},
-		{"Missing Colon", "1700"},
-		{"Out Of Range Hours", "24:00"},
-		{"Out Of Range Minutes", "17:60"},
-		{"Empty Time", ""},
-		{"Extra Characters", "17:00:00"},
-		{"Non-numeric", "HH:MM"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{
-					{
-						ShiftTitle:    "Morning Shift",
-						Employee:      "John Smith (123)",
-						Date:          "2025-05-04",
-						StartTime:     "09:00",
-						EndTime:       tc.endTime,
-						BreakDuration: "00:30:00",
-						Designation:   "Games",
-					},
-				},
-			}
-
-			err := validateNewScheduleRequest(request)
-			if err == nil {
-				t.Errorf("Expected error for invalid end time format '%s', but got none", tc.endTime)
-			}
-		})
-	}
-}
-
-func TestValidateNewScheduleRequest_InvalidBreakDuration(t *testing.T) {
-	testCases := []struct {
-		name          string
-		breakDuration string
-	}{
-		{"Wrong Format", "30:00"},
-		{"Missing Colons", "003000"},
-		{"Empty Duration", ""},
-		{"Missing Parts", "00:30"},
-		{"Wrong Format With Text", "30 minutes"},
-		{"Non-numeric", "xx:xx:xx"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{
-					{
-						ShiftTitle:    "Morning Shift",
-						Employee:      "John Smith (123)",
-						Date:          "2025-05-04",
-						StartTime:     "09:00",
-						EndTime:       "17:00",
-						BreakDuration: tc.breakDuration,
-						Designation:   "Games",
-					},
-				},
-			}
-
-			err := validateNewScheduleRequest(request)
-			if err == nil {
-				t.Errorf("Expected error for invalid break duration format '%s', but got none", tc.breakDuration)
-			}
-		})
-	}
-}
-
-func TestValidateNewScheduleRequest_InvalidDesignation(t *testing.T) {
-	testCases := []struct {
+func TestValidateNewScheduleRequest_InvalidFields(t *testing.T) {
+	tests := []struct {
 		name        string
-		designation string
+		mutate      func(*NewScheduleShift)
+		invalidDesc string // human-readable description of the invalid value
 	}{
-		{"Unknown Designation", "Supervisor"},
-		{"Empty Designation", ""},
-		{"Lowercase", "games"},
-		{"Misspelled", "Game"},
-		{"Whitespace", " Games "},
+		// Employee
+		{"employee missing parenthesis", func(s *NewScheduleShift) { s.Employee = "John Smith 123" }, "missing parenthesis"},
+		{"empty employee", func(s *NewScheduleShift) { s.Employee = "" }, "empty"},
+		{"employee only name no ID", func(s *NewScheduleShift) { s.Employee = "John Smith" }, "name only"},
+		{"employee only ID no name", func(s *NewScheduleShift) { s.Employee = "(123)" }, "ID only"},
+
+		// Date
+		{"date wrong format MM/DD/YYYY", func(s *NewScheduleShift) { s.Date = "05/04/2025" }, "MM/DD/YYYY"},
+		{"date invalid month 13", func(s *NewScheduleShift) { s.Date = "2025-13-04" }, "month 13"},
+		{"date invalid day 32", func(s *NewScheduleShift) { s.Date = "2025-05-32" }, "day 32"},
+		{"date missing parts", func(s *NewScheduleShift) { s.Date = "2025-05" }, "YYYY-MM only"},
+		{"empty date", func(s *NewScheduleShift) { s.Date = "" }, "empty"},
+		{"date wrong order DD-MM-YYYY", func(s *NewScheduleShift) { s.Date = "04-05-2025" }, "DD-MM-YYYY"},
+		{"date non-numeric", func(s *NewScheduleShift) { s.Date = "YYYY-MM-DD" }, "non-numeric"},
+
+		// Start time
+		{"start time with AM/PM", func(s *NewScheduleShift) { s.StartTime = "9:00 AM" }, "AM/PM format"},
+		{"start time missing colon", func(s *NewScheduleShift) { s.StartTime = "0900" }, "no colon"},
+		{"start time hour out of range", func(s *NewScheduleShift) { s.StartTime = "24:00" }, "hour 24"},
+		{"start time minute out of range", func(s *NewScheduleShift) { s.StartTime = "09:60" }, "minute 60"},
+		{"empty start time", func(s *NewScheduleShift) { s.StartTime = "" }, "empty"},
+		{"start time with seconds", func(s *NewScheduleShift) { s.StartTime = "09:00:00" }, "HH:MM:SS"},
+		{"start time non-numeric", func(s *NewScheduleShift) { s.StartTime = "HH:MM" }, "non-numeric"},
+
+		// End time
+		{"end time with AM/PM", func(s *NewScheduleShift) { s.EndTime = "5:00 PM" }, "AM/PM format"},
+		{"end time missing colon", func(s *NewScheduleShift) { s.EndTime = "1700" }, "no colon"},
+		{"end time hour out of range", func(s *NewScheduleShift) { s.EndTime = "24:00" }, "hour 24"},
+		{"end time minute out of range", func(s *NewScheduleShift) { s.EndTime = "17:60" }, "minute 60"},
+		{"empty end time", func(s *NewScheduleShift) { s.EndTime = "" }, "empty"},
+		{"end time with seconds", func(s *NewScheduleShift) { s.EndTime = "17:00:00" }, "HH:MM:SS"},
+		{"end time non-numeric", func(s *NewScheduleShift) { s.EndTime = "HH:MM" }, "non-numeric"},
+
+		// Break duration
+		{"break duration wrong format", func(s *NewScheduleShift) { s.BreakDuration = "30:00" }, "MM:SS instead of HH:MM:SS"},
+		{"break duration missing colons", func(s *NewScheduleShift) { s.BreakDuration = "003000" }, "no colons"},
+		{"empty break duration", func(s *NewScheduleShift) { s.BreakDuration = "" }, "empty"},
+		{"break duration missing hours", func(s *NewScheduleShift) { s.BreakDuration = "00:30" }, "MM:SS only"},
+		{"break duration with text", func(s *NewScheduleShift) { s.BreakDuration = "30 minutes" }, "descriptive text"},
+		{"break duration non-numeric", func(s *NewScheduleShift) { s.BreakDuration = "xx:xx:xx" }, "non-numeric"},
+
+		// Designation
+		{"unknown designation", func(s *NewScheduleShift) { s.Designation = "Supervisor" }, "Supervisor"},
+		{"empty designation", func(s *NewScheduleShift) { s.Designation = "" }, "empty"},
+		{"lowercase designation", func(s *NewScheduleShift) { s.Designation = "games" }, "games"},
+		{"misspelled designation", func(s *NewScheduleShift) { s.Designation = "Game" }, "Game"},
+		{"designation with whitespace", func(s *NewScheduleShift) { s.Designation = " Games " }, "whitespace"},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{
-					{
-						ShiftTitle:    "Morning Shift",
-						Employee:      "John Smith (123)",
-						Date:          "2025-05-04",
-						StartTime:     "09:00",
-						EndTime:       "17:00",
-						BreakDuration: "00:30:00",
-						Designation:   tc.designation,
-					},
-				},
-			}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			shift := validShift()
+			tt.mutate(&shift)
+			req := NewScheduleRequest{Shifts: []NewScheduleShift{shift}}
 
-			err := validateNewScheduleRequest(request)
+			err := validateNewScheduleRequest(req)
 			if err == nil {
-				t.Errorf("Expected error for invalid designation '%s', but got none", tc.designation)
-			}
-		})
-	}
-}
-
-func TestValidateNewScheduleRequest_ValidEdgeCases(t *testing.T) {
-	testCases := []struct {
-		name        string
-		shift       NewScheduleShift
-		shouldError bool
-	}{
-		{
-			"Minimum Time Values",
-			NewScheduleShift{
-				ShiftTitle:    "Midnight Shift",
-				Employee:      "John Smith (123)",
-				Date:          "2025-05-04",
-				StartTime:     "00:00",
-				EndTime:       "00:01",
-				BreakDuration: "00:00:00",
-				Designation:   "Games",
-			},
-			false,
-		},
-		{
-			"Maximum Time Values",
-			NewScheduleShift{
-				ShiftTitle:    "Late Night Shift",
-				Employee:      "John Smith (123)",
-				Date:          "2025-05-04",
-				StartTime:     "23:59",
-				EndTime:       "23:59",
-				BreakDuration: "99:59:59", // Technically valid format
-				Designation:   "Water Walkers",
-			},
-			false,
-		},
-		{
-			"Complex Employee Name",
-			NewScheduleShift{
-				ShiftTitle:    "Morning Shift",
-				Employee:      "John O'Connor-Smith Jr. (ABC123)",
-				Date:          "2025-05-04",
-				StartTime:     "09:00",
-				EndTime:       "17:00",
-				BreakDuration: "00:30:00",
-				Designation:   "Games",
-			},
-			false,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			request := NewScheduleRequest{
-				Shifts: []NewScheduleShift{tc.shift},
-			}
-
-			err := validateNewScheduleRequest(request)
-			if tc.shouldError && err == nil {
-				t.Errorf("Expected error for %s, but got none", tc.name)
-			} else if !tc.shouldError && err != nil {
-				t.Errorf("Expected no error for %s, got: %v", tc.name, err)
+				t.Errorf("validateNewScheduleRequest() with %s: expected error, got nil", tt.invalidDesc)
 			}
 		})
 	}
 }
 
 func TestValidateNewScheduleRequest_ErrorIndexing(t *testing.T) {
-	// Test that errors refer to the correct shift index
 	request := NewScheduleRequest{
 		Shifts: []NewScheduleShift{
-			{
-				ShiftTitle:    "Valid Shift",
-				Employee:      "John Smith (123)",
-				Date:          "2025-05-04",
-				StartTime:     "09:00",
-				EndTime:       "17:00",
-				BreakDuration: "00:30:00",
-				Designation:   "Games",
-			},
+			validShift(),
 			{
 				ShiftTitle:    "Invalid Shift",
 				Employee:      "Invalid Employee",
@@ -381,13 +160,12 @@ func TestValidateNewScheduleRequest_ErrorIndexing(t *testing.T) {
 
 	err := validateNewScheduleRequest(request)
 	if err == nil {
-		t.Errorf("Expected error for invalid shift, but got none")
+		t.Errorf("validateNewScheduleRequest() with invalid shift 2: expected error, got nil")
 		return
 	}
 
-	// Check that the error refers to shift 2 (index 1 + 1)
 	expectedErrorPrefix := "shift 2: employee format invalid"
-	if err != nil && err.Error()[:len(expectedErrorPrefix)] != expectedErrorPrefix {
-		t.Errorf("Error should reference shift 2, got: %v", err)
+	if err.Error()[:len(expectedErrorPrefix)] != expectedErrorPrefix {
+		t.Errorf("validateNewScheduleRequest() error should reference shift 2, got: %v", err)
 	}
 }

@@ -25,7 +25,7 @@ func TestAvailabileEmployeesSortByPosition(t *testing.T) {
 	sort.Sort(employees)
 
 	if !reflect.DeepEqual(employees, expected) {
-		t.Errorf("Employees were not sorted correctly by position.\nExpected: %v\nGot: %v", expected, employees)
+		t.Errorf("sort.Sort(AvailabileEmployees{...by position}) = %v, want %v", employees, expected)
 	}
 }
 
@@ -51,7 +51,7 @@ func TestAvailabileEmployeesSortByNameWhenPositionEqual(t *testing.T) {
 	sort.Sort(employees)
 
 	if !reflect.DeepEqual(employees, expected) {
-		t.Errorf("Employees with the same position were not sorted alphabetically by name.\nExpected: %v\nGot: %v", expected, employees)
+		t.Errorf("sort.Sort(AvailabileEmployees{...by name within position}) = %v, want %v", employees, expected)
 	}
 }
 
@@ -79,7 +79,7 @@ func TestAvailabileEmployeesSortByPositionKeywords(t *testing.T) {
 	sort.Sort(employees)
 
 	if !reflect.DeepEqual(employees, expected) {
-		t.Errorf("Employees were not sorted correctly by position keywords.\nExpected: %v\nGot: %v", expected, employees)
+		t.Errorf("sort.Sort(AvailabileEmployees{...by position keywords}) = %v, want %v", employees, expected)
 	}
 }
 
