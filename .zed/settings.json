@@ -1,0 +1,13 @@
+// Zed settings for the W2FHR monorepo
+{
+  // Use the workspace TypeScript version (not a bundled one)
+  "lsp": {
+    "typescript-language-server": {
+      "settings": {
+        "typescript": {
+          "tsdk": "node_modules/typescript/lib"
+        }
+      }
+    }
+  }
+}
