@@ -14,6 +14,12 @@
     "test:Googlesheets": "cd src/GoogleSheets; go test ./...",
     "cdk": "cdk"
   },
+  "pnpm": {
+    "overrides": {
+      "handlebars": ">=4.7.9",
+      "picomatch": ">=4.0.4"
+    }
+  },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^22.19.13",
