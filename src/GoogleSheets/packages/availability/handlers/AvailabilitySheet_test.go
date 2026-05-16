@@ -86,6 +86,39 @@ func TestGetEmployeesAvailablePerDay(t *testing.T) {
 	}
 }
 
+func TestAvailabilityRange(t *testing.T) {
+	tests := []struct {
+		name string
+		row  int
+		want string
+	}{
+		{
+			name: "row 3",
+			row:  3,
+			want: "Availability!E3:H3",
+		},
+		{
+			name: "row 10",
+			row:  10,
+			want: "Availability!E10:H10",
+		},
+		{
+			name: "row 1",
+			row:  1,
+			want: "Availability!E1:H1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := availabilityRange(tt.row)
+			if got != tt.want {
+				t.Errorf("availabilityRange(%d) = %q, want %q", tt.row, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCreateAvailabilityForTheWeek(t *testing.T) {
 	dates := []string{"d1", "d2", "d3", "d4"}
 	employeesAvailablePerDay := &[]AvailabileEmployees{
