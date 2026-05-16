@@ -7,45 +7,53 @@ description: W2FHR Go backend (src/GoogleSheets). Use when working on the Go Lam
 
 Go backend running as AWS Lambda functions behind API Gateway. Single-repo with vendored dependencies.
 
-## Quick Reference
+## Layout
 
-- **Entry point**: `src/GoogleSheets/server.go` — Lambda handlers + local dev server
-- **Packages**: `src/GoogleSheets/packages/` — 4 Lambda packages + shared utilities
-- **Dep manager**: Vendored deps in `src/GoogleSheets/vendor/`
-- **Run locally**: `src/GoogleSheets/run_local_server.sh`
+- `src/GoogleSheets/server.go` — Lambda handlers + local dev server
+- `src/GoogleSheets/packages/` — Lambda packages + shared utilities
+- `src/GoogleSheets/vendor/` — vendored Go dependencies
+- `src/GoogleSheets/run_local_server.sh` — local dev script
 
-## Patterns
+## Architecture
 
-### Package structure
-Each Lambda package follows a 3-layer pattern:
+### 3-Layer Pattern
+
+Every Lambda package follows this structure. Read the code to find exact file names — they follow these conventions.
 
 ```
 packages/<name>/
-├── main.go                    # Lambda entry: lambda.Start(handlers.HandleRequest)
+├── main.go                          # lambda.Start(handlers.HandleRequest)
 └── handlers/
-    ├── handler.go             # Auth extraction, HTTP routing, response marshaling
-    ├── <Name>Types.go         # Public types (API-shaped, json-tagged) + private types
-    ├── <Operation>.go         # Business logic / service layer (no HTTP concerns)
-    └── <Sheet>.go             # Data access — Google Sheets API calls only
+    ├── handler.go                   # Auth extraction, HTTP routing, response marshaling
+    ├── <Name>Types.go               # Public types (json-tagged) + private types
+    ├── <Operation>.go               # Business logic — no HTTP, no Sheets API
+    └── <Sheet>.go                   # Data access — Google Sheets calls only
 ```
 
-### Layers
-1. **Handler** (`handler.go`) — extracts JWT → `EmployeeInfo`, routes by method, marshals responses. No business logic.
-2. **Business** (`<Operation>.go`) — orchestrates data fetching, validation, transformation. No HTTP or Sheets API concerns.
-3. **Data** (`<Sheet>.go`) — raw Google Sheets read/write. `Connect()` returns a struct with an injected `*sheets.Service`. No business rules.
+**Rules for each layer:**
 
-### Shared packages
-- `packages/common/GoogleClient` — singleton Sheets service client
-- `packages/common/Constants` — shared constants, error sentinels, type helpers
-- `packages/common/Utilities` — `EmployeeInfo` JWT parsing
-- `packages/common/CognitoGroupAuthorizer` — role-based access (attendant/supervisor/manager)
-- `packages/common/TimeUtil` — date parsing (Vancouver timezone)
+| Layer | File convention | Do | Don't |
+|-------|----------------|-----|-------|
+| Handler | `handler.go` | Extract JWT → EmployeeInfo, route by HTTP method, marshal responses, set status codes | No business logic, no Sheets API calls |
+| Business | `<Operation>.go` (e.g. `GetFoo.go`, `PostBar.go`) | Validation, data transformation, orchestration | No HTTP concerns, no `*sheets.Service` |
+| Data | `<Sheet>.go` | Google Sheets read/write via `*sheets.Service`. Exposes `Connect()` | No business rules, no auth decisions |
 
-### Dependencies
-- Google Sheets API via `google.golang.org/api/sheets/v4`
-- AWS Lambda via `github.com/aws/aws-lambda-go`
-- Cognito JWT parsing via `github.com/golang-jwt/jwt/v5`
+### Shared Packages
+
+All under `packages/common/`. Read the code to understand each — conventions:
+
+- **GoogleClient** — Singleton `*sheets.Service`. Never import this from business layer code.
+- **Constants** — Shared error sentinels, header maps, type conversion helpers.
+- **Utilities** — JWT parsing → `EmployeeInfo` struct (email, id, group, availability row).
+- **CognitoGroupAuthorizer** — Integer-level role checks. Configurable minimum level.
+- **TimeUtil** — Date string parsing in Vancouver timezone. Handles two formats (schedule dates, API dates).
+
+### Key Dependencies
+
+- `google.golang.org/api/sheets/v4` — Google Sheets API
+- `github.com/aws/aws-lambda-go` — Lambda events and handler interface
+- `github.com/golang-jwt/jwt/v5` — Cognito JWT parsing
 
 ## Supplemental Docs
 
-- **Unit testing philosophy and patterns**: See [references/unit-testing.md](references/unit-testing.md)
+- **Unit testing**: [references/unit-testing.md](references/unit-testing.md) — philosophy, what to test, how to refactor for testability
