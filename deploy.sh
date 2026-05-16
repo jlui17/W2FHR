@@ -109,11 +109,18 @@ fi
 echo -e "${YELLOW}━━━ Synthesizing & deploying CDK stacks ━━━${NC}"
 pnpm build
 
+# ── Resolve CDK command ──────────────────────────────────
+# Use 1Password CLI if configured for this project, otherwise fall back to bare cdk.
+CDK_CMD="pnpm cdk"
+if command -v op &>/dev/null && [ -f ".op/plugins/cdk.json" ]; then
+  CDK_CMD="op plugin run -- cdk"
+fi
+
 # ── CDK deploy ───────────────────────────────────────────
 if $DEPLOY_ALL; then
-  op plugin run -- pnpm cdk deploy "${CDK_ARGS[@]}"
+  $CDK_CMD deploy "${CDK_ARGS[@]}"
 else
-  op plugin run -- pnpm cdk deploy "${ARGS[@]}" "${CDK_ARGS[@]}"
+  $CDK_CMD deploy "${ARGS[@]}" "${CDK_ARGS[@]}"
 fi
 
 echo -e "${GREEN}✓ Deployment complete${NC}"
