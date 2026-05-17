@@ -1,5 +1,5 @@
 ---
-name: w2fhr-frontend
+name: frontend
 description: W2FHR React frontend — scheduling app for shift workers. Covers architecture, patterns, and principles for working in this codebase.
 ---
 
