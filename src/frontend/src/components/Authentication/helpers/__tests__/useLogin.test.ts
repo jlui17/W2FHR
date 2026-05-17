@@ -15,7 +15,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
   return React.createElement(QueryClientProvider, { client: queryClient }, children)
 }
 
-const LOGIN_URL = 'https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1/auth/login'
+const LOGIN_URL = 'http://localhost:8080/auth/login'
 
 const validSession: AuthSession = { idToken: 'id123', refreshToken: 'ref123', features: ['manager'] }
 

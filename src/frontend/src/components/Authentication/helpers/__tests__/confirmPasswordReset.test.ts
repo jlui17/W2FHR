@@ -14,7 +14,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
   return React.createElement(QueryClientProvider, { client: queryClient }, children)
 }
 
-const PASSWORD_URL = 'https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1/auth/password'
+const PASSWORD_URL = 'http://localhost:8080/auth/password'
 
 describe('confirmPasswordReset', () => {
   afterEach(() => {

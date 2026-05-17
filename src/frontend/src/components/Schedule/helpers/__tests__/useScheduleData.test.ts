@@ -18,7 +18,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
   return React.createElement(QueryClientProvider, { client: queryClient }, children)
 }
 
-const BASE = 'https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1'
+const BASE = 'http://localhost:8080'
 
 const validTimesheet: TimesheetData = {
   shifts: [

@@ -14,7 +14,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
   return React.createElement(QueryClientProvider, { client: queryClient }, children)
 }
 
-const VERIFY_URL = 'https://q4q2yztd56.execute-api.us-west-2.amazonaws.com/v1/auth/verify'
+const VERIFY_URL = 'http://localhost:8080/auth/verify'
 
 describe('useConfirmAccount', () => {
   afterEach(() => {
