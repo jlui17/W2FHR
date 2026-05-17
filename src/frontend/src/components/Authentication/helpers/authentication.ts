@@ -34,7 +34,7 @@ export function useSignUp(p: {
         } else {
           const errMsg: string = `Unexpected response: ${data}`;
           console.error(errMsg);
-          Promise.reject(new Error("errMsg"));
+          return Promise.reject(new Error(errMsg));
         }
       case 400:
       case 401:
