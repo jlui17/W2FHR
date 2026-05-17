@@ -1,5 +1,3 @@
-"use client";
-
 import { ReactElement } from "react";
 import { Control, Controller, FieldArrayWithId, UseFieldArrayRemove } from "react-hook-form";
 

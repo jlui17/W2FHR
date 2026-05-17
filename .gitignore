@@ -9,3 +9,4 @@ build
 !src/frontend/*
 
 *.env
+*.tsbuildinfo

@@ -8,7 +8,10 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.609.0",
@@ -35,7 +38,7 @@
     "react-day-picker": "8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.1",
-    "react-router-dom": "^6.24.1",
+    "react-router-dom": "^6.30.2",
     "sonner": "^1.5.0",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.3.0",
@@ -52,6 +55,12 @@
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "typescript": "^5.5.3",
-    "vite": "^7.3.2"
+    "vite": "^7.3.2",
+    "vitest": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.6",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "msw": "^2.10.5",
+    "jsdom": "^26.1.0"
   }
 }
