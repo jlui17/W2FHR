@@ -16,6 +16,7 @@
     "test:backend": "cd src/GoogleSheets && go test ./...",
     "cdk": "cdk",
     "deploy": "pnpm build && pnpm cdk deploy --all",
+    "deploy:op": "pnpm build && op plugin run -- cdk deploy --all",
     "deploy:auth": "pnpm run build:cdk && pnpm cdk deploy AuthService",
     "deploy:api": "pnpm build:backend && pnpm run build:cdk && pnpm cdk deploy ApiService",
     "deploy:frontend": "pnpm build:frontend && pnpm run build:cdk && pnpm cdk deploy FrontendService",
