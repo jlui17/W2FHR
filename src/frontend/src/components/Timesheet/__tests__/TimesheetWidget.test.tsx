@@ -7,10 +7,14 @@ vi.mock("@/components/common/ScreenSizeHelpers", () => ({
   useIsDesktopView: () => true,
 }));
 
+// Dates use the same human-formatted shape the API returns (e.g.
+// "Sunday, May 31, 2026"). The months are chosen so that alphabetical
+// string order (April < June < May) differs from chronological order,
+// which would catch the date-sorting bug.
 const timesheetData: TimesheetData = {
   shifts: [
     {
-      date: "2024-06-01",
+      date: "Friday, April 24, 2026",
       shiftTitle: "Morning",
       startTime: "08:00",
       endTime: "16:00",
@@ -19,7 +23,7 @@ const timesheetData: TimesheetData = {
       employeeName: "John Doe",
     },
     {
-      date: "2024-06-03",
+      date: "Saturday, June 20, 2026",
       shiftTitle: "Evening",
       startTime: "16:00",
       endTime: "22:00",
@@ -28,7 +32,7 @@ const timesheetData: TimesheetData = {
       employeeName: "John Doe",
     },
     {
-      date: "2024-06-02",
+      date: "Sunday, May 31, 2026",
       shiftTitle: "Afternoon",
       startTime: "12:00",
       endTime: "18:00",
@@ -58,7 +62,11 @@ describe("TimesheetWidget", () => {
   it("sorts shifts by date descending by default", () => {
     renderWidget();
 
-    expect(renderedShiftDates()).toEqual(["2024-06-03", "2024-06-02", "2024-06-01"]);
+    expect(renderedShiftDates()).toEqual([
+      "Saturday, June 20, 2026",
+      "Sunday, May 31, 2026",
+      "Friday, April 24, 2026",
+    ]);
     expect(screen.getByRole("button", { name: /sort: desc/i })).toBeVisible();
   });
 
@@ -67,11 +75,19 @@ describe("TimesheetWidget", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /sort: desc/i }));
 
-    expect(renderedShiftDates()).toEqual(["2024-06-01", "2024-06-02", "2024-06-03"]);
+    expect(renderedShiftDates()).toEqual([
+      "Friday, April 24, 2026",
+      "Sunday, May 31, 2026",
+      "Saturday, June 20, 2026",
+    ]);
     expect(screen.getByRole("button", { name: /sort: asc/i })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: /sort: asc/i }));
 
-    expect(renderedShiftDates()).toEqual(["2024-06-03", "2024-06-02", "2024-06-01"]);
+    expect(renderedShiftDates()).toEqual([
+      "Saturday, June 20, 2026",
+      "Sunday, May 31, 2026",
+      "Friday, April 24, 2026",
+    ]);
   });
 });

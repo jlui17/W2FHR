@@ -22,7 +22,11 @@ export const TimesheetWidget = (p: {
   const sortedShifts = useMemo(
     () =>
       [...p.timesheetData.shifts].sort((a, b) => {
-        const comparison = a.date.localeCompare(b.date);
+        // Compare the actual calendar dates, not the formatted strings.
+        // The API sends dates like "Sunday, May 31, 2026", so localeCompare
+        // would sort them alphabetically (by weekday/month name) instead of
+        // chronologically.
+        const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
         return sortOrder === "asc" ? comparison : -comparison;
       }),
     [p.timesheetData.shifts, sortOrder],
